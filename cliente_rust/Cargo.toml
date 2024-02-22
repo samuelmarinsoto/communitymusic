@@ -1,0 +1,11 @@
+[package]
+name = "prueba1"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+# antes de buildear tiene que ejecutar comando:
+# export GTK_PATH=/usr/lib/x86_64-linux-gnu/gtk-4.0
+# para que encuentre biblioteca del sistema
+[dependencies]
+gtk = "0.18.1"
