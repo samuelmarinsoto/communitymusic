@@ -8,10 +8,12 @@ int main(){
     JSONObject json(jString);
         json.remove("u");
         json.append("new", 41);
+        json.append("a", 9);
     JSONArray arr = json.getArray("f");
         arr.append((float)67.81);
         arr.append(string("hello"));
         arr.remove(1);
-    cout << arr.getFloat(2) << endl;
+    json.append("f",  arr);
+    cout << json.content << endl;
     return 0;
 }

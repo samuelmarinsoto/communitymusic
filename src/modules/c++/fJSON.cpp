@@ -110,7 +110,12 @@ JSONObject::JSONObject(string jsonString){
 };
 
 string JSONObject::Get(string key){
-
+        for (int i=0;i<this->pairs.size();i++){
+            if (get<0> (this->pairs[i]) == key){
+                return get<1> (this->pairs[i]);
+            }
+        }
+        return "None";
 }
 
 int JSONObject::getInt(string key){
@@ -185,61 +190,96 @@ JSONArray JSONObject::getArray(string key){
 }
 
 bool JSONObject::isNull(string key){
+    for (int i=0; i<this->pairs.size();i++){
+        if (get<0> (this->pairs[i]) == key && get<1> (this->pairs[i]) == "null"){
+            return true;
+        }
+    }
     return false;
 }
 
 void JSONObject::append(string key, int value){
     // cast value to string
     string str_value = to_string(value);
-    // remove the last element: '}'
-    this->content.pop_back();
-    // create string pair to-insert
-    string new_pair = "";
-    if (this->inserting_point>0){
-        new_pair += ",";
+    // Check key availability
+    if (this->check_if_repeated(key)){ // repeated key
+        for (int i=0; i<this->pairs.size(); i++){
+            if (get<0> (this->pairs[i])==key){
+                get<1> (this->pairs[i]) = str_value;
+            }
+        }
+        this->rebuild_content();
+    } else { // NOT repeated key
+        // remove the last element: '}'
+        this->content.pop_back();
+        // create string pair to-insert
+        string new_pair = "";
+        if (this->inserting_point>0){
+            new_pair += ",";
+        }
+        new_pair = new_pair + string(1, '"') + key + string(1, '"') + ":" + str_value + "}";
+        // replace content on instance & add to vector
+        this->content += new_pair;
+        tuple<string, string> pair = make_tuple(key, str_value);
+        this->pairs.push_back(pair);
+        this->inserting_point = this->content.length()-2;
     }
-    new_pair = new_pair + string(1, '"') + key + string(1, '"') + ":" + str_value + "}";
-    // replace content on instance & add to vector
-    this->content += new_pair;
-    tuple<string, string> pair = make_tuple(key, str_value);
-    this->pairs.push_back(pair);
-    this->inserting_point = this->content.length()-2;
 }
 
 void JSONObject::append(string key, float value){
     // cast value to string
     string str_value = to_string(value);
-    // remove the last element: '}'
-    this->content.pop_back();
-    // create string pair to-insert
-    string new_pair = "";
-    if (this->inserting_point>0){
-        new_pair += ",";
+    // Check key availability
+    if (this->check_if_repeated(key)){ // repeated key
+        for (int i=0; i<this->pairs.size(); i++){
+            if (get<0> (this->pairs[i])==key){
+                get<1> (this->pairs[i]) = str_value;
+            }
+        }
+        this->rebuild_content();
+    } else { // NOT repeated key
+        // remove the last element: '}'
+        this->content.pop_back();
+        // create string pair to-insert
+        string new_pair = "";
+        if (this->inserting_point>0){
+            new_pair += ",";
+        }
+        new_pair = new_pair + string(1, '"') + key + string(1, '"') + ":" + str_value + "}";
+        // replace content on instance & add to vector
+        this->content += new_pair;
+        tuple<string, string> pair = make_tuple(key, str_value);
+        this->pairs.push_back(pair);
+        this->inserting_point = this->content.length()-2;
     }
-    new_pair = new_pair + string(1, '"') + key + string(1, '"') + ":" + str_value + "}";
-    // replace content on instance & add to vector
-    this->content += new_pair;
-    tuple<string, string> pair = make_tuple(key, str_value);
-    this->pairs.push_back(pair);
-    this->inserting_point = this->content.length()-2;
 }
 
 void JSONObject::append(string key, string value){
     // cast value to string
     string str_value = string(1, '"') + value + string(1, '"');
-    // remove the last element: '}'
-    this->content.pop_back();
-    // create string pair to-insert
-    string new_pair = "";
-    if (this->inserting_point>0){
-        new_pair += ",";
+    // Check key availability
+    if (this->check_if_repeated(key)){ // repeated key
+        for (int i=0; i<this->pairs.size(); i++){
+            if (get<0> (this->pairs[i])==key){
+                get<1> (this->pairs[i]) = str_value;
+            }
+        }
+        this->rebuild_content();
+    } else { // NOT repeated key
+        // remove the last element: '}'
+        this->content.pop_back();
+        // create string pair to-insert
+        string new_pair = "";
+        if (this->inserting_point>0){
+            new_pair += ",";
+        }
+        new_pair = new_pair + string(1, '"') + key + string(1, '"') + ":" + str_value + "}";
+        // replace content on instance & add to vector
+        this->content += new_pair;
+        tuple<string, string> pair = make_tuple(key, str_value);
+        this->pairs.push_back(pair);
+        this->inserting_point = this->content.length()-2;
     }
-    new_pair = new_pair + string(1, '"') + key + string(1, '"') + ":" + str_value + "}";
-    // replace content on instance & add to vector
-    this->content += new_pair;
-    tuple<string, string> pair = make_tuple(key, str_value);
-    this->pairs.push_back(pair);
-    this->inserting_point = this->content.length()-2;
 }
 
 void JSONObject::append(string key, bool value){
@@ -250,73 +290,113 @@ void JSONObject::append(string key, bool value){
     } else {
         str_value = "false";
     }
-     // remove the last element: '}'
-    this->content.pop_back();
-    // create string pair to-insert
-    string new_pair = "";
-    if (this->inserting_point>0){
-        new_pair += ",";
+    // Check key availability
+    if (this->check_if_repeated(key)){ // repeated key
+        for (int i=0; i<this->pairs.size(); i++){
+            if (get<0> (this->pairs[i])==key){
+                get<1> (this->pairs[i]) = str_value;
+            }
+        }
+        this->rebuild_content();
+    } else { // NOT repeated key
+        // remove the last element: '}'
+        this->content.pop_back();
+        // create string pair to-insert
+        string new_pair = "";
+        if (this->inserting_point>0){
+            new_pair += ",";
+        }
+        new_pair = new_pair + string(1, '"') + key + string(1, '"') + ":" + str_value + "}";
+        // replace content on instance & add to vector
+        this->content += new_pair;
+        tuple<string, string> pair = make_tuple(key, str_value);
+        this->pairs.push_back(pair);
+        this->inserting_point = this->content.length()-2;
     }
-    new_pair = new_pair + string(1, '"') + key + string(1, '"') + ":" + str_value + "}";
-    // replace content on instance & add to vector
-    this->content += new_pair;
-    tuple<string, string> pair = make_tuple(key, str_value);
-    this->pairs.push_back(pair);
-    this->inserting_point = this->content.length()-2;
 }
 
 void JSONObject::append(string key, JSONObject value){
     // cast value to string
     string str_value = value.content;
-    // remove the last element: '}'
-    this->content.pop_back();
-    // create string pair to-insert
-    string new_pair = "";
-    if (this->inserting_point>0){
-        new_pair += ",";
+    // Check key availability
+    if (this->check_if_repeated(key)){ // repeated key
+        for (int i=0; i<this->pairs.size(); i++){
+            if (get<0> (this->pairs[i])==key){
+                get<1> (this->pairs[i]) = str_value;
+            }
+        }
+        this->rebuild_content();
+    } else { // NOT repeated key
+        // remove the last element: '}'
+        this->content.pop_back();
+        // create string pair to-insert
+        string new_pair = "";
+        if (this->inserting_point>0){
+            new_pair += ",";
+        }
+        new_pair = new_pair + string(1, '"') + key + string(1, '"') + ":" + str_value + "}";
+        // replace content on instance & add to vector
+        this->content += new_pair;
+        tuple<string, string> pair = make_tuple(key, str_value);
+        this->pairs.push_back(pair);
+        this->inserting_point = this->content.length()-2;
     }
-    new_pair = new_pair + string(1, '"') + key + string(1, '"') + ":" + str_value + "}";
-    // replace content on instance & add to vector
-    this->content += new_pair;
-    tuple<string, string> pair = make_tuple(key, str_value);
-    this->pairs.push_back(pair);
-    this->inserting_point = this->content.length()-2;
 }
 
 void JSONObject::append(string key, JSONArray value){
     // cast value to string
     string str_value = value.content;
-    // remove the last element: '}'
-    this->content.pop_back();
-    // create string pair to-insert
-    string new_pair = "";
-    if (this->inserting_point>0){
-        new_pair += ",";
+    // Check key availability
+    if (this->check_if_repeated(key)){ // repeated key
+        for (int i=0; i<this->pairs.size(); i++){
+            if (get<0> (this->pairs[i])==key){
+                get<1> (this->pairs[i]) = str_value;
+            }
+        }
+        this->rebuild_content();
+    } else { // NOT repeated key
+        // remove the last element: '}'
+        this->content.pop_back();
+        // create string pair to-insert
+        string new_pair = "";
+        if (this->inserting_point>0){
+            new_pair += ",";
+        }
+        new_pair = new_pair + string(1, '"') + key + string(1, '"') + ":" + str_value + "}";
+        // replace content on instance & add to vector
+        this->content += new_pair;
+        tuple<string, string> pair = make_tuple(key, str_value);
+        this->pairs.push_back(pair);
+        this->inserting_point = this->content.length()-2;
     }
-    new_pair = new_pair + string(1, '"') + key + string(1, '"') + ":" + str_value + "}";
-    // replace content on instance & add to vector
-    this->content += new_pair;
-    tuple<string, string> pair = make_tuple(key, str_value);
-    this->pairs.push_back(pair);
-    this->inserting_point = this->content.length()-2;
 }   
 
 void JSONObject::append(string key){
     // cast value to string
     string str_value = "null";
-    // remove the last element: '}'
-    this->content.pop_back();
-    // create string pair to-insert
-    string new_pair = "";
-    if (this->inserting_point>0){
-        new_pair += ",";
+    // Check key availability
+    if (this->check_if_repeated(key)){ // repeated key
+        for (int i=0; i<this->pairs.size(); i++){
+            if (get<0> (this->pairs[i])==key){
+                get<1> (this->pairs[i]) = str_value;
+            }
+        }
+        this->rebuild_content();
+    } else { // NOT repeated key
+        // remove the last element: '}'
+        this->content.pop_back();
+        // create string pair to-insert
+        string new_pair = "";
+        if (this->inserting_point>0){
+            new_pair += ",";
+        }
+        new_pair = new_pair + string(1, '"') + key + string(1, '"') + ":" + str_value + "}";
+        // replace content on instance & add to instance
+        this->content += new_pair;
+        tuple<string, string> pair = make_tuple(key, str_value);
+        this->pairs.push_back(pair);
+        this->inserting_point = this->content.length()-2;
     }
-    new_pair = new_pair + string(1, '"') + key + string(1, '"') + ":" + str_value + "}";
-    // replace content on instance & add to instance
-    this->content += new_pair;
-    tuple<string, string> pair = make_tuple(key, str_value);
-    this->pairs.push_back(pair);
-    this->inserting_point = this->content.length()-2;
 }
 
 void JSONObject::remove(string key){
@@ -344,11 +424,23 @@ void JSONObject::remove(string key){
 }
 
 bool JSONObject::check_if_repeated(string key){
-
+    for (int i=0;i<this->pairs.size();i++){
+        if (get<0> (this->pairs[i]) == key){
+            return true;
+        }
+    }
+    return false;
 }
 
 void JSONObject::rebuild_content(){
-
+    this->content = "{";
+    for (tuple<string, string> pair:this->pairs){
+        if (pair != this->pairs[0]){
+            this->content += ",";
+        }
+        this->content += (string(1, '"') + get<0> (pair) + string(1, '"') + ":" + get<1> (pair));
+    }
+    this->content +=  "}";
 }
 
 // JSONArray methods
@@ -418,7 +510,12 @@ int JSONArray::size(){
 }
 
 string JSONArray::Get(int index){
-
+    for (int i=0; i<this->values.size(); i++){
+        if (i == index){
+            return this->values[i];
+        }
+    }
+    return "None";
 }
 
 int JSONArray::getInt(int index){
