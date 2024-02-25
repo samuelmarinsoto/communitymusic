@@ -1,7 +1,7 @@
 use std::fmt::format;
 use std::net::{TcpStream, Shutdown};
 use std::io::{Read, Write};
-use std::str::from_utf8;
+use serde_json::{Value}; // ---> library for json parsing
 
 pub struct Client{
     IP: String,
@@ -19,7 +19,7 @@ impl Client{
         Client {IP:ip, port:port_num, socket:stream}
     }
 
-    fn begin_com() -> (){
+    fn start_com() -> (){
 
     }
 
@@ -28,8 +28,19 @@ impl Client{
         return 0;
     }
 
-    pub fn post_request() -> bool {
-        true
+    pub fn set_petition(brief: &str) -> &str {
+        if brief == "up-vote" {
+
+        }
+
+        if brief == "down-vote" {
+
+        }
+
+        if brief == "ask" {
+            
+        }
+        r#"{"pow": null}"# // TODO: change for generic petition
     }
 
     pub fn exit(&mut self) -> (){

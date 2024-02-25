@@ -12,23 +12,24 @@
 #include <string>
 #include <thread>
 
+using namespace std;
+
 class Server{
     private:
         int port;
-        std::string ip;
+        string ip;
         int s_socket;
         LinkedList<int> client_connections;
         bool status;
     
     protected:
         void listen_for();
-        //int COM_with(char* msg, int *socket_recipient);
+        string load_response(string input);
         void open_new_channel(int client_socket);
 
     public:
         Server(int port_num, std::string ip_addr);
-
-        void finish();
+        ~Server();
 
 };
 

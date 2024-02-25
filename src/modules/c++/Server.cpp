@@ -47,7 +47,7 @@ void Server::open_new_channel(int client_socket){
     //}
 };
 
-void Server::finish(){
+Server::~Server(){
     this->status = false;
     close(this->s_socket);
 };
