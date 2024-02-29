@@ -1,10 +1,14 @@
 #include "modules/c++/fJSON.hpp"
+#include "modules/c++/Server.hpp"
 
 #include <iostream>
 #include <string>
 
 int main(){
-    std::string jString = json_as_string("settings/file.json");
+
+    Server socket(7676, "127.0.0.1");
+
+    /*std::string jString = json_as_string("settings/file.json");
     JSONObject json(jString);
         json.remove("u");
         json.append("new", 41);
@@ -14,6 +18,6 @@ int main(){
         arr.append(string("hello"));
         arr.remove(1);
     json.append("f",  arr);
-    cout << json.content << endl;
+    cout << json.content << endl;*/
     return 0;
 }

@@ -1,12 +1,19 @@
+use core::time;
 use std::fmt::format;
 use std::net::{TcpStream, Shutdown};
 use std::io::{Read, Write};
-use serde_json::{Value}; // ---> library for json parsing
+use std::thread::sleep;
+use std::time::Duration;
+use serde_json::{json, Value, Result}; // ---> library for json parsing
+
 
 pub struct Client{
     IP: String,
     port: i32,
-    socket: TcpStream
+    socket: TcpStream,
+    status: bool,
+    petition: String,
+    response: String
 }
 
 impl Client{
@@ -15,35 +22,57 @@ impl Client{
         let stream = TcpStream::connect(binding).unwrap();
         print!("Connected to: {}:{}", ip, port_num);
 
-
-        Client {IP:ip, port:port_num, socket:stream}
+        Client {IP:ip, port:port_num, socket:stream, status:true, 
+                petition:"{ \"cmd\":\"idling\"}".to_owned(), response: "null".to_owned()}
     }
 
-    fn start_com() -> (){
-
-    }
-
-    pub fn say_something(mut self, msg:&[u8]) -> i32{
-        self.socket.write(msg).unwrap();
-        return 0;
-    }
-
-    pub fn set_petition(brief: &str) -> &str {
-        if brief == "up-vote" {
-
+    pub fn start_com(&mut self) -> (){
+        while self.status{
+            self.socket.write(self.petition.as_bytes()).unwrap();
+            self.set_petition(&["idling"]);
+            sleep(time::Duration::from_secs(5));
         }
-
-        if brief == "down-vote" {
-
-        }
-
-        if brief == "ask" {
-            
-        }
-        r#"{"pow": null}"# // TODO: change for generic petition
     }
 
-    pub fn exit(&mut self) -> (){
-        self.socket.shutdown(Shutdown::Both);
+    pub fn stop_communication(&mut self) -> (){
+        self.status = false;
+    }
+
+    pub fn set_petition(&mut self, args: &[&str]) -> () {
+        if args[0] == "up-vote" {
+            let mut json = json!({
+                "cmd" : "up-vote",
+                "id": "0"
+            });
+            json["id"] = json!(args[1]);
+
+            self.petition = json.to_string();
+        } else if args[0] == "down-vote" {
+            let mut json = json!({
+                "cmd" : "down-vote",
+                "id": "0"
+            });
+            json["id"] = json!(args[1]);
+
+            self.petition = json.to_string();
+        } else if args[0] == "ask" {
+            let json = json!({
+                "cmd": "send-songs"
+            });
+
+            self.petition = json.to_string();
+        } else if args[0] == "exit" {
+            let json = json!({
+                "cmd": "exiting"
+            });
+
+            self.petition = json.to_string();
+        } else if args[0] == "idling" {
+            let json = json!({
+                "cmd": "idling"
+            });
+
+            self.petition = json.to_string();
+        }
     }
 }

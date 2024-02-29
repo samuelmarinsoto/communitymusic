@@ -28,7 +28,7 @@ class Server{
         void open_new_channel(int client_socket);
 
     public:
-        Server(int port_num, std::string ip_addr);
+        Server(int port_num, string ip_addr);
         ~Server();
 
 };

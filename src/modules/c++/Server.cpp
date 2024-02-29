@@ -41,10 +41,13 @@ void Server::listen_for(){
 
 void Server::open_new_channel(int client_socket){
     char buffer[1024] = { 0 };
-    //while (true) {
+    string msg_raw_content;
+    while (true) {
         recv(client_socket, buffer, sizeof(buffer), 0);
-        std::cout << buffer << std::endl;
-    //}
+        msg_raw_content = string(buffer);
+        std::cout << msg_raw_content << std::endl;
+        sleep(1);
+    }
 };
 
 Server::~Server(){
