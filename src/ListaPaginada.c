@@ -1,10 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <id3/tag.h>
 
 // Define a simple Nodo structure
-struct Nodo {
-    int data;
-    struct Nodo* next;
+struct mp3 {
+    char[33] guid;
+    char[50] cancion;
+    char[50] artista;
+    char[50] album;
+    char[50] genero;
+    int upvotes;
+    int downvotes;
+    char[50] archivo;
+    struct mp3* next;
+    struct mp3* prev;
 };
 
 // Function to save a portion of the linked list to a file
