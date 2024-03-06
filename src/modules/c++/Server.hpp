@@ -26,6 +26,7 @@ class Server{
         void listen_for();
         string load_response(string input);
         void open_new_channel(int client_socket);
+        char* str_to_char(string str);
 
     public:
         Server(int port_num, string ip_addr);

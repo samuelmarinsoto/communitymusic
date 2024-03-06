@@ -1,4 +1,5 @@
 #include "Server.hpp"
+#include "fJSON.hpp"
 
 #include <iostream>
 #include <cstring>
@@ -35,7 +36,7 @@ void Server::listen_for(){
             
             std::thread(&Server::open_new_channel, this, clientSocket).join();
         }
-        sleep(10);
+        sleep(6);
     }
 };
 
@@ -44,13 +45,56 @@ void Server::open_new_channel(int client_socket){
     string msg_raw_content;
     while (true) {
         recv(client_socket, buffer, sizeof(buffer), 0);
+        // ^^ reading client sent buffer
         msg_raw_content = string(buffer);
-        std::cout << msg_raw_content << std::endl;
-        sleep(1);
+        // ^^ cast buffer to string
+        JSONObject json(msg_raw_content);
+        std::cout << json.getString("cmd") << std::endl;
+        // ^^ parse as a json
+        // -----------[Case analysis]----------- //
+        //const char message[6] = "Hello";
+        //send(client_socket, message, strlen(message), 0);
+        if (json.getString("cmd")=="idling" || json.getString("cmd")=="send-songs"){
+            JSONObject response_json;
+                response_json.append("cmd","send-songs");
+                response_json.append("status", "OK");
+            const char* response = "Hello";//Server::str_to_char(response_json.content);
+            send(client_socket, response, strlen(response), 0);
+        } else if (json.getString("cmd")=="exiting"){
+            JSONObject response_json;
+                response_json.append("cmd","exiting");
+                response_json.append("status", "OK");
+            const char* response = Server::str_to_char(response_json.content);
+            send(client_socket, response, strlen(response), 0);
+        } else if (json.getString("cmd")=="up-vote"){
+            JSONObject response_json;
+                response_json.append("cmd","up-vote");
+                response_json.append("status", "OK");
+            const char* response = "Hello";//Server::str_to_char(response_json.content);
+            send(client_socket, response, strlen(response), 0);
+        } else if (json.getString("cmd")=="down-vote"){
+            JSONObject response_json;
+                response_json.append("cmd","down-vote");
+                response_json.append("status", "OK");
+            const char* response = "Hello";//Server::str_to_char(response_json.content);
+            send(client_socket, response, strlen(response), 0);
+        } else { // For UNKNOWN commands
+
+        }
+        // -----------[Case analysis]----------- //
+        sleep(3);
     }
 };
 
 Server::~Server(){
     this->status = false;
     close(this->s_socket);
+};
+
+char* Server::str_to_char(string str){
+    char arr_value[str.size()-1] = { 0 };
+    for (int i=0; i<str.size(); i++){
+        arr_value[i] = str[i];
+    }
+    return arr_value;
 };

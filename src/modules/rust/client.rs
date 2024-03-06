@@ -1,78 +1,131 @@
 use core::time;
-use std::fmt::format;
+
+// Socket related libraries
 use std::net::{TcpStream, Shutdown};
 use std::io::{Read, Write};
-use std::thread::sleep;
-use std::time::Duration;
+use std::str;
+
+// Thread related libraries
+use std::sync::Mutex; 
+
 use serde_json::{json, Value, Result}; // ---> library for json parsing
 
-
+pub enum Cmds {
+    Idling,
+    Request,
+    UpVote,
+    DownVote,
+    Exit
+}
 pub struct Client{
     IP: String,
     port: i32,
-    socket: TcpStream,
-    status: bool,
-    petition: String,
-    response: String
+    socket: Mutex<TcpStream>, //TcpStream,
+    status: Mutex<bool>, // Arc< Mutex <bool> >,
+    petition: Mutex <String>, // tring,
+    response: Mutex<String> // String
 }
 
 impl Client{
-    pub fn deploy(ip:String, port_num:i32)-> Client{
+    pub fn new(ip:String, port_num:i32)-> Client {
         let binding = format!("{}:{}", ip, port_num);
         let stream = TcpStream::connect(binding).unwrap();
-        print!("Connected to: {}:{}", ip, port_num);
+        print!("Connected to: {}:{}\n", ip, port_num);
 
-        Client {IP:ip, port:port_num, socket:stream, status:true, 
-                petition:"{ \"cmd\":\"idling\"}".to_owned(), response: "null".to_owned()}
+        Client {IP:ip, port:port_num, socket:Mutex::new(stream), status:Mutex::new(true), 
+                petition:Mutex::new("{\"cmd\":\"idling\"}".to_owned()), response: Mutex::new("null".to_owned())}
     }
 
-    pub fn start_com(&mut self) -> (){
-        while self.status{
-            self.socket.write(self.petition.as_bytes()).unwrap();
-            self.set_petition(&["idling"]);
-            sleep(time::Duration::from_secs(5));
+    pub fn start_com(&self) -> (){
+        while self.access_condition() {
+            let msg_buffer = self.petition.lock().unwrap();
+            // ^^ get petition json string
+            let mut connection = self.socket.lock().unwrap();
+            connection.write(msg_buffer.as_bytes()).unwrap();
+            drop(msg_buffer);
+            // ^^ send over socket
+            self.set_petition(Cmds::Idling,&[]);
+            // ^^ default the petition to the voidless type
+            //-------------{Obtain response(bytes) from Server}--------------//
+            let mut response_buffer = [0 as u8; 5];
+            connection.read(&mut response_buffer).unwrap();
+                // ^^^ bytes slice
+            let response = match str::from_utf8(&response_buffer) {
+                Ok(r) => r,
+                Err(e) => panic!("Error: {}", e)
+            };
+                // ^^^ actual str slice
+            //-------------[Break points]-------------//
+            let json_response: Value = serde_json::from_str(response).unwrap(); // NOTE: could be changed to manage parsing errors
+                // ^^ parse the received string as
+            // Responses
+            if response == "Hello"{ // Proto
+                self.set_petition(Cmds::UpVote, &["12712F1213"]);
+            }
+            // TO-DO: manage all responses
+            if json_response["cmd"] == "send-songs" {
+                // Code here
+            } else if json_response["cmd"] == "up-vote" {
+                // Code here
+            } else if json_response["cmd"] == "down-vote" {
+                // Code here
+            }
+
         }
     }
 
-    pub fn stop_communication(&mut self) -> (){
-        self.status = false;
+    fn access_condition(&self) -> bool {
+        let value = self.status.lock().unwrap();
+        *value
     }
 
-    pub fn set_petition(&mut self, args: &[&str]) -> () {
-        if args[0] == "up-vote" {
-            let mut json = json!({
-                "cmd" : "up-vote",
-                "id": "0"
-            });
-            json["id"] = json!(args[1]);
+    pub fn stop_communication(&self) -> (){
+        let mut ptr_status = self.status.lock().unwrap();
+        *ptr_status = false;
+    }
 
-            self.petition = json.to_string();
-        } else if args[0] == "down-vote" {
-            let mut json = json!({
-                "cmd" : "down-vote",
-                "id": "0"
-            });
-            json["id"] = json!(args[1]);
+    pub fn set_petition(&self, petition_type: Cmds,args: &[&str]) -> () {
+        let mut json_string = self.petition.lock().unwrap();
+        match petition_type {
+            Cmds::Idling => {
+                let json = json!({
+                    "cmd": "idling"
+                });
 
-            self.petition = json.to_string();
-        } else if args[0] == "ask" {
-            let json = json!({
-                "cmd": "send-songs"
-            });
-
-            self.petition = json.to_string();
-        } else if args[0] == "exit" {
-            let json = json!({
-                "cmd": "exiting"
-            });
-
-            self.petition = json.to_string();
-        } else if args[0] == "idling" {
-            let json = json!({
-                "cmd": "idling"
-            });
-
-            self.petition = json.to_string();
+                *json_string = json.to_string();
+            },
+            Cmds::Request => {
+                let json = json!({
+                    "cmd": "send-songs"
+                });
+    
+                *json_string = json.to_string();
+            },
+            Cmds::DownVote => {
+                let mut json = json!({
+                    "cmd" : "down-vote",
+                    "id": "0"
+                });
+                json["id"] = json!(args[0]);
+    
+                *json_string = json.to_string();
+            },
+            Cmds::UpVote => {
+                let mut json = json!({
+                    "cmd" : "up-vote",
+                    "id": "0"
+                });
+                json["id"] = json!(args[0]);
+    
+                *json_string = json.to_string();
+            },
+            Cmds::Exit => {
+                let json = json!({
+                    "cmd": "exiting"
+                });
+    
+                *json_string = json.to_string();
+            }
         }
     }
 }
