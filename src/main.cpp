@@ -1,5 +1,6 @@
 #include <iostream>
 #include <stdio.h>
+// #include "Lib/cpptk/cpptk.h"
 #include <SFML/Graphics.hpp>
 
 int main()
@@ -24,3 +25,18 @@ int main()
 
     return 0;
 }
+
+/*
+void hello(){
+    puts("Hello C++/Tk!");
+}
+
+int main(int, char *argv[]){
+    init(argv[0]);
+
+    button(".b") -text("Say Hello") -command(hello);
+    pack(".b") -padx(20) - pady(6);
+
+    runEventLoop();
+}
+*/
