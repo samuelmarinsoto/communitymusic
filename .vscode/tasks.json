@@ -9,6 +9,7 @@
             "args": [
                 "-g",
                 "src/modules/c++/**.cpp",
+                "src/Lib/cpptk/**",
                 "src/main.cpp",
                 "-o",
                 "program"
