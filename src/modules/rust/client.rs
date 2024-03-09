@@ -46,31 +46,34 @@ impl Client{
             // ^^ send over socket
             self.set_petition(Cmds::Idling,&[]);
             // ^^ default the petition to the voidless type
-            //-------------{Obtain response(bytes) from Server}--------------//
-            let mut response_buffer = [0 as u8; 5];
+            //-------------{Obtain response(bytespetition_type) from Server}--------------//
+            let mut response_buffer = [0 as u8; 1024];
             connection.read(&mut response_buffer).unwrap();
-                // ^^^ bytes slice
             let response = match str::from_utf8(&response_buffer) {
-                Ok(r) => r,
-                Err(e) => panic!("Error: {}", e)
+                Ok(rp_slice) => String::from(rp_slice),
+                Err(e) => panic!("ERROR: {}", e)
             };
-                // ^^^ actual str slice
+            print!("{}", response);
             //-------------[Break points]-------------//
-            let json_response: Value = serde_json::from_str(response).unwrap(); // NOTE: could be changed to manage parsing errors
+            /*let json_response: Value = serde_json::from_str(&response).unwrap(); // NOTE: could be changed to manage parsing errors
                 // ^^ parse the received string as
             // Responses
-            if response == "Hello"{ // Proto
+            /*if response == "Hello"{ // Proto
                 self.set_petition(Cmds::UpVote, &["12712F1213"]);
-            }
+            }*/
             // TO-DO: manage all responses
             if json_response["cmd"] == "send-songs" {
                 // Code here
+                self.set_petition(Cmds::UpVote, &["0x008"]);
+                //save to response;
             } else if json_response["cmd"] == "up-vote" {
                 // Code here
+                self.set_petition(Cmds::DownVote, &["0x107"])
             } else if json_response["cmd"] == "down-vote" {
                 // Code here
+                self.set_petition(Cmds::Request, &[]);
             }
-
+            */
         }
     }
 
