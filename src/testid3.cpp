@@ -4,7 +4,7 @@
 
 int main(void){
 	char archivo[25] = "03 I say love.mp3";
-	Cancion cancion;
+	Cancion cancion(archivo);
 
 	std::cout << "guid: " << cancion.guid << std::endl;
 	std::cout << "titulo: " << cancion.titulo << std::endl;
