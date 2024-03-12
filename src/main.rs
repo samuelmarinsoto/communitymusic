@@ -23,6 +23,11 @@ use std::sync::Arc;
 use modules::rust::client::{Client as Client, Cmds as Cmds};
 
 fn main() {     
-    let client = Client::new("127.0.0.1".to_owned(), 7676);
+    let client = Client::new("172.16.0.1".to_owned(), 49094);
     client.start_com();
+    /*let js_data = "{\"x\":147,\"y\":\"hello\"}";
+    let pre_js = serde_json::to_value(js_data).unwrap();
+    let js: Value = serde_json::from_value(pre_js).unwrap();
+    let jsx = json!(js_data);
+    print!("{}\t{}\n", js["x"], jsx["x"]);*/
 }

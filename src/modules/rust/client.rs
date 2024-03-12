@@ -32,7 +32,8 @@ impl Client{
         let stream = TcpStream::connect(binding).unwrap();
         print!("Connected to: {}:{}\n", ip, port_num);
 
-        Client {IP:ip, port:port_num, socket:Mutex::new(stream), status:Mutex::new(true), 
+        Client {IP:ip, port:port_num,
+             socket:Mutex::new(stream), status:Mutex::new(true), 
                 petition:Mutex::new("{\"cmd\":\"idling\"}".to_owned()), response: Mutex::new("null".to_owned())}
     }
 
@@ -46,23 +47,29 @@ impl Client{
             // ^^ send over socket
             self.set_petition(Cmds::Idling,&[]);
             // ^^ default the petition to the voidless type
-            //-------------{Obtain response(bytespetition_type) from Server}--------------//
+            //-------------{Obtain response(bytes) from Server}--------------//
             let mut response_buffer = [0 as u8; 1024];
             connection.read(&mut response_buffer).unwrap();
-            let response = match str::from_utf8(&response_buffer) {
-                Ok(rp_slice) => String::from(rp_slice),
+            let mut response = match str::from_utf8(&response_buffer) {
+                Ok(rp_slice) => rp_slice,
                 Err(e) => panic!("ERROR: {}", e)
             };
-            print!("{}", response);
+            let new_response = &response.replace("\u{0000}", " ");
+            response = new_response.trim();
+            print!("{}\n", response);
             //-------------[Break points]-------------//
-            /*let json_response: Value = serde_json::from_str(&response).unwrap(); // NOTE: could be changed to manage parsing errors
+            let json_response: Value = match serde_json::from_str(response){
+                Ok(r) => r,
+                Err(e) => panic!("ERROR: {}", e)
+            }; // NOTE: could be changed to manage parsing errors
                 // ^^ parse the received string as
+            print!("{}\n", json_response["status"]);
             // Responses
             /*if response == "Hello"{ // Proto
                 self.set_petition(Cmds::UpVote, &["12712F1213"]);
             }*/
             // TO-DO: manage all responses
-            if json_response["cmd"] == "send-songs" {
+            /*if json_response["cmd"] == "send-songs" {
                 // Code here
                 self.set_petition(Cmds::UpVote, &["0x008"]);
                 //save to response;

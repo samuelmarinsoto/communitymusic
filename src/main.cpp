@@ -6,7 +6,7 @@
 
 int main(){
 
-    Server socket(7676, "127.0.0.1");
+    Server socket(49094 ,"172.16.0.1");
 
     /*std::string jString = json_as_string("settings/file.json");
     JSONObject json(jString);

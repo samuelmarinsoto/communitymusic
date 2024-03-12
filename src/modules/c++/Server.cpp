@@ -13,7 +13,8 @@ Server::Server(int port_num, std::string ip_addr) : port(port_num), ip(ip_addr){
     sockaddr_in address_ip;
         address_ip.sin_family = AF_INET;
         address_ip.sin_port = htons(this->port);
-        inet_pton(AF_INET, std::strcpy(new char[this->ip.length()+1], this->ip.c_str()), &address_ip.sin_addr.s_addr);
+        address_ip.sin_addr.s_addr = inet_addr(ip_addr.c_str());
+        //inet_pton(AF_INET, std::strcpy(new char[this->ip.length()+1], this->ip.c_str()), &address_ip.sin_addr.s_addr);
         //------^same domain^------^convert ip string to a char array[]^----------------^reference to insert the conversion^
 
     bind(this->s_socket, (struct sockaddr*)&address_ip, sizeof(address_ip)); // binds the socket to start a channel for listening
@@ -36,7 +37,6 @@ void Server::listen_for(){
             
             std::thread(&Server::open_new_channel, this, clientSocket).join();
         }
-        sleep(6);
     }
 };
 
@@ -56,29 +56,29 @@ void Server::open_new_channel(int client_socket){
         //send(client_socket, message, strlen(message), 0);
         if (json.getString("cmd")=="idling" || json.getString("cmd")=="send-songs"){
             JSONObject response_json;
-                response_json.append("cmd","send-songs");
-                response_json.append("status", "OK");  
+                response_json.append("cmd", string("send-songs"));
+                response_json.append("status", string("OK"));  
             char* response = new char[response_json.content.length()+1];
             strcpy(response, response_json.content.c_str());
             send(client_socket, response, strlen(response), 0);
         } else if (json.getString("cmd")=="exiting"){
             JSONObject response_json;
-                response_json.append("cmd","exiting");
-                response_json.append("status", "OK");
+                response_json.append("cmd",string("exiting"));
+                response_json.append("status", string("OK"));
             char* response = new char[response_json.content.length()+1];
             strcpy(response, response_json.content.c_str());
             send(client_socket, response, strlen(response), 0);
         } else if (json.getString("cmd")=="up-vote"){
             JSONObject response_json;
-                response_json.append("cmd","up-vote");
-                response_json.append("status", "OK");
+                response_json.append("cmd",string("up-vote"));
+                response_json.append("status", string("OK"));
             char* response = new char[response_json.content.length()+1];
             strcpy(response, response_json.content.c_str());
             send(client_socket, response, strlen(response), 0);
         } else if (json.getString("cmd")=="down-vote"){
             JSONObject response_json;
-                response_json.append("cmd","down-vote");
-                response_json.append("status", "OK");
+                response_json.append("cmd",string("down-vote"));
+                response_json.append("status", string("OK"));
             char* response = new char[response_json.content.length()+1];
             strcpy(response, response_json.content.c_str());
             send(client_socket, response, strlen(response), 0);
