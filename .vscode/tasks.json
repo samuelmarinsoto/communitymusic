@@ -9,6 +9,7 @@
             "args": [
                 "-g",
                 "src/modules/c++/**.cpp",
+                "src/modules/c++/**.hpp",
                 "src/main.cpp",
                 "-o",
                 "program"
