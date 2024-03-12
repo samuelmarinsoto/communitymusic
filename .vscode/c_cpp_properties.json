@@ -4,7 +4,6 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/src/Lib/SFML-2.6.1/include",
                 "/usr/include"
             ],
             "defines": [],
