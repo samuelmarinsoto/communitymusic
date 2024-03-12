@@ -1,8 +1,8 @@
 #include <iostream>
-#include "src/modules/c++/GUI.hpp" 
+#include "modules/c++/GUI.hpp" 
 
 int main(){
-    GUI app;
+    Gui app;
     app.createWindow();
     return 0;
 }

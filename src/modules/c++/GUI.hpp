@@ -1,11 +1,11 @@
 #include <iostream>
 #include <tk.h>
 
-using namespace std
+using namespace std;
 
-class gui(){
+class Gui {
     public:
-        gui(){
+        Gui(){
             // Initialize Tk and Tcl
             if (Tcl_Init(interp.get()) == TCL_ERROR) {
                 std::cerr << "Error initializing Tk: " << Tcl_GetStringResult(interp.get()) << std::endl;
@@ -13,7 +13,7 @@ class gui(){
             }
         }
 
-        ~gui(){
+        ~Gui(){
             // 
             Tcl_Finalize();
         }
