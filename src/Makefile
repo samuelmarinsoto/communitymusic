@@ -9,6 +9,11 @@ id3test:
 socketstest:
 	${CC} -g modules/c++/**.cpp main.cpp -o socketstest
 	./socketstest
+sockets: socketserver socketclient
+socketserver:
+	${CC} testserver.cpp ${INCS} ${LIBS} -o server
+socketclient:
+	${CC} testclient.cpp ${INCS} ${LIBS} -o client 
 threadstest:
 	${CC} -g test.cpp -o threadstest
 	./threadstest
