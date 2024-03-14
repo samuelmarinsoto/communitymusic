@@ -69,7 +69,7 @@ int main() {
         pagedArray[i] = i * i;
     }
 
-    std::cout << "Element at index 42: " << pagedArray[42] << std::endl;
+    std::cout << "Element at index 54: " << pagedArray[54] << std::endl;
 
     return 0;
 }

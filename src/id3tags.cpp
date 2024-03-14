@@ -55,4 +55,8 @@ public:
 		free(genero);
 		free(archivo);
 	}
+
+	size_t GetSize(){
+		return 100*5 + 4*2 + sizeof(this->guid);
+	}
 };

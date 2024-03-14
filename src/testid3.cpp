@@ -11,5 +11,6 @@ int main(void){
 	std::cout << "artista: " << cancion.artista << std::endl;
 	std::cout << "album: " << cancion.album << std::endl;
 	std::cout << "genero: " << cancion.genero << std::endl;
+	std::cout << "tamaño: " << cancion.GetSize() << std::endl;
 	return 0;
 }
