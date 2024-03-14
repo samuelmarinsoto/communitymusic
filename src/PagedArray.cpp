@@ -3,12 +3,12 @@
 #include <vector>
 #include <cstdlib>
 
-const std::string FILENAME = "paged_array.bin";
-const size_t PAGE_SIZE = 4096;  // Adjust as needed
+#define FILE "swap.bin";
 
 class PagedArray {
 public:
-    PagedArray(size_t size) : size_(size), page_count_(size / PAGE_SIZE + (size % PAGE_SIZE != 0)), file_(FILENAME, std::ios::binary | std::ios::in | std::ios::out | std::ios::trunc) {
+    PagedArray(size_t size, size_t objsize, size_t mempages){
+     : size_(size), page_count_(size / PAGE_SIZE + (size % PAGE_SIZE != 0)), file_(FILENAME, std::ios::binary | std::ios::in | std::ios::out | std::ios::trunc) {
         if (!file_.is_open()) {
             std::cerr << "Error opening file for PagedArray\n";
             std::exit(EXIT_FAILURE);
