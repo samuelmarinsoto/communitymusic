@@ -14,7 +14,7 @@ int main() {
     // Create client socket
     client_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (client_socket == -1) {
-        std::cerr << "Socket creation failed\n";
+        std::cout << "Socket creation failed\n";
         return 1;
     }
 
@@ -22,13 +22,13 @@ int main() {
     server_address.sin_family = AF_INET;
     server_address.sin_port = htons(PORT);
     if(inet_pton(AF_INET, SERVER_IP, &server_address.sin_addr) <= 0) {
-        std::cerr << "Invalid address/ Address not supported\n";
+        std::cout << "Invalid address/ Address not supported\n";
         return 1;
     }
 
     // Connect to server
     if (connect(client_socket, (struct sockaddr *)&server_address, sizeof(server_address)) < 0) {
-        std::cerr << "Connection failed\n";
+        std::cout << "Connection failed\n";
         return 1;
     }
 

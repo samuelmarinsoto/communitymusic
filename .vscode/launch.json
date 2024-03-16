@@ -2,10 +2,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(gdb) Launch main.cpp",
+            "name": "(gdb) Launch server",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/program",
+            "program": "${workspaceFolder}/cmpexec",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
@@ -25,33 +25,7 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "C/C++: Run executable"
-        },
-        {
-            "name": "(gdb) Launch test.cpp",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/program",
-            "args": [],
-            "stopAtEntry": false,
-            "cwd": "${fileDirname}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "miDebuggerPath": "/usr/bin/gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                },
-                {
-                    "description": "Set Disassembly Flavor to Intel",
-                    "text": "-gdb-set disassembly-flavor intel",
-                    "ignoreFailures": true
-                }
-            ],
-            "preLaunchTask": "(TASK)C/C++: Compile test.cpp"
+            "preLaunchTask": "(TASK)C/C++: File linking & compiling"
         }
     ]
 }

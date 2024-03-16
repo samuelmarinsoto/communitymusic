@@ -2,7 +2,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "(TASK)C/C++: g++ file compiling & linking",
+            "label": "(TASK)C/C++: File linking & compiling",
             "detail": "Compiles and links the respective .hpp/.cpp(except templates) files into a single executable",
             "type": "shell",
             "command": "g++",
@@ -11,31 +11,11 @@
                 "src/modules/c++/**.cpp",
                 "src/main.cpp",
                 "-o",
-                "program"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": false
-            }
-        },
-        {
-            "label": "C/C++: Run executable",
-            "detail": "Runs compiling and linking tasks together",
-            "type": "shell",
-            "command": "./program",
-            "dependsOn": "(TASK)C/C++: g++ file compiling & linking",
-            "group": "build"
-        },
-        {
-            "label": "(TASK)C/C++: Compile test.cpp",
-            "detail": "Compiles and links the respective .hpp/.cpp(except templates) files into a single executable",
-            "type": "shell",
-            "command": "g++",
-            "args": [
-                "-g",
-                "src/test.cpp",
-                "-o",
-                "program"
+                "cmpexec",
+                "-I/usr/include/tk",
+                "-I/usr/include/tcl8.6",
+                "-ltk8.6",
+                "-ltcl8.6"
             ],
             "group": {
                 "kind": "build",

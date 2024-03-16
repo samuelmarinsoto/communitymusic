@@ -13,7 +13,7 @@ int main() {
     // Create server socket
     server_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (server_socket == -1) {
-        std::cerr << "Socket creation failed\n";
+        std::cout << "Socket creation failed\n";
         return 1;
     }
 
@@ -22,13 +22,13 @@ int main() {
     server_address.sin_addr.s_addr = INADDR_ANY;
     server_address.sin_port = htons(PORT);
     if (bind(server_socket, (struct sockaddr *)&server_address, sizeof(server_address)) < 0) {
-        std::cerr << "Binding failed\n";
+        std::cout << "Binding failed\n";
         return 1;
     }
 
     // Listen for incoming connections
     if (listen(server_socket, 5) < 0) {
-        std::cerr << "Listening failed\n";
+        std::cout << "Listening failed\n";
         return 1;
     }
 
@@ -38,7 +38,7 @@ int main() {
     socklen_t client_address_len = sizeof(client_address);
     client_socket = accept(server_socket, (struct sockaddr *)&client_address, &client_address_len);
     if (client_socket < 0) {
-        std::cerr << "Acceptance failed\n";
+        std::cout << "Acceptance failed\n";
         return 1;
     }
 

@@ -3,10 +3,23 @@
 
 #include <iostream>
 #include <string>
+#include <tk.h>
 
-int main(){
+extern "C" {
+    int Tcl_AppInit(Tcl_Interp *interp) {
+        if (Tk_Init(interp) == TCL_ERROR) {
+            return TCL_ERROR;
+        }
 
-    Server socket(49094 ,"172.16.0.1");
+        // You can add additional initialization code here
+
+        return TCL_OK;
+    }
+}
+
+int main(int argc, char *argv[]){
+    Tk_Main(argc, argv, Tcl_AppInit);
+    //Server socket(49094 ,"172.16.0.1");
 
     /*std::string jString = json_as_string("settings/file.json");
     JSONObject json(jString);
@@ -19,5 +32,6 @@ int main(){
         arr.remove(1);
     json.append("f",  arr);
     cout << json.content << endl;*/
+
     return 0;
 }
