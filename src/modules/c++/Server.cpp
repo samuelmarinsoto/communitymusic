@@ -11,7 +11,7 @@ using namespace std;
 // Creates an instance of Server, binds the socket to specified ip and port and starts listening for clients
 // Example:
 // Server server(12345, "172.16.0.176");
-Server::Server(int port, char* ip) {
+Server::Server(int port, const char* ip) {
     // Create the socket with TCP protocol
     this->socket_server = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -176,16 +176,17 @@ void Server::modify_event(int who, string change){
 int Server::modify_clients(Method fn, int index){
     // lock guard the mutex to unlock the use of the client list upon return
     lock_guard<mutex> lock(this->shared_list);
+    int client = 0;
     // determine requested method
     switch (fn){
         case Get: // Retrieve any current client on session
-            int client = this->clients.Get(index)->data;
-            return client;
+            client = this->clients.Get(index)->data;
+            break;
         case Remove: // remove a client that is logging out of session
             this->clients.Remove(index);
             break;
         default:
-            return -1;
+            break;
     }
-    return 0;
+    return client;
 }

@@ -18,8 +18,12 @@ extern "C" {
 }
 
 int main(int argc, char *argv[]){
-    Tk_Main(argc, argv, Tcl_AppInit);
-    //Server socket(49094 ,"172.16.0.1");
+    //Tk_Main(argc, argv, Tcl_AppInit);
+    Server socket(49094 ,"127.0.0.1");
+    while (true) {
+        string* x = socket.access_event();
+        cout << x[0] << " said " << x[1] << endl;
+    }
 
     /*std::string jString = json_as_string("settings/file.json");
     JSONObject json(jString);

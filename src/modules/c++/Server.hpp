@@ -47,7 +47,7 @@ class Server{
         // void set_ref_attach(Rsrc which, Lista* argL, Paginada* argC);
         // void modify_ref_attach();
     public:
-        Server(int port, char* ip);
+        Server(int port, const char* ip);
         ~Server();
 
         bool accces_shared_status();

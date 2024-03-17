@@ -1,4 +1,6 @@
 use rstk::*;
+use std::sync::Arc;
+use std::thread::{self, Thread};
 
 // >> Project modules "imports" <<
 mod modules{
@@ -11,17 +13,32 @@ mod modules{
 use modules::rust::client::Client as Client;
 
 fn main() {
-    let root = rstk::start_wish().unwrap();
+    /*let root = rstk::start_wish().unwrap();
 
     let hello = rstk::make_label(&root);
     hello.text("Hello from Rust/Tk");
   
     hello.grid().layout();
   
-    rstk::mainloop();
+    rstk::mainloop();*/
 
-    /*let client = Client::new("172.16.0.1".to_owned(), 49094);
-    client.start_com();*/
+    let client = Client::new("127.0.0.1", 49094);
+    match client {
+        Ok(cli) => {
+            let arc_guard = Arc::new(cli);
+            let copy = Arc::clone(&arc_guard);
+            thread::spawn(move || {
+                copy.start_com();
+            });
+            loop {
+                let response = arc_guard.get_current_response();
+                print!("Server said: {}\n", response);
+            }
+        },
+        Err(e) => {
+            eprint!("Client couldnt communicate with server\nError: {}\n", e)
+        }
+    }
 
     /*let js_data = "{\"x\":147,\"y\":\"hello\"}";
     let pre_js = serde_json::to_value(js_data).unwrap();
