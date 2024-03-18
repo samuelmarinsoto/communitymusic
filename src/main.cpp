@@ -18,7 +18,7 @@ extern "C" {
 }
 
 int main(int argc, char *argv[]){
-    //Tk_Main(argc, argv, Tcl_AppInit);
+    Tk_Main(argc, argv, Tcl_AppInit);
     Server socket(49094 ,"127.0.0.1");
     while (true) {
         string* x = socket.access_event();
