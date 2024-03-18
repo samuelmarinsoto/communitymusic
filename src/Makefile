@@ -6,8 +6,9 @@ INCS = -I/usr/include
 TKINCS = -I/usr/include/tk8.6 -I/usr/include/tcl8.6
 
 .ifdef OPENBSD
-LIBS = -L/usr/local/lib -lcrossguid -lid3
-INCS = -I/usr/local/include
+LIBS = -L/usr/local/lib -L/usr/X11R6/lib -lcrossguid -lid3 -lX11
+INCS = -I/usr/X11R6/include -I/usr/local/include
+TKINCS = -I/usr/local/include/tk8.6 -I/usr/local/include/tcl8.6
 .endif
 
 id3test:
