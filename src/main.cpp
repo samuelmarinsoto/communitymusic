@@ -19,7 +19,7 @@ extern "C" {
 
 int main(int argc, char *argv[]){
     // Tk_Main(argc, argv, Tcl_AppInit);
-    Server socket(49050 ,"127.0.0.1");
+    Server socket(49050 ,"192.168.18.42");
     while (true) {
         string* x = socket.access_event();
         cout << x[0] << " said " << x[1] << endl;

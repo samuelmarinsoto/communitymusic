@@ -22,7 +22,7 @@ fn main() {
   
     rstk::mainloop();*/
 
-    let client = Client::new("127.0.0.1", 49050);
+    let client = Client::new("192.168.18.42", 49050);
     match client {
         Ok(cli) => {
             let arc_guard = Arc::new(cli);
