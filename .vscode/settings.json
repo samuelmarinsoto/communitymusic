@@ -48,7 +48,17 @@
         "stdexcept": "cpp",
         "streambuf": "cpp",
         "typeinfo": "cpp",
-        "sstream": "cpp"
+        "sstream": "cpp",
+        "chrono": "cpp",
+        "condition_variable": "cpp",
+        "ctime": "cpp",
+        "ratio": "cpp",
+        "fstream": "cpp",
+        "iomanip": "cpp",
+        "mutex": "cpp",
+        "semaphore": "cpp",
+        "stop_token": "cpp",
+        "thread": "cpp"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

@@ -1,23 +1,22 @@
-#include "modules/c++/fJSON.hpp"
-#include "modules/c++/Server.hpp"
-
+#include "modules/c++/LinkedList.hpp"
 #include <iostream>
-#include <string>
 
-int main(){
+int main() {
+    LinkedList<int> list;
 
-    Server socket(7676, "127.0.0.1");
+    // Añadir elementos a la lista
+    list.insertAtEnd(1);
+    list.insertAtEnd(2);
+    list.insertAtEnd(3);
 
-    /*std::string jString = json_as_string("settings/file.json");
-    JSONObject json(jString);
-        json.remove("u");
-        json.append("new", 41);
-        json.append("a", 9);
-    JSONArray arr = json.getArray("f");
-        arr.append((float)67.81);
-        arr.append(string("hello"));
-        arr.remove(1);
-    json.append("f",  arr);
-    cout << json.content << endl;*/
+    // Imprimir la lista
+    list.PrintList();
+
+    // Eliminar un elemento de la lista
+    list.deleteNode(2);
+
+    // Imprimir la lista después de eliminar un elemento
+    list.PrintList();
+
     return 0;
 }
