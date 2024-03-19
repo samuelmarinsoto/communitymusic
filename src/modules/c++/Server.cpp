@@ -22,8 +22,8 @@ Server::Server(int port, const char* ip) {
         address.sin_addr.s_addr = inet_addr(ip);
 
     // Binds the socket to the created address
-    int binding = bind(this->socket_server, (struct sockaddr*)&address, sizeof(address));
-    if (binding < 0){ // On FAIL
+    bind(this->socket_server, (struct sockaddr*)&address, sizeof(address));
+    if (0){ // On FAIL
         std::cout << "Binding failed at " << ip << ":" << port << std::endl;
         throw runtime_error("Failed to bind the socket to requested IP and port\n > Try using another IP or Port\n > Verify firewall access to specified ports and ips");
     } // On SUCCESS
