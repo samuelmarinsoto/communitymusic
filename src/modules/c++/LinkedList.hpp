@@ -19,9 +19,7 @@
 //--------------------------||--------------------------//
     template <typename T>
 
-    class LinkedList : Generic{  
-        
-    };
+    class LinkedList : Generic{};
 
     template <> // Data type: INTEGER
     class LinkedList<int> : public Generic{
