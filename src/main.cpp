@@ -1,41 +1,24 @@
-#include "modules/c++/fJSON.hpp"
-#include "modules/c++/Server.hpp"
-
+#include "modules/c++/LinkedList.hpp"
 #include <iostream>
+
 #include <string>
-#include <tk.h>
 
-extern "C" {
-    int Tcl_AppInit(Tcl_Interp *interp) {
-        if (Tk_Init(interp) == TCL_ERROR) {
-            return TCL_ERROR;
-        }
+int main() {
+    LinkedList<int> list;
 
-        // You can add additional initialization code here
+    // Añadir elementos a la lista
+    list.insertAtEnd(1);
+    list.insertAtEnd(2);
+    list.insertAtEnd(3);
 
-        return TCL_OK;
-    }
-}
+    // Imprimir la lista
+    list.PrintList();
 
-int main(int argc, char *argv[]){
-    // Tk_Main(argc, argv, Tcl_AppInit);
-    Server socket(49050 ,"192.168.18.42");
-    while (true) {
-        string* x = socket.access_event();
-        cout << x[0] << " said " << x[1] << endl;
-    }
+    // Eliminar un elemento de la lista
+    list.deleteNode(2);
 
-    /*std::string jString = json_as_string("settings/file.json");
-    JSONObject json(jString);
-        json.remove("u");
-        json.append("new", 41);
-        json.append("a", 9);
-    JSONArray arr = json.getArray("f");
-        arr.append((float)67.81);
-        arr.append(string("hello"));
-        arr.remove(1);
-    json.append("f",  arr);
-    cout << json.content << endl;*/
+    // Imprimir la lista después de eliminar un elemento
+    list.PrintList();
 
     return 0;
 }

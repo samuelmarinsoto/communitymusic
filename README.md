@@ -7,3 +7,5 @@ Proyecto enfocado en crear un playlist de canciones(en formato MP3) donde un ser
 **[[Azure DevOps]](https://dev.azure.com/CE2103-Datos2/CMP/_backlogs/backlog/CMP%20Team/Stories)** <br>
 
 ## Dependencias
+
+` uuid-dev libid3-dev `

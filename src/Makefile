@@ -3,7 +3,7 @@ CC = clang++
 CFLAGS = -W -O -std=c++11 -Wno-undefined
 LIBS = -L/usr/lib -lz -lexpat -pthread -lid3 -ltk86 -ltcl86 -lcrossguid
 INCS = -I/usr/include
-TKINCS = -I/usr/include/tk86 -I/usr/include/tcl86
+TKINCS = -I/usr/include/tk86 -I/usr/include/tcl8.6
 
 .ifdef OPENBSD
 X11INC = -I/usr/X11R6/include
@@ -21,7 +21,8 @@ socketstest:
 threadstest:
 	${CC} ${CFLAGS} -g test.cpp -o threadstest
 	./threadstest
-server:
-	${CC} ${CFLAGS} modules/c++/**.cpp main.cpp ${INCS} ${TKINCS} ${LIBS} -o server
+main:
+	${CC} ${CFLAGS} -g modules/c++/**.cpp main.cpp ${INCS} ${TKINCS} ${LIBS} -o program_binary
+	./program_binary
 clean:
-	rm -rf threadstest socketstest id3test server *.core
+	rm -rf threadstest socketstest id3test program_binary
