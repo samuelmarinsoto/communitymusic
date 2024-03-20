@@ -1,46 +1,48 @@
-use test::execute;
+use rstk::*;
+use std::sync::Arc;
+use std::thread::{self, Thread};
 
 // >> Project modules "imports" <<
 mod modules{
     pub mod rust{
-        pub mod test;
-
         pub mod client;
     }
 }
 
-pub mod test;
 
-//use core::time;
-//use std::fmt::format;
-
-//use serde_json::Value;
-//use std::thread;
-//use std::thread::sleep;
-
-//use modules::rust::client::Client as Client;
+use modules::rust::client::Client as Client;
 
 fn main() {
-    execute();
-    /*let mut socket = Client::deploy("127.0.0.1".to_owned(), 7676);
-    let com_thread = thread::spawn(move || {
-        socket.start_com();
-    });
-    socket.set_petition(&["up-vote", "0x008"]);
-    sleep(time::Duration::from_secs(12));
-    socket.set_petition(&["down-vote", "0x106"]);*/
+    /*let root = rstk::start_wish().unwrap();
 
-    /*let data = r#"
-    {
-        "key1" : null,
-        "key2" : 777,
-        "arr1" : [false, 10, {"x": 80, "y": 170}],
-        "key3" : true
+    let hello = rstk::make_label(&root);
+    hello.text("Hello from Rust/Tk");
+  
+    hello.grid().layout();
+  
+    rstk::mainloop();*/
+
+    let client = Client::new("192.168.18.42", 49050);
+    match client {
+        Ok(cli) => {
+            let arc_guard = Arc::new(cli);
+            let copy = Arc::clone(&arc_guard);
+            thread::spawn(move || {
+                copy.start_com();
+            });
+            loop {
+                let response = arc_guard.get_current_response();
+                print!("Server said: {}\n", response);
+            }
+        },
+        Err(e) => {
+            eprint!("Client couldnt communicate with server\nError: {}\n", e)
+        }
     }
-    "#; 7u89
-    let json : Value = serde_json::from_str(&data).unwrap();
-    let search_v = "arr1";
-    print!("KEY-PAIR ---> ({}) : ({}) \n", search_v ,json[search_v][2]["y"]);
-    let value = json[search_v].as_i64().unwrap_or(0);
-    print!("JSON int = {}", value);*/
+
+    /*let js_data = "{\"x\":147,\"y\":\"hello\"}";
+    let pre_js = serde_json::to_value(js_data).unwrap();
+    let js: Value = serde_json::from_value(pre_js).unwrap();
+    let jsx = json!(js_data);
+    print!("{}\t{}\n", js["x"], jsx["x"]);*/
 }

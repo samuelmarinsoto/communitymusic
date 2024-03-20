@@ -549,7 +549,7 @@ bool JSONArray::getBool(int index){
     } else if (this->values[index]== "false"){
         return false;
     } else{
-        return NULL;
+        return false;
     }
 }
 

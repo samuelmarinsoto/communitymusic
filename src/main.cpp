@@ -1,6 +1,8 @@
 #include "modules/c++/LinkedList.hpp"
 #include <iostream>
 
+#include <string>
+
 int main() {
     LinkedList<int> list;
 

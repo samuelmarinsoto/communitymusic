@@ -15,19 +15,18 @@ enum Container{
 struct MyClass{
     name: String,
     container: Container,
-    shared: Arc< Mutex<bool> >
+    shared: Mutex<bool>
 }
 
 impl MyClass{
     fn create(arg: &str) -> MyClass{
         MyClass{name:arg.to_owned(),container: Container::Exec,
-             shared:Arc::new(Mutex::new(true))}
+             shared:Mutex::new(true)}
     }
 
     fn access_condition(&self, thread_id:&str) -> bool{
         print!("Thread ({}) is accessing data \n", thread_id);
-        let hold = Arc::clone(&self.shared);
-        let result = hold.lock().unwrap();
+        let result = self.shared.lock().unwrap();
         *result
     }
 
@@ -36,10 +35,13 @@ impl MyClass{
         while self.access_condition(id) {
             if counter == 18 {
                 break;
+            } else if counter==7 && id=="0x007"{
+                let mut condition = self.shared.lock().unwrap();
+                *condition = false;
             }
             counter += 1;
             print!("Thread {} is counting at {} \n", id, counter);
-            sleep(time::Duration::from_secs(7));
+            sleep(time::Duration::from_secs(2));
         }
     }
 }

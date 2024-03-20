@@ -61,6 +61,5 @@ public:
         std::cout << '\n';
     }
 };
-#endif
 
-
+#endif // LinkedList_H
