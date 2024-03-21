@@ -1,5 +1,5 @@
-// [Header(.hpp) file include]
-#include "Server.hpp"
+// [Header(.h) file include]
+#include "Server.h"
 
 // [Other imports]
 #include <iostream>

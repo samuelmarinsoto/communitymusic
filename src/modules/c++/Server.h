@@ -2,9 +2,9 @@
 #define SERVER_H
 
 // >>> Module imports <<<
-#include "Params.hpp"
+#include "Params.h"
 #include "fJSON.hpp"
-#include "LinkedList.hpp"
+#include "LinkedList.h"
 
 // >>> Main imports <<< 
 #include <cstring>
