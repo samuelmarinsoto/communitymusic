@@ -8,11 +8,18 @@
             "command": "g++",
             "args": [
                 "-g",
-                "src/lib/**.cpp",
-                "src/modules/c++/**.cpp",
                 "src/main.cpp",
                 "-o",
-                "app"
+                "app",
+                "-L/usr/local/lib",
+                "-L/usr/lib",
+                "-L/usr/lib/x86_64-linux-gnue",
+                "-I/usr/include",
+                "-I/usr/local/include",
+                "-lsfml-system",
+                "-lsfml-audio",
+                "-lsfml-graphics",
+                "-lsfml-window"
             ],
             "group": {
                 "kind": "build",

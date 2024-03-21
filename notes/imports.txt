@@ -1,1 +1,3 @@
--I/usr/include/tk -L/usr/lib/tk8.6 -I/usr/include/tcl8.6 -L/usr/lib/tcl8.6 -L/usr/lib/x86_64-linux-gnu -ltk8.6 -ltcl8.6
+tasks other values:
+                "src/lib/**.cpp",
+                "src/modules/c++/**.cpp",
