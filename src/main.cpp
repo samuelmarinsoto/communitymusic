@@ -1,24 +1,14 @@
-#include "modules/c++/LinkedList.hpp"
-#include <iostream>
+#include "modules/c++/Server.hpp"
 
+#include <iostream>
 #include <string>
 
-int main() {
-    LinkedList<int> list;
 
-    // Añadir elementos a la lista
-    list.insertAtEnd(1);
-    list.insertAtEnd(2);
-    list.insertAtEnd(3);
-
-    // Imprimir la lista
-    list.PrintList();
-
-    // Eliminar un elemento de la lista
-    list.deleteNode(2);
-
-    // Imprimir la lista después de eliminar un elemento
-    list.PrintList();
-
+int main(int argc, char *argv[]){
+    Server socket(49001 ,"127.0.0.1");
+    while (true) {
+        string* x = socket.access_event();
+        cout << x[0] << " said " << x[1] << endl;
+    }
     return 0;
 }
