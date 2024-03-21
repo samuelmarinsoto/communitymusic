@@ -10,6 +10,14 @@ class Node {
         T data;
         Node* next;
         Node* prev;
+    //----------------[Class atributes]----------------//
+
+        Node(T dta) {
+        data = dta;
+        next = nullptr;
+        prev = nullptr;
+    }
+
 };
 
 #endif
