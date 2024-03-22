@@ -1,21 +1,58 @@
+/*
+REQ-S004 (15pts) La lista principal está paginada. El archivo .INI contiene los siguientes parámetros:
+a. Activada o desactivada
+b. Cantidad de páginas permitidas en memoria
+c. Tamaño en bytes de cada página. Debe asegurarse que la cantidad de bytes sea exacta
+para que quepan nodos completos. Cualquier valor incorrecto debe ser validado por el
+programa
+d. Ruta absoluta en el disco donde ocurre el swap
+La paginación debe ser transparente, es decir, debe construir una clase llamada ListaPaginada que
+implemente una interfaz ILista. Dicha interfaz provee operaciones tradicionales como add, delete,
+search, getByIndex, entre otros. La paginación está totalmente encapsulada para el código que use
+ListaPaginada.
+ListaPaginada tiene un algoritmo de reemplazo LRU para reemplazar las páginas cargadas. El swap
+ocurre en disco en la ruta configurada
+La interfaz gráfica provee un toggle para activar o desactivar la paginación. Cuando se desactiva, se
+carga nuevamente la lista de canciones completa a memoria. Cuando se activa, se libera el espacio de la
+lista original y se carga la lista paginada.
+La interfaz gráfica del servidor debe mostrar en todo momento, el consumo de memoria total de la
+aplicación. Al activar o desactivar paginación, debe actualizarse apropiadamente. Si la memoria total no
+se reduce, indicaría que la paginación no es correcta. El uso de memoria se puede validar utilizando el
+monitor de procesos y memoria del sistema operativo.
+*/
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <cstdlib>
 
-#define FILE "swap.bin";
-
 class PagedArray {
 public:
-    PagedArray(size_t size, size_t objsize, size_t mempages){
-     : size_(size), page_count_(size / PAGE_SIZE + (size % PAGE_SIZE != 0)), file_(FILENAME, std::ios::binary | std::ios::in | std::ios::out | std::ios::trunc) {
-        if (!file_.is_open()) {
-            std::cerr << "Error opening file for PagedArray\n";
+	size_t size, objsize, rampages, pagesize, pagecount;
+	char * filename;
+	std::vector active_pages;
+	
+    PagedArray(size_t size_, size_t objsize_, size_t rampages_, size_t pagesize_ char* filename_){
+    	size = size_;
+    	objsize = objsize_;
+    	rampages = rampages_;
+    	strlcpy(filename_, filename, strlen(filename_)+1);
+    	pagesize = pagesize_;
+    	pagecount = (size*objsize)/pagesize
+ 	
+    	if (pagesize_%objsize_){
+    		std:cerr << "Tamaño de pagina inadecuado para objeto para el objeto almacenado"ñ
+    		std::exit(EXIT_FAILURE);
+    	}
+    	
+    	std::fstream file(*filename, std::ios::binary | std::ios::in | std::ios::out | std::ios::trunc);
+    	
+    	if (!file.is_open()) {
+            std::cerr << "Error: No se pudo abrir " << filename << " para uso en arreglo paginado\n";
             std::exit(EXIT_FAILURE);
         }
-
+        
         // Resize the file to accommodate all pages
-        file_.seekp((page_count_ * PAGE_SIZE) - 1);
+        file_.seekp((pagecount*pagesize) - 1);
         file_.put(0);
         file_.seekp(0);
     }
@@ -25,10 +62,10 @@ public:
     }
 
     int& operator[](size_t index) {
-        size_t pageIndex = index / PAGE_SIZE;
-        size_t pageOffset = index % PAGE_SIZE;
+        size_t pageIndex = index / pagesize;
+        size_t pageOffset = index % pagesize;
 
-        if (pageIndex >= page_count_) {
+        if (pageIndex >= pagecount) {
             std::cerr << "Index out of bounds\n";
             std::exit(EXIT_FAILURE);
         }
@@ -44,32 +81,19 @@ public:
 
 private:
     void loadPage(size_t pageIndex) {
-        file_.seekg(pageIndex * PAGE_SIZE);
-        file_.read(reinterpret_cast<char*>(pages_.data()), PAGE_SIZE);
+        file_.seekg(pageIndex * pagesize);
+        file_.read(reinterpret_cast<char*>(pages_.data()), pagesize);
     }
 
     void savePage(size_t pageIndex) {
-        file_.seekp(pageIndex * PAGE_SIZE);
-        file_.write(reinterpret_cast<const char*>(pages_.data()), PAGE_SIZE);
+        file_.seekp(pageIndex * pagesize);
+        file_.write(reinterpret_cast<const char*>(pages_.data()), pagesize);
     }
 
     size_t size_;
     size_t page_count_;
     std::fstream file_;
-    std::vector<int> pages_ = std::vector<int>(PAGE_SIZE / sizeof(int));
+    std::vector<int> pages_ = std::vector<int>(pagesize / sizeof(int));
     size_t currentPage_ = static_cast<size_t>(-1); // Invalid page index
 };
 
-int main() {
-    const size_t arraySize = 10000;
-    PagedArray pagedArray(arraySize);
-
-    // Usage example
-    for (size_t i = 0; i < arraySize; ++i) {
-        pagedArray[i] = i * i;
-    }
-
-    std::cout << "Element at index 54: " << pagedArray[54] << std::endl;
-
-    return 0;
-}
