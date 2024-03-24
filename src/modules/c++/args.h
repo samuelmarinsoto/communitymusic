@@ -1,7 +1,7 @@
 #ifndef TYPES_H
 #define TYPES_H
 
-enum Types{
+enum cmd{
     //is_Idling,
     is_Asking,
     is_VotingUp,
@@ -10,12 +10,12 @@ enum Types{
     unknown
 };
 
-enum Method{
+enum action{
     Get,
     Remove
 };
 
-enum Rsrc{
+enum rsrc_type{
     LIST,
     ARR
 };

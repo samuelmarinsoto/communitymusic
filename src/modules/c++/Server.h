@@ -2,9 +2,9 @@
 #define SERVER_H
 
 // >>> Module imports <<<
-#include "Params.h"
-#include "fJSON.hpp"
-#include "LinkedList.h"
+#include "args.h"
+#include "lib/fJSON.hpp"
+#include "LinkedList.hpp"
 
 // >>> Main imports <<< 
 #include <cstring>
@@ -39,10 +39,10 @@ class Server{
 
     protected:
         void start_listen();
-        char* load_response(Types r_tp, JSONObject content);
+        char* load_response(cmd r_tp, JSONObject content);
         void open_new_channel(int client, int who);
 
-        int modify_clients(Method fn, int index);
+        int modify_clients(action fn, int index);
 
         // void set_ref_attach(Rsrc which, Lista* argL, Paginada* argC);
         // void modify_ref_attach();

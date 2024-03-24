@@ -31,8 +31,8 @@ Server::Server(int port, const char* ip) {
     
     // Sets up other instance attributes
     this->status = true;
-    this->clients.Insert(0);
-    this->modify_event(this->clients.Get(0)->data, string("No changes"));
+    this->clients.insert(0);
+    this->modify_event(this->clients.get(0), string("No changes"));
     thread(&Server::start_listen, this).detach();
 };
 
@@ -51,11 +51,11 @@ void Server::start_listen(){
         socket_client = accept(this->socket_server, nullptr, nullptr);
         if (socket_client > 0){
             // Append to full list
-            this->clients.Insert(socket_client);
+            this->clients.insert(socket_client);
             std::cout<< "Client connected succesfully" << std::endl;
 
             // Open a separate thread for communication
-            thread(&Server::open_new_channel, this, socket_client, this->clients.get_size()-1).detach();
+            thread(&Server::open_new_channel, this, socket_client, this->clients.size-1).detach();
         }
     }
 };
@@ -64,17 +64,17 @@ void Server::start_listen(){
 // r_tp: is type of client request
 // content: json object dictionary which contains possible args for interaction with server resources
 // NOTE: returned value is a pointer on dynamic memory and should be freed when it is no longer required
-char* Server::load_response(Types r_tp, JSONObject content){
-    JSONObject response;
+char* Server::load_response(cmd r_tp, Dictionary content){
+    Dictionary response;
     switch ( r_tp ){
         case is_Asking:
-            response.append("cmd", string("send-songs"));
-            response.append("status", string("OK"));
+            response.add("cmd", JSON::convert_to_value<string>("send-songs"));
+            response.add("status", JSON::convert_to_value<string>("OK"));
             // TODO: Full implementation of list of songs retrieval
-            response.append("attach", JSONObject("{\"song1\":\"0x0009\"}"));
+            response.add("attach", JSON::convert_to_value<Dictionary>("{\"song1\":\"0x0009\"}"));
             break;
         case is_Exiting:
-            response.append("cmd", string("exiting"));
+            response.add("cmd", JSON::convert_to_value<string>("exiting"));
             response.append("status", string("OK"));
             break;
         case is_VotingUp:

@@ -7,55 +7,54 @@
 #include <iostream>
 
 using namespace std;
-
+// C++ data structure for dynamic memory usage with node linking in both directions
 template <typename T>
-
-// Data structure for linking nodes as a list
 class DoubleLinkedList {
 
 private:
     Node<T>* head;
     Node<T>* tail;
-
 public:
-    DoubleLinkedList() : head(nullptr), tail(nullptr) {}
-
+    int size;
+    // Creates a new DoublyLinkedList with no elements
+    DoubleLinkedList() : head(nullptr), tail(nullptr), size(0) {}
+    // Inserts a new node at the end of the list
     void insertAtEnd(T data) {
         Node<T>* newNode = new Node<T>(data);
-
-        if (tail) {
+        if (tail != nullptr) {
             tail->next = newNode;
         } else {
             head = newNode;
         }
 
         tail = newNode;
+        this->size++;
     }
-
+    // Deletes a node(element) of the list based on its data contained
     void deleteNode(T data) {
-        Node<T>* curr = this->head;
-        while (*curr) {
-            if ((*curr)->data == data) {
-                Node* temp = *curr;
-                *curr = (*curr)->next;
+        Node<T>* current = this->head;
+        while (current != nullptr) {
+            if ((*current)->data == data) {
+                Node<T>* temp = current;
+                current = current->next;
                 delete temp;
 
-                if (*curr == nullptr) {
+                if (current == nullptr) {
                     tail = nullptr;
                 }
-
+                this->size--;
                 return;
             }
 
-            curr = &(*curr)->next;
+            current = current->next;
         }
     }
-
+    // Prints all the values of the list
     void PrintList() {
-        Node* curr = head;
-        while (curr) {
-            std::cout << curr->data << ' ';
-            curr = curr->next;
+        Node<T>* current = this->head;
+        while (current) {
+            std::cout << current->data << ' ';
+            current = current->next;
         }
         std::cout << '\n';
     }
