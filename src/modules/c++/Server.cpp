@@ -70,30 +70,30 @@ char* Server::load_response(cmd r_tp, Dictionary content){
         case is_Asking:
             response.add("cmd", JSON::convert_to_value<string>("send-songs"));
             response.add("status", JSON::convert_to_value<string>("OK"));
+            response.add("attach", JSON::convert_to_value<Dictionary>(Dictionary("{\"song1\":\"0x0009\"}")));
             // TODO: Full implementation of list of songs retrieval
-            response.add("attach", JSON::convert_to_value<Dictionary>("{\"song1\":\"0x0009\"}"));
             break;
         case is_Exiting:
             response.add("cmd", JSON::convert_to_value<string>("exiting"));
-            response.append("status", string("OK"));
+            response.add("status", JSON::convert_to_value<string>("OK"));
             break;
         case is_VotingUp:
-            response.append("cmd", string("up-vote"));
-            response.append("status", string("OK"));
-            response.append("id", content.getString("id"));
+            response.add("cmd", JSON::convert_to_value<string>("up-vote"));
+            response.add("status", JSON::convert_to_value<string>("OK"));
+            response.add("id", content["id"]);
             // TODO: Full implementation of modifying the specific song attribute
             break;
         case is_VotingDown:
-            response.append("cmd", string("down-vote"));
-            response.append("status", string("OK"));
-            response.append("id", content.getString("id"));
+            response.add("cmd", JSON::convert_to_value<string>("down-vote"));
+            response.add("status", JSON::convert_to_value<string>("OK"));
+            response.add("id", content["id"]);
             // TODO: Full implementation of modifying the specific song attribute
             break;
         case unknown:
-            response.append("cmd", content.getString("cmd"));
-            response.append("status", string("Error"));
-            response.append("attach", content.Get("attach"));
-            response.append("detail", string("bad command"));
+            response.add("cmd", content["cmd"]);
+            response.add("status", JSON::convert_to_value<string>("Error"));
+            response.add("attach", content["attach"]);
+            response.add("detail", JSON::convert_to_value<string>("bad command"));
             break;
         default:
             break;
@@ -116,23 +116,23 @@ void Server::open_new_channel(int client_socket, int who){
         recv(client_socket, buffer, sizeof(buffer), 0);
         msg_raw_content = string(buffer);
         // Parse the buffer message into the json dict
-        JSONObject json(msg_raw_content);
+        Dictionary json(msg_raw_content);
         // Save to client event for logging
         this->modify_event(who, json.content);
         // Generate response
-        if (json.getString("cmd")=="idling" || json.getString("cmd")=="send-songs"){
+        if (json["cmd"].as_str()=="idling" || json["cmd"].as_str()=="send-songs"){
             char* response = this->load_response(is_Asking, json);
             send(client_socket, response, strlen(response), 0);
             free(response);
-        } else if (json.getString("cmd")=="exiting"){
+        } else if (json["cmd"].as_str()=="exiting"){
             char* response = this->load_response(is_Exiting, json);
             send(client_socket, response, strlen(response), 0);
             free(response);
-        } else if (json.getString("cmd")=="up-vote"){
+        } else if (json["cmd"].as_str()=="up-vote"){
             char* response = this->load_response(is_VotingUp, json);
             send(client_socket, response, strlen(response), 0);
             free(response);
-        } else if (json.getString("cmd")=="down-vote"){
+        } else if (json["cmd"].as_str()=="down-vote"){
             char* response = this->load_response(is_VotingDown, json);
             send(client_socket, response, strlen(response), 0);
             free(response);
@@ -173,17 +173,17 @@ void Server::modify_event(int who, string change){
     this->shared_event.unlock();
 }
 
-int Server::modify_clients(Method fn, int index){
+int Server::modify_clients(action fn, int index){
     // lock guard the mutex to unlock the use of the client list upon return
     lock_guard<mutex> lock(this->shared_list);
     int client = 0;
     // determine requested method
     switch (fn){
         case Get: // Retrieve any current client on session
-            client = this->clients.Get(index)->data;
+            client = this->clients[index];
             break;
         case Remove: // remove a client that is logging out of session
-            this->clients.Remove(index);
+            this->clients.remove(index);
             break;
         default:
             break;

@@ -3,10 +3,10 @@
 
 #include "JSON_Array.h"
 #include "JSON_Value.h"
-#include "Vector.hpp"
 
 #include <string>
 #include <tuple>
+#include <vector>
 
 class Array;
 class Value;
@@ -15,7 +15,7 @@ using namespace std;
 // Use this to parse any json file represented as a string
 class Dictionary {
     private:
-        vect< tuple<string, string> > pairs;
+        vector < tuple<string, string> > pairs;
         bool verify_existence(string key);
         void rebuild();
     public:

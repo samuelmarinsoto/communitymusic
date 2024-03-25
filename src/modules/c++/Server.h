@@ -39,7 +39,7 @@ class Server{
 
     protected:
         void start_listen();
-        char* load_response(cmd r_tp, JSONObject content);
+        char* load_response(cmd r_tp, Dictionary content);
         void open_new_channel(int client, int who);
 
         int modify_clients(action fn, int index);

@@ -3,11 +3,10 @@
 
 #include "JSON_Dict.h"
 #include "JSON_Value.h"
-#include "Vector.hpp"
 
 #include <string>
 #include <tuple>
-
+#include <vector>
 
 class Dictionary;
 class Value;
@@ -15,7 +14,7 @@ using namespace std;
 // C++ object for a json array of values
 class Array {
     private:
-        vect<string> values;
+        vector <string> values;
     public:
         string content; // Current array in json format
         // Creates a json array from given string using json formatting

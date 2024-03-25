@@ -9,6 +9,7 @@
             "args": [
                 "-g",
                 "src/lib/**.cpp",
+                "src/modules/c++/MP3Tags.hpp",
                 "src/main.cpp",
                 "-o",
                 "app",
@@ -20,7 +21,9 @@
                 "-lsfml-system",
                 "-lsfml-audio",
                 "-lsfml-graphics",
-                "-lsfml-window"
+                "-lsfml-window",
+                "-lid3",
+                "-lcrossguid"
             ],
             "group": {
                 "kind": "build",

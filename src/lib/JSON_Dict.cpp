@@ -32,14 +32,14 @@ Dictionary::Dictionary(string json_string){
                         reading += string(1, json_string[i]);
                         get<1> (n_pair) = reading;
                         reading = "";
-                        this->pairs.append(n_pair);
+                        this->pairs.push_back(n_pair);
                         n_pair = make_tuple("","");
                         hasSeenKey = false;
                     } else if (case_count == 0){
                         if (reading!="") {
                             get<1> (n_pair) = reading;
                             reading = "";
-                            this->pairs.append(n_pair);
+                            this->pairs.push_back(n_pair);
                             n_pair = make_tuple("","");
                             hasSeenKey = false;
                         }
@@ -56,7 +56,7 @@ Dictionary::Dictionary(string json_string){
                     }else if (case_count == 0){
                         get<1> (n_pair) = reading;
                         reading = "";
-                        this->pairs.append(n_pair);
+                        this->pairs.push_back(n_pair);
                         n_pair = make_tuple("","");
                         hasSeenKey = false;
                     }
@@ -70,7 +70,7 @@ Dictionary::Dictionary(string json_string){
                     if (case_count == 0){
                         get<1> (n_pair) = reading;
                         reading = "";
-                        this->pairs.append(n_pair);
+                        this->pairs.push_back(n_pair);
                         n_pair = make_tuple("","");;
                         hasSeenKey = false;
                     }
@@ -93,7 +93,7 @@ Dictionary::Dictionary(string json_string){
 }
 
 bool Dictionary::verify_existence(string key){
-    for (int i = 0; i<this->pairs.size; i++){
+    for (int i = 0; i<this->pairs.size(); i++){
         if (get<0> (this->pairs[i]) == key){
             return true;
         }
@@ -104,7 +104,7 @@ bool Dictionary::verify_existence(string key){
 void Dictionary::rebuild(){
     this->content = "{";
     tuple <string, string> pair;
-    for (int i = 0; i<this->pairs.size ; i++){
+    for (int i = 0; i<this->pairs.size() ; i++){
         pair = this->pairs[i];
         if (i != 0){
             this->content += ",";
@@ -115,12 +115,12 @@ void Dictionary::rebuild(){
 }
 
 Value Dictionary::operator[](string key){
-    for (int i = 0; i<this->pairs.size; i++){
+    for (int i = 0; i<this->pairs.size(); i++){
         if (get<0>(this->pairs[i])==key){
             return Value(get<1>(this->pairs[i]));
         }
     }
-    if (this->pairs.size == 1){
+    if (this->pairs.size() == 1){
         return Value(get<1>(this->pairs[0]));
     }
     return Value("");
@@ -128,23 +128,24 @@ Value Dictionary::operator[](string key){
 
 void Dictionary::add(string key, Value value){
     if (this->verify_existence(key)){
-        for (int i = 0; i<this->pairs.size; i++){
+        for (int i = 0; i<this->pairs.size(); i++){
             if (get<0>(this->pairs[i]) == key){
-                this->pairs.set(i, make_tuple(key, value.content));
+                //this->pairs.set(i, make_tuple(key, value.content));
+                this->pairs[i] = make_tuple(key, value.content);
                 break;
             }
         }
     } else {
-        this->pairs.append(make_tuple(key, value.content));
+        this->pairs.push_back(make_tuple(key, value.content));
     }
     this->rebuild();
 }
 
 void Dictionary::remove(string key){
-    vect< tuple<string, string> > new_pairs;
-    for (int i = 0; i<this->pairs.size; i++){
+    vector < tuple<string, string> > new_pairs;
+    for (int i = 0; i<this->pairs.size(); i++){
         if (get<0>(this->pairs[i]) != key){
-            new_pairs.append(this->pairs[i]);
+            new_pairs.push_back(this->pairs[i]);
         }
     }
     this->pairs = new_pairs;
