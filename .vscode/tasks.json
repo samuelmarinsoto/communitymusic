@@ -8,7 +8,6 @@
             "command": "g++",
             "args": [
                 "-g",
-                "src/lib/**.cpp",
                 "src/main.cpp",
                 "-o",
                 "app",
