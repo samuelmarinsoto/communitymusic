@@ -9,7 +9,7 @@
 
 class Cancion {
 public:
-	// uuid_t guid;
+	uuid_t guid;
 	char* titulo;
 	char* artista;
 	char* album;
@@ -18,6 +18,8 @@ public:
 	int upvotes, downvotes;
 
 	Cancion(char* mp3){
+		uuid_generate_random(guid);
+		
 		upvotes = 0;
 		downvotes = 0;
 
@@ -58,9 +60,7 @@ public:
 	size_t GetSize(){
 		return 100*5 + 4*2;
 	}
-	// void printguid(){
-		// char* str;
-		// uuid_unparse_lower(this->guid, str);
-		// printf("guid: %s\n", str);
-	// }
+	void printguid(){
+		printf("guid: %08x-%04x-%04x-%04x-%012x\n", this->guid);
+	}
 };
