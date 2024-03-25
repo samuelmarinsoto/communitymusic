@@ -15,18 +15,17 @@ using namespace std;
 // C++ class implementation to extract the id3 metadata of mp3 files
 class MP3Tags {
 public:
-    char* uuid;
-    char *title;
-    char *artist;
-    char *album;
-    char *genre;
-    char *file;
+    char uuid[80];
+    char title[50];
+    char artist[50];
+    char album[50];
+    char genre[50];
+    char file[100];
     int upvotes, downvotes;
 
 	// Loads the tags of a song into an object for use in the program
     MP3Tags(std::string mp3_path) {
 		// GUID generation
-		this->uuid = new char[80]; // Create a fixed size uuid space
 		boost::uuids::random_generator gen;
 		boost::uuids::uuid guid = gen();
 
@@ -37,13 +36,8 @@ public:
         this->upvotes = 0;
         this->downvotes = 0;
 
-        // Allocate all values in memory
-		this->file = new char[100]; // fixed size(also maximum) is 101 bytes(1 byte = 1 char)
-			strcpy(this->file, mp3_path.c_str()); // copy file path as array into the required field
-		this->title = new char[50];
-		this->artist = new char[50];
-		this->album = new char[50];
-		this->genre = new char[50];
+		// Set the path into the buffer
+		strcpy(this->file, mp3_path.c_str()); // copy file path as array into the required field
 
 		// Metadata extraction
 		TagLib::FileRef file(mp3_path.c_str());
@@ -82,16 +76,11 @@ public:
     }
 	// Destroys the object and all its contents		
 	~MP3Tags(){
-		delete[] title;
-		delete[] artist;
-		delete[] album;
-		delete[] genre;
-		delete[] file;
-		delete[] uuid;
+
 	}
 	// Returns the byte size of the object with all its elements
 	size_t GetSize(){
-		// TOTAL BYTE SIZE: file[101] + tags[50]*4 + uuid[80] + int[4]*2
+		// TOTAL BYTE SIZE: file[100] + tags[50]*4 + uuid[80] + int[4]*2
 		//return sizeof(char[101]) + sizeof(char[50])*4 + sizeof(char[80]) + sizeof(int)*2;
 		return sizeof(*this);
 	}
