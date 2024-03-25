@@ -1,9 +1,8 @@
 .POSIX:
 CC = clang++
-CFLAGS = -W -O -std=c++11 -Wno-undefined
-LIBS = -L/usr/lib -lz -lexpat -pthread -lid3 -ltk86 -ltcl86 -lcrossguid
+CFLAGS = -W -O
+LIBS = -L/usr/lib -luuid -lid3
 INCS = -I/usr/include
-TKINCS = -I/usr/include/tk86 -I/usr/include/tcl8.6
 
 .ifdef OPENBSD
 X11INC = -I/usr/X11R6/include
@@ -14,7 +13,7 @@ TKINCS = -I/usr/local/include/tk86 -I/usr/local/include/tcl86
 .endif
 
 id3test:
-	${CC} ${CFLAGS} id3tags.cpp testid3.cpp ${INCS} ${LIBS} -o id3test
+	${CC} ${CFLAGS} Cancion.cpp testid3.cpp ${INCS} ${LIBS} -o id3test
 socketstest:
 	${CC} ${CFLAGS} -g modules/c++/**.cpp main.cpp -o socketstest
 	./socketstest
