@@ -7,21 +7,25 @@
 using namespace std;
 // int main(int argc, char *argv[]){
 int main(){ // Code testing
-    MP3Tags cancion(string("/home/frederick/Desktop/bib/playlist1/Slipknot.mp3"));
+    MP3Tags cancion(string("/home/frederick/Desktop/bib/playlist1/System_Of_A_Down.mp3"));
 
-    std::cout << cancion.file << std::endl;
-    std::cout << cancion.title << std::endl;
-    std::cout << cancion.artist << std::endl;
-    std::cout << cancion.album << std::endl;
-    std::cout << cancion.genre << std::endl;
+    std::cout << "MP3 path: " << cancion.file << std::endl;
+    std::cout << "Generated UUID: " << cancion.uuid << std::endl;
+    std::cout << "Song name: " << cancion.title << std::endl;
+    std::cout << "Artist: " << cancion.artist << std::endl;
+    std::cout << "Album: " << cancion.album << std::endl;
+    std::cout << "Genre: " << cancion.genre << std::endl;
+    std::cout << "Total size(bytes): " << cancion.GetSize() << std::endl;
 
-    char* str_chars = new char[60];
-    string str = "h e l l o ";
-    strcpy(str_chars, str.c_str());
-    str_chars[str.length()] = 'p';
-    str_chars[str.length()+1] = '\0';
+    MP3Tags cancion2(string("/home/frederick/Desktop/bib/playlist1/Slipknot.mp3"));
 
-    string alf = string(str_chars);
-    std::cout << alf << "\n" << alf.length() << std::endl;
+    std::cout << "MP3 path: " << cancion2.file << std::endl;
+    std::cout << "Generated UUID: " << cancion2.uuid << std::endl;
+    std::cout << "Song name: " << cancion2.title << std::endl;
+    std::cout << "Artist: " << cancion2.artist << std::endl;
+    std::cout << "Album: " << cancion2.album << std::endl;
+    std::cout << "Genre: " << cancion2.genre << std::endl;
+    std::cout << "Total size(bytes): " << cancion.GetSize() << std::endl;
+
     return 0;
 }

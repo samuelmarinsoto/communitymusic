@@ -39,6 +39,7 @@ class DoubleLinkedList : public Observable {
         }
         // Deletes a node(element) of the list based on its data contained
         void deleteNode(T data) {
+            // Normal operations
             Node<T>* current = this->head;
             while (current != nullptr) {
                 if ((*current)->data == data) {

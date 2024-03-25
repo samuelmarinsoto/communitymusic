@@ -22,8 +22,7 @@
                 "-lsfml-audio",
                 "-lsfml-graphics",
                 "-lsfml-window",
-                "-lid3",
-                "-lcrossguid"
+                "-ltag"
             ],
             "group": {
                 "kind": "build",
