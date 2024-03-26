@@ -1,3 +1,4 @@
+
 /*
 REQ-S004 (15pts) La lista principal está paginada. El archivo .INI contiene los siguientes parámetros:
 a. Activada o desactivada
@@ -24,11 +25,12 @@ monitor de procesos y memoria del sistema operativo.
 #include <fstream>
 #include <vector>
 #include <cstdlib>
+#include <cstring>
 
 class PagedArray {
 public:
 	size_t size, objsize, rampages, pagesize, pagecount;
-	char * filename;
+	char* filename;
 	std::vector active_pages;
 	
     PagedArray(size_t size_, size_t objsize_, size_t rampages_, size_t pagesize_ char* filename_){
@@ -37,10 +39,10 @@ public:
     	rampages = rampages_;
     	strlcpy(filename_, filename, strlen(filename_)+1);
     	pagesize = pagesize_;
-    	pagecount = (size*objsize)/pagesize
+    	pagecount = (size*objsize)/pagesize;
  	
     	if (pagesize_%objsize_){
-    		std:cerr << "Tamaño de pagina inadecuado para objeto para el objeto almacenado"ñ
+    		std::cerr << "Tamaño de pagina inadecuado para el objeto almacenado";
     		std::exit(EXIT_FAILURE);
     	}
     	
@@ -93,7 +95,7 @@ private:
     size_t size_;
     size_t page_count_;
     std::fstream file_;
-    std::vector<int> pages_ = std::vector<int>(pagesize / sizeof(int));
+    std::vector<char> pages_ = std::vector<char>(pagesize*pagecount);
     size_t currentPage_ = static_cast<size_t>(-1); // Invalid page index
 };
 

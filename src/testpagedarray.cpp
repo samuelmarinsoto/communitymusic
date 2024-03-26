@@ -1,20 +1,31 @@
-#include "PagedArray.cpp"
-#include "id3tags.cpp"
+#include <fcntl.h>
+#include <unistd.h>
+#include "Cancion.cpp"
 
 int main() {
-    PagedArray pagedArray(20);
-	char archivo[25] = "03 I say love.mp3";
-
-    // Usage example
-    for (size_t i = 0; i < 20-1; ++i) {
-        pagedArray[i] = Cancion(archivo);
+    // Open a file for writing in binary mode
+    int fd = open("binary_data.bin", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (fd == -1) {
+        // Handle error if unable to open the file
+        perror("open");
+        return 1;
     }
 
-	std::cout << "guid: " << pagedArray[15].guid << std::endl;
-	std::cout << "titulo: " << pagedArray[15].titulo << std::endl;
-	std::cout << "artista: " << pagedArray[15].artista << std::endl;
-	std::cout << "album: " << pagedArray[15].album << std::endl;
-	std::cout << "genero: " << pagedArray[15].genero << std::endl;
-	std::cout << "tamaño: " << pagedArray[15].GetSize() << std::endl;
-	return 0;
+    // Example binary data
+    char archivo[25] = "smackdat.mp3";
+    Cancion cancion(archivo);
+
+    // Write the binary data to the file
+    ssize_t bytes_written = write(fd, cancion, 524);
+    if (bytes_written == -1) {
+        // Handle error if unable to write
+        perror("write");
+        close(fd);
+        return 1;
+    }
+
+    // Close the file
+    close(fd);
+
+    return 0;
 }

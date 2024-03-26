@@ -58,8 +58,9 @@ public:
 	}
 
 	size_t GetSize(){
-		return 100*5 + 4*2;
+		return 100*5 + sizeof(int)*2 + sizeof(uuid_t);
 	}
+	
 	void printguid(){
 		printf("guid: %08x-%04x-%04x-%04x-%012x\n", this->guid);
 	}
