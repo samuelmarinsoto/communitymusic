@@ -1,7 +1,7 @@
 #ifndef OBSERVE_H
 #define OBSERVE_H
 
-#include "modules/c++/LinkedList.hpp"
+#include "LinkedList.hpp"
 
 enum State{
     type0,
@@ -11,7 +11,20 @@ enum State{
     type4
 };
 
-class Observer;
+// C++ parent class for observer objects
+class Observer{
+    public:
+        // Receive an update of state changes in the object being observer
+        virtual void update(State state){};
+    protected:
+        // For comparing any observer
+        bool operator==(Observer other){
+            if (this == &other){
+                return true;
+            }
+            return false;
+        }
+};
 
 // C++ parent class for observable objects 
 class Observable {
@@ -41,19 +54,4 @@ class Observable {
         };
     
 };
-// C++ parent class for observer objects
-class Observer{
-    public:
-        // Receive an update of state changes in the object being observer
-        virtual void update(State state);
-    protected:
-        // For comparing any observer
-        bool operator==(Observer other){
-            if (this == &other){
-                return true;
-            }
-            return false;
-        }
-};
-
 #endif // OBSERVE_H

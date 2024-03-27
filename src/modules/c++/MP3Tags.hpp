@@ -84,6 +84,14 @@ public:
 		//return sizeof(char[101]) + sizeof(char[50])*4 + sizeof(char[80]) + sizeof(int)*2;
 		return sizeof(*this);
 	}
+	// Operator for comparing two MP3Tags instances correctly
+	// Compares check that the uuids are indeed different
+	bool operator==(MP3Tags other){
+		if(string(this->uuid) == string(other.uuid)){
+			return true;
+		}
+		return false;
+	}
 };
 
 #endif // MP3TAGS_H
