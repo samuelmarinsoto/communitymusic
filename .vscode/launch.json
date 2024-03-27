@@ -2,10 +2,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(gdb) Launch server",
+            "name": "(gdb) Launch app",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/main",
+            "program": "${workspaceFolder}/app",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",

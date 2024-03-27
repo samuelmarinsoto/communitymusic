@@ -1,5 +1,5 @@
-// [Header(.hpp) file include]
-#include "Server.hpp"
+// [Header(.h) file include]
+#include "Server.h"
 
 // [Other imports]
 #include <iostream>
@@ -22,8 +22,8 @@ Server::Server(int port, const char* ip) {
         address.sin_addr.s_addr = inet_addr(ip);
 
     // Binds the socket to the created address
-    bind(this->socket_server, (struct sockaddr*)&address, sizeof(address));
-    if (0){ // On FAIL
+    int binding = bind(this->socket_server, (struct sockaddr*)&address, sizeof(address));
+    if (binding < 0){ // On FAIL
         std::cout << "Binding failed at " << ip << ":" << port << std::endl;
         throw runtime_error("Failed to bind the socket to requested IP and port\n > Try using another IP or Port\n > Verify firewall access to specified ports and ips");
     } // On SUCCESS
@@ -31,8 +31,8 @@ Server::Server(int port, const char* ip) {
     
     // Sets up other instance attributes
     this->status = true;
-    this->clients.Insert(0);
-    this->modify_event(this->clients.Get(0)->data, string("No changes"));
+    this->clients.insert(0);
+    this->modify_event(this->clients.get(0), string("No changes"));
     thread(&Server::start_listen, this).detach();
 };
 
@@ -51,11 +51,11 @@ void Server::start_listen(){
         socket_client = accept(this->socket_server, nullptr, nullptr);
         if (socket_client > 0){
             // Append to full list
-            this->clients.Insert(socket_client);
+            this->clients.insert(socket_client);
             std::cout<< "Client connected succesfully" << std::endl;
 
             // Open a separate thread for communication
-            thread(&Server::open_new_channel, this, socket_client, this->clients.get_size()-1).detach();
+            thread(&Server::open_new_channel, this, socket_client, this->clients.size-1).detach();
         }
     }
 };
@@ -64,36 +64,36 @@ void Server::start_listen(){
 // r_tp: is type of client request
 // content: json object dictionary which contains possible args for interaction with server resources
 // NOTE: returned value is a pointer on dynamic memory and should be freed when it is no longer required
-char* Server::load_response(Types r_tp, JSONObject content){
-    JSONObject response;
+char* Server::load_response(cmd r_tp, Dictionary content){
+    Dictionary response;
     switch ( r_tp ){
         case is_Asking:
-            response.append("cmd", string("send-songs"));
-            response.append("status", string("OK"));
+            response.add("cmd", JSON::convert_to_value<string>("send-songs"));
+            response.add("status", JSON::convert_to_value<string>("OK"));
+            response.add("attach", JSON::convert_to_value<Dictionary>(Dictionary("{\"song1\":\"0x0009\"}")));
             // TODO: Full implementation of list of songs retrieval
-            response.append("attach", JSONObject("{\"song1\":\"0x0009\"}"));
             break;
         case is_Exiting:
-            response.append("cmd", string("exiting"));
-            response.append("status", string("OK"));
+            response.add("cmd", JSON::convert_to_value<string>("exiting"));
+            response.add("status", JSON::convert_to_value<string>("OK"));
             break;
         case is_VotingUp:
-            response.append("cmd", string("up-vote"));
-            response.append("status", string("OK"));
-            response.append("id", content.getString("id"));
+            response.add("cmd", JSON::convert_to_value<string>("up-vote"));
+            response.add("status", JSON::convert_to_value<string>("OK"));
+            response.add("id", content["id"]);
             // TODO: Full implementation of modifying the specific song attribute
             break;
         case is_VotingDown:
-            response.append("cmd", string("down-vote"));
-            response.append("status", string("OK"));
-            response.append("id", content.getString("id"));
+            response.add("cmd", JSON::convert_to_value<string>("down-vote"));
+            response.add("status", JSON::convert_to_value<string>("OK"));
+            response.add("id", content["id"]);
             // TODO: Full implementation of modifying the specific song attribute
             break;
         case unknown:
-            response.append("cmd", content.getString("cmd"));
-            response.append("status", string("Error"));
-            response.append("attach", content.Get("attach"));
-            response.append("detail", string("bad command"));
+            response.add("cmd", content["cmd"]);
+            response.add("status", JSON::convert_to_value<string>("Error"));
+            response.add("attach", content["attach"]);
+            response.add("detail", JSON::convert_to_value<string>("bad command"));
             break;
         default:
             break;
@@ -116,23 +116,23 @@ void Server::open_new_channel(int client_socket, int who){
         recv(client_socket, buffer, sizeof(buffer), 0);
         msg_raw_content = string(buffer);
         // Parse the buffer message into the json dict
-        JSONObject json(msg_raw_content);
+        Dictionary json(msg_raw_content);
         // Save to client event for logging
         this->modify_event(who, json.content);
         // Generate response
-        if (json.getString("cmd")=="idling" || json.getString("cmd")=="send-songs"){
+        if (json["cmd"].as_str()=="idling" || json["cmd"].as_str()=="send-songs"){
             char* response = this->load_response(is_Asking, json);
             send(client_socket, response, strlen(response), 0);
             free(response);
-        } else if (json.getString("cmd")=="exiting"){
+        } else if (json["cmd"].as_str()=="exiting"){
             char* response = this->load_response(is_Exiting, json);
             send(client_socket, response, strlen(response), 0);
             free(response);
-        } else if (json.getString("cmd")=="up-vote"){
+        } else if (json["cmd"].as_str()=="up-vote"){
             char* response = this->load_response(is_VotingUp, json);
             send(client_socket, response, strlen(response), 0);
             free(response);
-        } else if (json.getString("cmd")=="down-vote"){
+        } else if (json["cmd"].as_str()=="down-vote"){
             char* response = this->load_response(is_VotingDown, json);
             send(client_socket, response, strlen(response), 0);
             free(response);
@@ -173,17 +173,17 @@ void Server::modify_event(int who, string change){
     this->shared_event.unlock();
 }
 
-int Server::modify_clients(Method fn, int index){
+int Server::modify_clients(action fn, int index){
     // lock guard the mutex to unlock the use of the client list upon return
     lock_guard<mutex> lock(this->shared_list);
     int client = 0;
     // determine requested method
     switch (fn){
         case Get: // Retrieve any current client on session
-            client = this->clients.Get(index)->data;
+            client = this->clients[index];
             break;
         case Remove: // remove a client that is logging out of session
-            this->clients.Remove(index);
+            this->clients.remove(index);
             break;
         default:
             break;

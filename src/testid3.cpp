@@ -1,16 +1,16 @@
 #include <iostream>
 #include <crossguid/guid.hpp>
-#include "Cancion.cpp"
+#include "modules/c++/MP3Tags.hpp"
 
 int main(void){
-	char archivo[25] = "smackdat.opus";
-	Cancion cancion(archivo);
+	std::string archivo;
+	archivo = "smackdat.mp3";
+	MP3Tags cancion(archivo);
 
-	cancion.printguid();
-	std::cout << "titulo: " << cancion.titulo << std::endl;
-	std::cout << "artista: " << cancion.artista << std::endl;
+	std::cout << "titulo: " << cancion.title << std::endl;
+	std::cout << "artista: " << cancion.artist << std::endl;
 	std::cout << "album: " << cancion.album << std::endl;
-	std::cout << "genero: " << cancion.genero << std::endl;
-	std::cout << "tamaño: " << cancion.GetSize() << std::endl;
+	std::cout << "genero: " << cancion.genre << std::endl;
+	// std::cout << "tamaño: " << cancion.GetSize() << std::endl;
 	return 0;
 }

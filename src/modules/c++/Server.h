@@ -2,8 +2,8 @@
 #define SERVER_H
 
 // >>> Module imports <<<
-#include "Params.hpp"
-#include "fJSON.hpp"
+#include "args.h"
+#include "lib/fJSON.hpp"
 #include "LinkedList.hpp"
 
 // >>> Main imports <<< 
@@ -11,7 +11,6 @@
 #include <sys/socket.h> 
 #include <unistd.h>
 #include <arpa/inet.h>
-#include <netinet/in.h>
 #include <thread>
 #include <string>
 #include <mutex>
@@ -40,10 +39,10 @@ class Server{
 
     protected:
         void start_listen();
-        char* load_response(Types r_tp, JSONObject content);
+        char* load_response(cmd r_tp, Dictionary content);
         void open_new_channel(int client, int who);
 
-        int modify_clients(Method fn, int index);
+        int modify_clients(action fn, int index);
 
         // void set_ref_attach(Rsrc which, Lista* argL, Paginada* argC);
         // void modify_ref_attach();

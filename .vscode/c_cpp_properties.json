@@ -4,8 +4,9 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/usr/include/tcl8.6",
-                "/usr/include/tk"
+                "src/modules/c++",
+                "src/lib",
+                "src/app"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/clang",

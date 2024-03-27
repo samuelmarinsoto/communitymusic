@@ -52,13 +52,18 @@
         "chrono": "cpp",
         "condition_variable": "cpp",
         "ctime": "cpp",
+        "map": "cpp",
         "ratio": "cpp",
         "fstream": "cpp",
         "iomanip": "cpp",
         "mutex": "cpp",
         "semaphore": "cpp",
         "stop_token": "cpp",
-        "thread": "cpp"
+        "thread": "cpp",
+        "cinttypes": "cpp"
     },
-    "C_Cpp.errorSquiggles": "disabled"
+    "cSpell.words": [
+        "downvotes",
+        "upvotes"
+    ]
 }

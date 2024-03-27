@@ -1,24 +1,31 @@
-#include "modules/c++/LinkedList.hpp"
+// #include "SFML/Graphics.hpp"
+// #include "SFML/Window.hpp"
+#include "modules/c++/MP3Tags.hpp"
 #include <iostream>
+#include <string.h>
 
-#include <string>
+using namespace std;
+// int main(int argc, char *argv[]){
+int main(){ // Code testing
+    MP3Tags cancion(string("/home/frederick/Desktop/bib/playlist1/System_Of_A_Down.mp3"));
 
-int main() {
-    LinkedList<int> list;
+    std::cout << "MP3 path: " << cancion.file << std::endl;
+    std::cout << "Generated UUID: " << cancion.uuid << std::endl;
+    std::cout << "Song name: " << cancion.title << std::endl;
+    std::cout << "Artist: " << cancion.artist << std::endl;
+    std::cout << "Album: " << cancion.album << std::endl;
+    std::cout << "Genre: " << cancion.genre << std::endl;
+    std::cout << "Total size(bytes): " << cancion.GetSize() << std::endl;
 
-    // Añadir elementos a la lista
-    list.insertAtEnd(1);
-    list.insertAtEnd(2);
-    list.insertAtEnd(3);
+    MP3Tags cancion2(string("/home/frederick/Desktop/bib/playlist1/Slipknot.mp3"));
 
-    // Imprimir la lista
-    list.PrintList();
-
-    // Eliminar un elemento de la lista
-    list.deleteNode(2);
-
-    // Imprimir la lista después de eliminar un elemento
-    list.PrintList();
+    std::cout << "MP3 path: " << cancion2.file << std::endl;
+    std::cout << "Generated UUID: " << cancion2.uuid << std::endl;
+    std::cout << "Song name: " << cancion2.title << std::endl;
+    std::cout << "Artist: " << cancion2.artist << std::endl;
+    std::cout << "Album: " << cancion2.album << std::endl;
+    std::cout << "Genre: " << cancion2.genre << std::endl;
+    std::cout << "Total size(bytes): " << cancion.GetSize() << std::endl;
 
     return 0;
 }

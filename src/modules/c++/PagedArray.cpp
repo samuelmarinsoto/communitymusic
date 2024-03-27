@@ -98,4 +98,3 @@ private:
     std::vector<char> pages_ = std::vector<char>(pagesize*pagecount);
     size_t currentPage_ = static_cast<size_t>(-1); // Invalid page index
 };
-

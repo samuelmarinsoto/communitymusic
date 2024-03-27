@@ -2,11 +2,6 @@
 // #include "LinkedList.hpp"
 // using namespace :: std;
 // #include "Node.hpp"
-// // struct nodo {
-// //     int data;
-// //     Node* next;
-// //     Node* prev;
-// // }*first, *last;
 
 // void insertSong();
 // void ShowSongs();
