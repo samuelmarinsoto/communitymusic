@@ -74,9 +74,24 @@ public:
 		}
 
     }
+    MP3Tags(){
+    	uuid[0] = '\0';
+    	title[0] = '\0';
+    	artist[0] = '\0';
+    	album[0] = '\0';
+    	genre[0] = '\0';
+    	file[0] = '\0';
+    	upvotes = 0;
+    	downvotes = 0;
+    }
 	// Destroys the object and all its contents		
 	~MP3Tags(){
 
+	}
+	void serialize(std::fstream file, size_t index, size_t pagesize){
+		file.seekp()
+		
+		
 	}
 	// Returns the byte size of the object with all its elements
 	size_t GetSize(){

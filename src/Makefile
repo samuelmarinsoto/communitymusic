@@ -1,8 +1,8 @@
 .POSIX:
 CC = clang++
 CFLAGS = -W -O0
-LIBS = -L/usr/lib -L/usr/local/lib -L/usr/lib/x86_64-linux-gnu -L. -ltag
-INCS = -I/usr/include -I/usr/local/include -I../modules/c++/ -I../lib/
+LIBS = -L/usr/lib -L/usr/local/lib -L/usr/lib/x86_64-linux-gnu
+INCS = -I/usr/include -I/usr/local/include
 
 .ifdef OPENBSD
 X11INC = -I/usr/X11R6/include
@@ -16,9 +16,7 @@ id3test: mp3tags
 mp3tags:
 	${CC} ${CFLAGS} -c modules/c++/MP3Tags.hpp ${INCS} ${LIBS} -o mp3tags.o
 	ar rcs libmp3tags.a mp3tags.o
-socketstest:
-	${CC} -g modules/c++/**.cpp main.cpp -o $@
-threadstest:
-	${CC} -g test.cpp -o $@
+pagedarray:
+	${CC} ${CFLAGS} cacaarray.cpp ${INCS} ${LIBS} -o $@
 clean:
-	rm -rf id3test *.a *.o
+	rm -rf id3test pagedarray *.a *.o
