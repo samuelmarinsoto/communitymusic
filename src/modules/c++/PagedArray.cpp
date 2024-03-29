@@ -87,9 +87,11 @@ private:
         active_pages[0] = newtuple;
     }
 
-    void switch_front(std::tuple<size_t, std::vector<MP3Tags>>& switchtuple) {
+    void switch_front(std::tuple<size_t, std::vector<MP3Tags>>& switchtuple, int switchindex) {
     	std::tuple<size_t, std::vector<MP3Tags>> temp = active_pages[0];
     	active_pages[0] = switchtuple;
+    	active_pages[switchindex] = temp;
+    }
     	
 
 public:
@@ -135,10 +137,11 @@ public:
             std::exit(EXIT_FAILURE);
         }
 
-        // Load the page into memory if not already loaded
+        /* ver si pagina esta cargada, y si esta en frente de
+           todas las demas paginas */
         int pageloaded = 0;
         int ramindex = -1;
-        for (size_t i = active_pages.size()-1; i>-1; --i){
+        for (size_t i = active_pages.size()-1; i>=0; --i){
         	if (std::get<0>(active_pages[i]) == pageIndex){
         		pageloaded = 1;
         		ramindex = i;
@@ -147,10 +150,13 @@ public:
         }
         
         if (pageloaded) {
-        	if (std::get<0>(active_pages[0]) != pageIndex)
-        		push_front(
+        	// poner pagina al frente si no lo estaba
+        	if (!(ramindex == 0))
+        		switch_front(active_pages[ramindex], ramindex);
+        } else {
+        	loadPage(pageIndex);
         }
 
-        return pages_[pageOffset];
+        return std::get<1>(active_pages[0])[pageOffset];
     }
 };

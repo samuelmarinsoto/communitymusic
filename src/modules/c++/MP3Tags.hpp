@@ -88,11 +88,6 @@ public:
 	~MP3Tags(){
 
 	}
-	void serialize(std::fstream file, size_t index, size_t pagesize){
-		file.seekp()
-		
-		
-	}
 	// Returns the byte size of the object with all its elements
 	size_t GetSize(){
 		// TOTAL BYTE SIZE: file[100] + tags[50]*4 + uuid[80] + int[4]*2
