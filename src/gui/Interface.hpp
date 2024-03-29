@@ -14,6 +14,9 @@ private:
     sf::Font font;
     sf::Text text;
     sf::RectangleShape button;
+    sf::Text buttonText;
+    
+
 
     void handleEvents();
     void draw();
