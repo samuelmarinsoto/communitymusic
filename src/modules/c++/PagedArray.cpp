@@ -32,19 +32,19 @@ class PagedArray {
 private:
 	size_t size, objsize, rampages, pagesize, pagecount, objs_per_page, previndex;
 	char* filename;
-	std::vector<std::vector<MP3Tags>> active_pages;
+	std::vector<std::tuple<size_t, std::vector<MP3Tags>>> active_pages;
 	std::fstream file;
     size_t currentPage_ = static_cast<size_t>(-1); // Invalid page index
 
     void loadPage(size_t pageIndex) {
-        file_.seekg(pageIndex * pagesize);
+        file.seekg(pageIndex * pagesize);
         std::vector<MP3Tags> page;
 
-        for (i=0;i<objs_per_page;i++){
+        for (size_t i=0;i<objs_per_page;i++){
         	MP3Tags cancion();
         	file.read(cancion->uuid, 80);
         	file.read(cancion->title, 50);
-        	file.read(cancion.artist, 50);
+        	file.read(cancion->artist, 50);
         	file.read(cancion->album, 50);
         	file.read(cancion->genre, 50);
         	file.read(cancion->file, 100);
@@ -52,22 +52,45 @@ private:
         	file.read(cancion->downvotes, sizeof(int));
         	page[i] = cancion;
         }
-        push_front(page);
+        std::tuple<size_t, std::vector<MP3Tags>> tuple;
+        std::get<0>(tuple) = pageIndex;
+        std::get<1>(tuple) = page;
+        
+        push_front(tuple);
+    }
 
-    void savePage(size_t pageIndex) {
-        file_.seekp(pageIndex * pagesize);
-        file_.write(reinterpret_cast<const char*>(pages_.data()), pagesize);
+    void savePage(std::tuple<size_t, std::vector<MP3Tags>>& savetuple) {
+        file.seekp(std::get<0>(savetuple) * pagesize);
+		std::vector<MP3Tags> cancionvec = std::get<1>(savetuple);
+			
+        for (size_t i=0;i<objs_per_page;i++){
+        	file.write(cancionvec[i]->uuid, 80);
+        	file.write(cancionvec[i]->title, 50);
+        	file.write(cancionvec[i]->artist, 50);
+        	file.write(cancionvec[i]->album, 50);
+        	file.write(cancionvec[i]->genre, 50);
+        	file.write(cancionvec[i]->file, 100);
+        	file.write(cancionvec[i]->upvotes, sizeof(int));
+        	file.write(cancionvec[i]->downvotes, sizeof(int));
+        }
     }
     
-    void push_front(std::vector<MP3Tag>& newpage) {
+    void push_front(std::tuple<size_t, std::vector<MP3Tags>>& newtuple) {
+    	// save last active page to disk
+    	savePage(active_pages[active_pages.size()-1]);
         // Move all elements one position to the right
         for (size_t i = active_pages.size() - 1; i > 0; --i) {
             active_pages[i] = std::move(vec[i - 1]);
         }
     
         // Insert the new item at the front
-        active_pages[0] = newpage;
+        active_pages[0] = newtuple;
     }
+
+    void switch_front(std::tuple<size_t, std::vector<MP3Tags>>& switchtuple) {
+    	std::tuple<size_t, std::vector<MP3Tags>> temp = active_pages[0];
+    	active_pages[0] = switchtuple;
+    	
 
 public:
     PagedArray(size_t size_, size_t objsize_, size_t rampages_, size_t pagesize_ char* filename_){
@@ -113,9 +136,19 @@ public:
         }
 
         // Load the page into memory if not already loaded
-        if (currentPage_ != pageIndex) {
-            loadPage(pageIndex);
-            currentPage_ = pageIndex;
+        int pageloaded = 0;
+        int ramindex = -1;
+        for (size_t i = active_pages.size()-1; i>-1; --i){
+        	if (std::get<0>(active_pages[i]) == pageIndex){
+        		pageloaded = 1;
+        		ramindex = i;
+        		break;
+        	}
+        }
+        
+        if (pageloaded) {
+        	if (std::get<0>(active_pages[0]) != pageIndex)
+        		push_front(
         }
 
         return pages_[pageOffset];
