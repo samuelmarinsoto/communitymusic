@@ -1,7 +1,7 @@
 .POSIX:
 CC = clang++
 CFLAGS = -W -O0
-LIBS = -L/usr/lib -L/usr/local/lib -L/usr/lib/x86_64-linux-gnu
+LIBS = -L/usr/lib -L/usr/local/lib -L/usr/lib/x86_64-linux-gnu -L.
 INCS = -I/usr/include -I/usr/local/include -I./modules/c++
 
 .ifdef OPENBSD

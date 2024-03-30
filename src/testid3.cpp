@@ -3,7 +3,7 @@
 
 int main(void){
 	std::string archivo;
-	archivo = "smackdat.mp3";
+	archivo = "musica/smackdat.mp3";
 	MP3Tags cancion(archivo);
 
 	std::cout << "titulo: " << cancion.title << std::endl;

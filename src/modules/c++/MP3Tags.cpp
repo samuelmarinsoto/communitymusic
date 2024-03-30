@@ -31,29 +31,29 @@ MP3Tags::MP3Tags(std::string mp3_path) {
         TagLib::Tag* tag = file.tag(); // Get the tags
         // Set the tags into the object fields
         // Title
-        const char* title_tag = tag->title().toCString(true);
+        std::string title_tag = tag->title().to8Bit(true);
         if (string(title_tag) == "") {
             title_tag = "Unknown";
         }
-        strcpy(this->title, title_tag);
+        strcpy(this->title, title_tag.c_str());
         // Artist
-        const char* artist_tag = tag->artist().toCString(true);
-        if (string(artist_tag) == "") {
+	    std::string artist_tag = tag->artist().to8Bit(true);
+        if (artist_tag == "") {
             artist_tag = "Unknown";
         }
-        strcpy(this->artist, artist_tag);
+        strcpy(this->artist, artist_tag.c_str());
         // Album
-        const char* album_tag = tag->album().toCString(true);
+        std::string album_tag = tag->album().to8Bit(true);
         if (string(album_tag) == "") {
             album_tag = "Unknown";
         }
-        strcpy(this->album, album_tag);
+        strcpy(this->album, album_tag.c_str());
         // Genre
-        const char* genre_tag = tag->genre().toCString(true);
+        std::string genre_tag = tag->genre().to8Bit(true);
         if (string(genre_tag) == "") {
             genre_tag = "Unknown";
         }
-        strcpy(this->genre, genre_tag);
+        strcpy(this->genre, genre_tag.c_str());
     } else {
         // TODO: Should manage this error into the logs
         cout << "Failed to open mp3" << endl;
