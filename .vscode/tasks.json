@@ -12,6 +12,7 @@
                 "-I/usr/local/include",
                 "src/lib/**.cpp",
                 "src/modules/c++/**.cpp",
+                "src/gui/**.cpp",
                 "src/main.cpp",
                 "-o",
                 "app",
