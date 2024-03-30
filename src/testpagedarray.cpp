@@ -1,31 +1,50 @@
-#include <fcntl.h>
-#include <unistd.h>
-#include "Cancion.cpp"
+#include <iostream>
+#include <string>
+#include <vector>
+#include <dirent.h>
+#include "PagedArray.hpp"
+#include "MP3Tags.hpp"
+
+std::vector<std::string> loadFilenames(const std::string& directoryPath) {
+    std::vector<std::string> filenames;
+
+    DIR* dir = opendir(directoryPath.c_str());
+    if (dir == nullptr) {
+        std::cerr << "Error opening directory: " << directoryPath << std::endl;
+        return filenames;
+    }
+
+    struct dirent* entry;
+    while ((entry = readdir(dir)) != nullptr) {
+        if (entry->d_type == DT_REG) {  // Regular file
+            filenames.push_back(entry->d_name);
+        }
+    }
+
+    closedir(dir);
+    return filenames;
+}
 
 int main() {
-    // Open a file for writing in binary mode
-    int fd = open("binary_data.bin", O_WRONLY | O_CREAT | O_TRUNC, 0644);
-    if (fd == -1) {
-        // Handle error if unable to open the file
-        perror("open");
-        return 1;
-    }
+    std::string directoryPath = "musica";
+    std::vector<std::string> filenames = loadFilenames(directoryPath);
 
-    // Example binary data
-    char archivo[25] = "smackdat.mp3";
-    Cancion cancion(archivo);
-
-    // Write the binary data to the file
-    ssize_t bytes_written = write(fd, cancion, 524);
-    if (bytes_written == -1) {
-        // Handle error if unable to write
-        perror("write");
-        close(fd);
-        return 1;
-    }
-
-    // Close the file
-    close(fd);
+	char archivo[25] = "swap.bin";
+	PagedArray parray(55, 396, 3, 3168, archivo);
+	
+    // size_t i = 0;
+    // // Print the loaded filenames
+    // for (const std::string& filename : filenames) {
+    //     std::cout << filename << std::endl;
+    //     MP3Tags cancion(filename);
+    //     parray[i] = cancion;
+    //     i++;
+    // }
+    std::string songfile = "smackdat.mp3";
+    
+    MP3Tags cancion(songfile);
+	parray[31] = cancion;
+    std::cout << "Artist 31: " << parray[31].artist << std::endl;
 
     return 0;
 }

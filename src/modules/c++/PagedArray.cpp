@@ -1,4 +1,3 @@
-
 /*
 REQ-S004 (15pts) La lista principal está paginada. El archivo .INI contiene los siguientes parámetros:
 a. Activada o desactivada
@@ -27,136 +26,138 @@ monitor de procesos y memoria del sistema operativo.
 #include <cstdlib>
 #include <cstring>
 #include "MP3Tags.hpp"
+#include "PagedArray.hpp"
 
-class PagedArray {
-private:
-	size_t size, objsize, rampages, pagesize, pagecount, objs_per_page, previndex;
-	char* filename;
-	std::vector<std::tuple<size_t, std::vector<MP3Tags>>> active_pages;
-	std::fstream file;
-    size_t currentPage_ = static_cast<size_t>(-1); // Invalid page index
+// Private method definitions
+void PagedArray::loadPage(size_t pageIndex) {
+    file.seekg(pageIndex * pagesize);
+    std::vector<MP3Tags> page;
 
-    void loadPage(size_t pageIndex) {
-        file.seekg(pageIndex * pagesize);
-        std::vector<MP3Tags> page;
+    for (size_t i = 0; i < objs_per_page; i++) {
+        MP3Tags cancion;
+        file.read(cancion.uuid, 80);
+        file.read(cancion.title, 50);
+        file.read(cancion.artist, 50);
+        file.read(cancion.album, 50);
+        file.read(cancion.genre, 50);
+        file.read(cancion.file, 100);
+        file.read((char*)&cancion.upvotes, sizeof(int));
+        file.read((char*)&cancion.downvotes, sizeof(int));
+        page.push_back(cancion);
+    }
+    std::tuple<size_t, std::vector<MP3Tags>> tuple;
+    std::get<0>(tuple) = pageIndex;
+    std::get<1>(tuple) = page;
 
-        for (size_t i=0;i<objs_per_page;i++){
-        	MP3Tags cancion();
-        	file.read(cancion->uuid, 80);
-        	file.read(cancion->title, 50);
-        	file.read(cancion->artist, 50);
-        	file.read(cancion->album, 50);
-        	file.read(cancion->genre, 50);
-        	file.read(cancion->file, 100);
-        	file.read(cancion->upvotes, sizeof(int));
-        	file.read(cancion->downvotes, sizeof(int));
-        	page[i] = cancion;
-        }
-        std::tuple<size_t, std::vector<MP3Tags>> tuple;
-        std::get<0>(tuple) = pageIndex;
-        std::get<1>(tuple) = page;
-        
-        push_front(tuple);
+    push_front(tuple);
+}
+
+void PagedArray::savePage(std::tuple<size_t, std::vector<MP3Tags>>& savetuple) {
+    file.seekp(std::get<0>(savetuple) * pagesize);
+    std::vector<MP3Tags> cancionvec = std::get<1>(savetuple);
+
+    for (size_t i = 0; i < objs_per_page; i++) {
+        file.write(cancionvec[i].uuid, 80);
+        file.write(cancionvec[i].title, 50);
+        file.write(cancionvec[i].artist, 50);
+        file.write(cancionvec[i].album, 50);
+        file.write(cancionvec[i].genre, 50);
+        file.write(cancionvec[i].file, 100);
+        file.write((char*)&cancionvec[i].upvotes, sizeof(int));
+        file.write((char*)&cancionvec[i].downvotes, sizeof(int));
+    }
+}
+
+void PagedArray::push_front(std::tuple<size_t, std::vector<MP3Tags>>& newtuple) {
+    // Save last active page to disk
+    savePage(active_pages[active_pages.size() - 1]);
+    // Move all elements one position to the right
+    for (size_t i = active_pages.size() - 1; i > 0; --i) {
+        active_pages[i] = std::move(active_pages[i - 1]);
     }
 
-    void savePage(std::tuple<size_t, std::vector<MP3Tags>>& savetuple) {
-        file.seekp(std::get<0>(savetuple) * pagesize);
-		std::vector<MP3Tags> cancionvec = std::get<1>(savetuple);
-			
-        for (size_t i=0;i<objs_per_page;i++){
-        	file.write(cancionvec[i]->uuid, 80);
-        	file.write(cancionvec[i]->title, 50);
-        	file.write(cancionvec[i]->artist, 50);
-        	file.write(cancionvec[i]->album, 50);
-        	file.write(cancionvec[i]->genre, 50);
-        	file.write(cancionvec[i]->file, 100);
-        	file.write(cancionvec[i]->upvotes, sizeof(int));
-        	file.write(cancionvec[i]->downvotes, sizeof(int));
-        }
-    }
-    
-    void push_front(std::tuple<size_t, std::vector<MP3Tags>>& newtuple) {
-    	// save last active page to disk
-    	savePage(active_pages[active_pages.size()-1]);
-        // Move all elements one position to the right
-        for (size_t i = active_pages.size() - 1; i > 0; --i) {
-            active_pages[i] = std::move(vec[i - 1]);
-        }
-    
-        // Insert the new item at the front
-        active_pages[0] = newtuple;
-    }
+    // Insert the new item at the front
+    active_pages[0] = newtuple;
+}
 
-    void switch_front(std::tuple<size_t, std::vector<MP3Tags>>& switchtuple, int switchindex) {
-    	std::tuple<size_t, std::vector<MP3Tags>> temp = active_pages[0];
-    	active_pages[0] = switchtuple;
-    	active_pages[switchindex] = temp;
-    }
-    	
+void PagedArray::switch_front(std::tuple<size_t, std::vector<MP3Tags>>& switchtuple, int switchindex) {
+    std::tuple<size_t, std::vector<MP3Tags>> temp = active_pages[0];
+    active_pages[0] = switchtuple;
+    active_pages[switchindex] = temp;
+}
 
-public:
-    PagedArray(size_t size_, size_t objsize_, size_t rampages_, size_t pagesize_ char* filename_){
-    	size = size_;
-    	objsize = objsize_;
-    	rampages = rampages_;
-    	strlcpy(filename_, filename, strlen(filename_)+1);
-    	pagesize = pagesize_;
-    	pagecount = (size*objsize)/pagesize;
-    	objs_per_page = pagesize/objsize;
- 	
-    	if (pagesize_%objsize_){
-    		std::cerr << "Tamaño de pagina inadecuado para el objeto almacenado";
-    		std::exit(EXIT_FAILURE);
-    	}
-    	
-    	std::fstream file(*filename, std::ios::binary | std::ios::in | std::ios::out | std::ios::trunc);
-    	
-    	if (!file.is_open()) {
-            std::cerr << "Error: No se pudo abrir " << filename << " para uso en arreglo paginado\n";
-            std::exit(EXIT_FAILURE);
-        }
+// Constructor definition
+PagedArray::PagedArray(size_t size_, size_t objsize_, size_t rampages_, size_t pagesize_, char* filename_) {
+    size = size_;
+    objsize = objsize_;
+    rampages = rampages_;
+    filename = filename_;
+    pagesize = pagesize_;
 
-        active_pages = std::vector<std::vector<MP3Tags>(objs_per_page)>(rampages);
-        
-        // Resize the file to accommodate all pages
-        file.seekp((pagecount*pagesize) - 1);
-        file.put(0);
-        file.seekp(0);
+    if ((size * objsize) % pagesize)
+        pagecount = (size * objsize) / pagesize + 1;
+    else
+        pagecount = (size * objsize) / pagesize;
+
+    objs_per_page = pagesize / objsize;
+
+    if (pagesize_ % objsize_) {
+        std::cerr << "Tamaño de pagina inadecuado para el objeto almacenado";
+        std::exit(EXIT_FAILURE);
     }
 
-    ~PagedArray() {
-        file.close();
+    file.open(filename, std::ios::binary | std::ios::in | std::ios::out | std::ios::trunc);
+
+    if (!file.is_open()) {
+        std::cerr << "Error: No se pudo abrir " << filename << " para uso en arreglo paginado\n";
+        std::exit(EXIT_FAILURE);
     }
 
-    int& operator[](size_t index) {
-        size_t pageIndex = index / pagesize;
-        size_t pageOffset = index % pagesize;
-
-        if (pageIndex >= pagecount) {
-            std::cerr << "Index out of bounds\n";
-            std::exit(EXIT_FAILURE);
-        }
-
-        /* ver si pagina esta cargada, y si esta en frente de
-           todas las demas paginas */
-        int pageloaded = 0;
-        int ramindex = -1;
-        for (size_t i = active_pages.size()-1; i>=0; --i){
-        	if (std::get<0>(active_pages[i]) == pageIndex){
-        		pageloaded = 1;
-        		ramindex = i;
-        		break;
-        	}
-        }
-        
-        if (pageloaded) {
-        	// poner pagina al frente si no lo estaba
-        	if (!(ramindex == 0))
-        		switch_front(active_pages[ramindex], ramindex);
-        } else {
-        	loadPage(pageIndex);
-        }
-
-        return std::get<1>(active_pages[0])[pageOffset];
+    active_pages.resize(rampages);
+    for (size_t i = 0; i < rampages; i++) {
+        std::get<1>(active_pages[i]).resize(objs_per_page);
     }
-};
+
+    // Resize the file to accommodate all pages
+    file.seekp((pagecount * pagesize) - 1);
+    file.put(0);
+    file.seekp(0);
+}
+
+// Destructor definition
+PagedArray::~PagedArray() {
+    file.close();
+}
+
+// Overloaded subscript operator definition
+MP3Tags& PagedArray::operator[](size_t index) {
+    size_t pageIndex = index / pagesize;
+    size_t pageOffset = index % pagesize;
+
+    if (pageIndex >= pagecount) {
+        std::cerr << "Index out of bounds\n";
+        std::exit(EXIT_FAILURE);
+    }
+
+    // Check if the page is loaded and if it's at the front of all other pages
+    int pageloaded = 0;
+    int ramindex = -1;
+    for (size_t i = active_pages.size() - 1; i >= 0; --i) {
+        if (std::get<0>(active_pages[i]) == pageIndex) {
+            pageloaded = 1;
+            ramindex = i;
+            break;
+        }
+    }
+
+    if (pageloaded) {
+        // Move the page to the front if it wasn't already
+        if (!(ramindex == 0))
+            switch_front(active_pages[ramindex], ramindex);
+    } else {
+        loadPage(pageIndex);
+    }
+
+    return std::get<1>(active_pages[0])[pageOffset];
+}
+

@@ -2,21 +2,22 @@
 CC = clang++
 CFLAGS = -W -O0
 LIBS = -L/usr/lib -L/usr/local/lib -L/usr/lib/x86_64-linux-gnu
-INCS = -I/usr/include -I/usr/local/include
+INCS = -I/usr/include -I/usr/local/include -I./modules/c++
 
 .ifdef OPENBSD
-X11INC = -I/usr/X11R6/include
-X11LIB = -L/usr/X11R6/lib -lX11 -lxcb -lXau -lXdmcp -lXft -lXss -lfontconfig -lXext -lfreetype -lXrender -lz -lexpat
-LIBS = -L/usr/lib -L/usr/local/lib ${X11LIB} -pthread -lid3 -ltk86 -ltcl86 -ltkstub86 -ltclstub86 -lcrossguid
-INCS = -I/usr/local/include -I/usr/include ${X11INC}
+LIBS = -L/usr/lib -L/usr/local/lib -L.
+INCS = -I/usr/local/include -I/usr/include -I./modules/c++
 .endif
 
 id3test: mp3tags
-	${CC} ${CFLAGS} testid3.cpp ${INCS} ${LIBS} -o $@
+	${CC} ${CFLAGS} testid3.cpp ${INCS} ${LIBS} -lmp3tags -lz -ltag -lboost_filesystem -lboost_random -o $@
 mp3tags:
-	${CC} ${CFLAGS} -c modules/c++/MP3Tags.hpp ${INCS} ${LIBS} -o mp3tags.o
-	ar rcs libmp3tags.a mp3tags.o
-pagedarray:
-	${CC} ${CFLAGS} cacaarray.cpp ${INCS} ${LIBS} -o $@
+	${CC} ${CFLAGS} -c modules/c++/MP3Tags.cpp ${INCS} ${LIBS} -o $@.o
+	ar rcs lib$@.a $@.o
+pagedarray: mp3tags
+	${CC} ${CFLAGS} -c modules/c++/PagedArray.cpp ${INCS} ${LIBS} -o $@.o
+	ar rcs lib$@.a $@.o
+testpa: mp3tags pagedarray
+	${CC} ${CFLAGS} testpagedarray.cpp ${INCS} ${LIBS} -lmp3tags -lpagedarray -lz -ltag -lboost_filesystem -lboost_random -o $@
 clean:
-	rm -rf id3test pagedarray *.a *.o
+	rm -rf id3test testpa *.a *.o *.core *.bin
