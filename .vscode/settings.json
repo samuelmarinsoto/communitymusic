@@ -63,7 +63,8 @@
         "cinttypes": "cpp",
         "codecvt": "cpp",
         "list": "cpp",
-        "set": "cpp"
+        "set": "cpp",
+        "filesystem": "cpp"
     },
     "cSpell.words": [
         "downvotes",

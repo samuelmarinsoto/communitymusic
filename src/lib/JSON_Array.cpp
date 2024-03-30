@@ -19,7 +19,7 @@ Array::Array(string json_string){
                     n_value += string(1, json_string[i]);
                 } else if (case_count == 0){
                     if (n_value != ""){
-                        this->values.append(n_value);
+                        this->values.push_back(n_value);
                         n_value = "";
                     }
                 } else if (case_count > 1){
@@ -34,7 +34,7 @@ Array::Array(string json_string){
                 }
                 n_value += string(1, json_string[i]);
                 if (case_count == 0){
-                    this->values.append(n_value);
+                    this->values.push_back(n_value);
                     n_value = "";
                 }
                 break;
@@ -43,7 +43,7 @@ Array::Array(string json_string){
                 if (case_count>0){
                     n_value += string(1, json_string[i]);
                 }else if (case_count==0){
-                    this->values.append(n_value);
+                    this->values.push_back(n_value);
                     n_value = "";
                 }
                 break;
@@ -61,33 +61,33 @@ Array::Array(string json_string){
 }
 
 Value Array::operator[](int index){
-    if (this->values.size == 0){
+    if (this->values.size() == 0){
         return Value("");
     }
     return Value(this->values[index]);
 }
 
 void Array::append(Value value){
-    this->values.append(value.content);
+    this->values.push_back(value.content);
 }
 
 void Array::pop(){
-    this->values.pop();
+    this->values.pop_back();
 }
 
 void Array::remove(int index){
     string new_content = "[";
     // ^^^^ fill this string with current pairs(saved on the vector)
     //          and avoid the specified key
-    vect< string > new_values;
+    vector < string > new_values;
     // ^^NOTE^^: in the same loop the vector with the pairs will be reconstructed
-    for (int i=0; i<this->values.size; i++) {
+    for (int i=0; i<this->values.size(); i++) {
         string current = this->values[i];
         if (i != index){
             if (i>0){
                 new_content += ",";
             }
-            new_values.append(current);
+            new_values.push_back(current);
             new_content = new_content + current;
         }
     }
@@ -98,7 +98,7 @@ void Array::remove(int index){
 }
 
 int Array::size(){
-    return this->values.size;
+    return this->values.size();
 }
 
 Array::~Array(){

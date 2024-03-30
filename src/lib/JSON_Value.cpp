@@ -11,8 +11,8 @@ Value::~Value(){
 }
 
 int Value::as_int(){
-    if (this->content[0] != '0' || this->content[0] != '1' || this->content[0] != '2' || this->content[0] != '3' || this->content[0] != '4'
-     || this->content[0] != '5' || this->content[0] != '6' || this->content[0] != '7' || this->content[0] != '8' || this->content[0] != '9'){
+    if (this->content[0] != '0' && this->content[0] != '1' && this->content[0] != '2' && this->content[0] != '3' && this->content[0] != '4'
+     && this->content[0] != '5' && this->content[0] != '6' && this->content[0] != '7' && this->content[0] != '8' && this->content[0] != '9'){
 
         return 0;
     }
@@ -22,8 +22,8 @@ int Value::as_int(){
 }
 
 float Value::as_float(){
-    if (this->content[0] != '0' || this->content[0] != '1' || this->content[0] != '2' || this->content[0] != '3' || this->content[0] != '4'
-     || this->content[0] != '5' || this->content[0] != '6' || this->content[0] != '7' || this->content[0] != '8' || this->content[0] != '9'){
+    if (this->content[0] != '0' && this->content[0] != '1' && this->content[0] != '2' && this->content[0] != '3' && this->content[0] != '4'
+     && this->content[0] != '5' && this->content[0] != '6' && this->content[0] != '7' && this->content[0] != '8' && this->content[0] != '9'){
         return 0;
     }
     float value;
@@ -32,8 +32,8 @@ float Value::as_float(){
 }
 
 double Value::as_double(){
-    if (this->content[0] != '0' || this->content[0] != '1' || this->content[0] != '2' || this->content[0] != '3' || this->content[0] != '4'
-     || this->content[0] != '5' || this->content[0] != '6' || this->content[0] != '7' || this->content[0] != '8' || this->content[0] != '9'){
+    if (this->content[0] != '0' && this->content[0] != '1' && this->content[0] != '2' && this->content[0] != '3' && this->content[0] != '4'
+     && this->content[0] != '5' && this->content[0] != '6' && this->content[0] != '7' && this->content[0] != '8' && this->content[0] != '9'){
 
         return 0;
     }

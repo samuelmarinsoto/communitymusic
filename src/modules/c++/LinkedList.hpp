@@ -16,10 +16,12 @@ class LinkedList {
         ~LinkedList(){
             Node<T>* current = this->head;
             Node<T>* temp;
-            while(current->next != nullptr){
-                temp = current;
-                current = current->next;
-                delete temp;
+            if (current != nullptr){
+                while(current->next != nullptr){
+                    temp = current;
+                    current = current->next;
+                    delete temp;
+                }
             }
         }
         // Inserts a new node at the beginning of the list
@@ -84,7 +86,7 @@ class LinkedList {
             delete temp;
             this->size--;
         }
-        // Get the value of a node based on its index
+        // Get the data of a node based on its index
         T& get(int index){
             Node<T>* node = this->head;
             for (int i = 0; i<index; i++){
@@ -92,7 +94,7 @@ class LinkedList {
             }
             return node->data;
         }
-        // Get the value of a node based on its index
+        // Get the data of a node based on its index
         T& operator[](int index){
             return this->get(index);
         }
