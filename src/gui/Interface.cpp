@@ -2,33 +2,32 @@
 #include <iostream>
 
 Interface::Interface() {
-    this->crc = 'g';
+    this->dimensions[0] = std::make_tuple(200,160);
+    this->dimensions[1] = std::make_tuple(950,700);
+    if (!this->font.loadFromFile("../app/res/CourierPrime-Bold.ttf")) {
+        std::cerr << "Error cargando la fuente." << std::endl;
+    }
     this->InitWinA();
 }
 
 void Interface::InitWinA(){
-    sf::RenderWindow window(sf::VideoMode(200, 200), "Comunity Playlist");
+    sf::RenderWindow window(sf::VideoMode(std::get<0>(this->dimensions[0]), std::get<1>(this->dimensions[0])), "Comunity Playlist");
 
-    if (!this->font.loadFromFile("../app/res/CourierPrime-Bold.ttf")) {
-        std::cerr << "Error cargando la fuente." << std::endl;
-    }
-
-    sf::Text text;
-    text.setFont(font);
-    text.setString("SoundScore");
-    text.setCharacterSize(22);
-    text.setFillColor(sf::Color::Black);
-    text.setStyle(sf::Text::Bold);
-    text.setPosition(window.getSize().x / 2 - text.getGlobalBounds().width / 2, 20.f);
+    sf::Text title;
+    title.setFont(this->font);
+    title.setString("SoundScore");
+    title.setCharacterSize(22);
+    title.setFillColor(sf::Color::White);
+    title.setPosition(window.getSize().x / 2 - title.getGlobalBounds().width / 2, 20.f);
 
     sf::RectangleShape button;
     button.setSize(sf::Vector2f(60.f, 25.f));
-    button.setFillColor(sf::Color::Blue);
+    button.setFillColor(sf::Color(191, 50, 207));
     button.setPosition(window.getSize().x / 2 - button.getSize().x / 2, window.getSize().y / 2 + button.getSize().y);
 
     sf::Text buttonText;
-    buttonText.setFont(font);
-    buttonText.setString("Play");
+    buttonText.setFont(this->font);
+    buttonText.setString("Start");
     buttonText.setCharacterSize(12);
     buttonText.setFillColor(sf::Color::White);
     buttonText.setPosition(button.getPosition().x + button.getSize().x / 2 - buttonText.getGlobalBounds().width / 2, button.getPosition().y + button.getSize().y / 2 - buttonText.getGlobalBounds().height / 2);
@@ -51,113 +50,334 @@ void Interface::InitWinA(){
                 }
             }
         }
-        window.clear(sf::Color::White);
+        window.clear(sf::Color::Black);
         window.draw(button);
         window.draw(buttonText); // draw the button text
-        window.draw(text);
+        window.draw(title);
         window.display();
     }
 }
 
 void Interface::InitWinB(){
-        sf::RenderWindow newWindow(sf::VideoMode(800, 600), "Comunity Playlist");
+        sf::RenderWindow window(sf::VideoMode(std::get<0>(this->dimensions[1]), std::get<1>(this->dimensions[1])), "Comunity Playlist");
+        // Color palette for the theme of the window
+            // [0]: Grey
+            // [1]: Black
+            // [2]: Purple
+            // [3]: Violet
+            // [4]: Dark magenta
+        sf::Color palette[] = {sf::Color(27, 26, 27), sf::Color(12, 12, 12), sf::Color(128, 14, 174), sf::Color(56, 8, 151), sf::Color(127, 40, 135)};
+        bool paused = true;
+        bool performance = false;
+        bool dragging_scrub = false;
+        int volume_percentage = 50;
 
-        sf::RectangleShape button1(sf::Vector2f(100.f, 50.f));
-        button1.setFillColor(sf::Color::Transparent);
-        button1.setOutlineThickness(2.f);
-        button1.setOutlineColor(sf::Color::Black);
-        button1.setPosition(50.f, 100.f);
-        sf::Text text1;
-        text1.setFont(font);
-        text1.setString("<<-");
-        text1.setCharacterSize(22);
-        text1.setFillColor(sf::Color::Black);
-        text1.setStyle(sf::Text::Bold);
-        text1.setPosition(button1.getPosition().x + button1.getSize().x / 2 - text1.getGlobalBounds().width / 2, button1.getPosition().y + button1.getSize().y / 2 - text1.getGlobalBounds().height / 2);
-
-
-        sf::RectangleShape button2(sf::Vector2f(100.f, 50.f));
-        button2.setFillColor(sf::Color::Transparent);
-        button2.setOutlineThickness(2.f);
-        button2.setOutlineColor(sf::Color::Black);
-        button2.setPosition(200.f, 100.f);
-        sf::Text text2;
-        text2.setFont(font);
-        text2.setString("10<-");
-        text2.setCharacterSize(22);
-        text2.setFillColor(sf::Color::Black);
-        text2.setStyle(sf::Text::Bold);
-        text2.setPosition(button2.getPosition().x + button2.getSize().x / 2 - text2.getGlobalBounds().width / 2, button2.getPosition().y + button2.getSize().y / 2 - text2.getGlobalBounds().height / 2);
-
-
-        sf::RectangleShape button3(sf::Vector2f(100.f, 50.f));
-        button3.setFillColor(sf::Color::Transparent);
-        button3.setOutlineThickness(2.f);
-        button3.setOutlineColor(sf::Color::Black);
-        button3.setPosition(350.f, 100.f);
-        sf::Text text3;
-        text3.setFont(font);
-        text3.setString("P");
-        text3.setCharacterSize(22);
-        text3.setFillColor(sf::Color::Black);
-        text3.setStyle(sf::Text::Bold);
-        text3.setPosition(button3.getPosition().x + button3.getSize().x / 2 - text3.getGlobalBounds().width / 2, button3.getPosition().y + button3.getSize().y / 2 - text3.getGlobalBounds().height / 2);
+        // Sidebar elements creation
+            // Sidebar
+        sf::RectangleShape sidebar(sf::Vector2f(float(window.getSize().x/5) + 15.f, float(window.getSize().y)));
+            sidebar.setPosition(0.f,0.f);
+            sidebar.setFillColor(palette[0]);
+            //TODO: Load songs
         
+        // Scrub creation
+        sf::CircleShape scrub;
+            scrub.setRadius(6.f);
+            scrub.setPosition(float(window.getSize().x)/2, float(window.getSize().y) - 100.f);
+            scrub.setFillColor(palette[2]);
+        
+        sf::Text curr_time;
+            curr_time.setFont(this->font);
+            curr_time.setString("0:00");
+            curr_time.setCharacterSize(17);
+            curr_time.setFillColor(sf::Color::White);
+            curr_time.setPosition(sidebar.getPosition().x + sidebar.getSize().x + 15.f, scrub.getPosition().y - curr_time.getGlobalBounds().height/2);
 
-        sf::RectangleShape button4(sf::Vector2f(100.f, 50.f));
-        button4.setFillColor(sf::Color::Transparent);
-        button4.setOutlineThickness(2.f);
-        button4.setOutlineColor(sf::Color::Black);
-        button4.setPosition(500.f, 100.f);
-        sf::Text text4;
-        text4.setPosition(button4.getPosition().x + 10, button4.getPosition().y + 10);
-        text4.setFont(font);
-        text4.setString("->10");
-        text4.setCharacterSize(22);
-        text4.setFillColor(sf::Color::Black);
-        text4.setStyle(sf::Text::Bold);
-        text4.setPosition(button4.getPosition().x + button4.getSize().x / 2 - text4.getGlobalBounds().width / 2, button4.getPosition().y + button4.getSize().y / 2 - text4.getGlobalBounds().height / 2);
+        sf::Text total_time;
+            total_time.setFont(this->font);
+            total_time.setString("0:00");
+            total_time.setCharacterSize(17);
+            total_time.setFillColor(sf::Color::White);
+            total_time.setPosition(float(window.getSize().x) - total_time.getGlobalBounds().width - 15.f, curr_time.getPosition().y);
 
-        sf::RectangleShape button5(sf::Vector2f(100.f, 50.f));
-        button5.setFillColor(sf::Color::Transparent);
-        button5.setOutlineThickness(2.f);
-        button5.setOutlineColor(sf::Color::Black);
-        button5.setPosition(650.f, 100.f);
-        sf::Text text5;
-        text5.setFont(font);
-        text5.setString("->>");
-        text5.setCharacterSize(22);
-        text5.setFillColor(sf::Color::Black);
-        text5.setStyle(sf::Text::Bold);
-        text5.setPosition(button5.getPosition().x + button5.getSize().x / 2 - text5.getGlobalBounds().width / 2, button5.getPosition().y + button5.getSize().y / 2 - text5.getGlobalBounds().height / 2);
+        sf::RectangleShape scrub_line(sf::Vector2f(scrub.getPosition().x - (sidebar.getSize().x + curr_time.getGlobalBounds().width + 15.f), scrub.getRadius()/1.5));
+            scrub_line.setFillColor(scrub.getFillColor());
+            scrub_line.setPosition(curr_time.getPosition().x + curr_time.getGlobalBounds().width + 10.f, scrub.getPosition().y + scrub.getRadius()/2);
 
-        while (newWindow.isOpen()) {
-        button1.setFillColor(sf::Color(255, 165, 0));
-        button2.setFillColor(sf::Color(255, 165, 0));
-        button3.setFillColor(sf::Color(255, 165, 0));
-        button4.setFillColor(sf::Color(255, 165, 0));
-        button5.setFillColor(sf::Color(255, 165, 0));
-        sf::Event newEvent;
-        while (newWindow.pollEvent(newEvent)) {
-            if (newEvent.type == sf::Event::Closed)
-                newWindow.close();
+
+        // Settings button creation
+        sf::RectangleShape topbar(sf::Vector2f(float(window.getSize().x) - (sidebar.getPosition().x + sidebar.getSize().x), 50.f));
+            topbar.setFillColor(palette[2]);
+            topbar.setPosition(sidebar.getPosition().x + sidebar.getSize().x, 0.f);
+
+        sf::Text settings;
+            settings.setFont(this->font);
+            settings.setString("Settings");
+            settings.setCharacterSize(19);
+            settings.setFillColor(sf::Color::White);
+            settings.setPosition(sidebar.getPosition().x + sidebar.getSize().x + 15.f, 10.f);
+        
+        // Memory usage widget creation(TODO)
+        sf::Text boost;
+            boost.setFont(this->font);
+            boost.setString("Boost? OFF");
+            boost.setCharacterSize(17);
+            boost.setFillColor(sf::Color::White);
+            boost.setPosition(float(window.getSize().x) - 275.f, settings.getPosition().y + boost.getGlobalBounds().height/4);
+        
+        sf::RectangleShape boost_block(sf::Vector2f(12.f, 12.f));
+            boost_block.setFillColor(sf::Color::Red);
+            boost_block.setPosition(boost.getPosition().x + boost.getGlobalBounds().width + 5.f , boost.getPosition().y + boost_block.getSize().y/2);
+
+        sf::RectangleShape boost_toggle(sf::Vector2f(boost_block.getSize().x*2 , boost_block.getSize().y));
+            boost_toggle.setFillColor(palette[1]);
+            boost_toggle.setPosition(boost_block.getPosition().x , boost_block.getPosition().y);
+        
+        // Button 1 creation
+        sf::CircleShape back_shape;
+            back_shape.setRadius(20.f);
+            back_shape.setPosition( sidebar.getPosition().x + sidebar.getSize().x + 20.f + window.getSize().x/4.2 , float(window.getSize().y) - 70.f);
+            back_shape.setFillColor(palette[3]);
+        sf::Text backward;
+            backward.setFont(this->font);
+            backward.setString("<<");
+            backward.setCharacterSize(16);
+            backward.setFillColor(sf::Color::White);
+            backward.setPosition( back_shape.getPosition().x + back_shape.getRadius()/2, back_shape.getPosition().y + back_shape.getRadius()/2 );
+
+        // Button 2 creation
+        sf::CircleShape minus_shape;
+            minus_shape.setRadius(20.f);
+            minus_shape.setPosition( back_shape.getPosition().x + 50.f, back_shape.getPosition().y );
+            minus_shape.setFillColor(palette[3]);
+        sf::Text minus10;
+            minus10.setFont(this->font);
+            minus10.setString("-10");
+            minus10.setCharacterSize(15);
+            minus10.setFillColor(sf::Color::White);
+            minus10.setPosition( minus_shape.getPosition().x + minus_shape.getRadius()/2 - 5.f, minus_shape.getPosition().y + minus_shape.getRadius()/2 );
+
+
+        // Button 3 creation
+        sf::CircleShape pause_shape;
+            pause_shape.setRadius(20.f);
+            pause_shape.setPosition( minus_shape.getPosition().x + 50.f, minus_shape.getPosition().y );
+            pause_shape.setFillColor(palette[3]);
+        sf::Text pause;
+            pause.setFont(this->font);
+            pause.setString("||");
+            pause.setCharacterSize(16);
+            pause.setFillColor(sf::Color::White);
+            pause.setPosition( pause_shape.getPosition().x + pause_shape.getRadius()/2, pause_shape.getPosition().y + pause_shape.getRadius()/2 );
+        
+        // Button 4 creation
+        sf::CircleShape plus_shape;
+            plus_shape.setRadius(20.f);
+            plus_shape.setPosition( pause_shape.getPosition().x + 50.f, pause_shape.getPosition().y );
+            plus_shape.setFillColor(palette[3]);
+        sf::Text plus10;
+            plus10.setFont(this->font);
+            plus10.setString("+10");
+            plus10.setCharacterSize(15);
+            plus10.setFillColor(sf::Color::White);
+            plus10.setPosition( plus_shape.getPosition().x + plus_shape.getRadius()/2 - 5.f, plus_shape.getPosition().y + plus_shape.getRadius()/2 );
+
+        // Button 5 creation
+        sf::CircleShape forw_shape;
+            forw_shape.setRadius(20.f);
+            forw_shape.setPosition( plus_shape.getPosition().x + 50.f, plus_shape.getPosition().y );
+            forw_shape.setFillColor(palette[3]);
+        sf::Text forward;
+            forward.setFont(this->font);
+            forward.setString(">>");
+            forward.setCharacterSize(16);
+            forward.setFillColor(sf::Color::White);
+            forward.setPosition( forw_shape.getPosition().x + forw_shape.getRadius()/2, forw_shape.getPosition().y + forw_shape.getRadius()/2 );
+
+        // Volume control buttons
+        sf::Text volume;
+            volume.setFont(this->font);
+            volume.setString("Volume:");
+            volume.setCharacterSize(15);
+            volume.setFillColor(sf::Color::White);
+            volume.setPosition(forw_shape.getPosition().x + 145.f - volume.getGlobalBounds().width/2, forw_shape.getPosition().y - 5.f);
+
+        sf::Text volume_num;
+            volume_num.setFont(this->font);
+            volume_num.setString("45%");
+            volume_num.setCharacterSize(15);
+            volume_num.setFillColor(sf::Color::White);
+            volume_num.setPosition(volume.getPosition().x + volume.getGlobalBounds().width/2, volume.getPosition().y + 25.f);
+
+        sf::RectangleShape decrease_shape(sf::Vector2f(15.f, 15.f));
+            decrease_shape.setFillColor(palette[4]);
+            decrease_shape.setPosition(volume_num.getPosition().x - volume_num.getGlobalBounds().width, volume_num.getPosition().y + decrease_shape.getSize().y/4);
+        sf::Text decrease;
+            decrease.setFont(this->font);
+            decrease.setString("-");
+            decrease.setCharacterSize(16);
+            decrease.setFillColor(sf::Color::White);
+            decrease.setPosition(decrease_shape.getPosition().x + decrease.getGlobalBounds().width/2, decrease_shape.getPosition().y - 2.5f);   
+
+        sf::RectangleShape increase_shape(sf::Vector2f(15.f, 15.f));
+            increase_shape.setFillColor(palette[4]);
+            increase_shape.setPosition(volume_num.getPosition().x + volume_num.getGlobalBounds().width + 15.f, volume_num.getPosition().y + increase_shape.getSize().y/4);     
+        sf::Text increase;
+            increase.setFont(this->font);
+            increase.setString("+");
+            increase.setCharacterSize(16);
+            increase.setFillColor(sf::Color::White);
+            increase.setPosition(increase_shape.getPosition().x + increase.getGlobalBounds().width/2, increase_shape.getPosition().y - 2.5f);   
+
+        while (window.isOpen()) {
+        sf::Event event;
+        while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed){
+                window.close();
+            }
+            if (event.type == sf::Event::MouseButtonPressed) {
+                if (event.mouseButton.button == sf::Mouse::Left) {
+                    sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+                    sf::Vector2f mousePosF(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
+                    // ------------------- Settings interaction
+                    if(settings.getGlobalBounds().contains(mousePosF)){
+                        std::cout << "Opening configurations" << std::endl;
+                        this->InitWinC();
+                    };
+                    // ------------------- Boost toggle button
+                    if (boost_toggle.getGlobalBounds().contains(mousePosF)){
+                        if (!performance){
+                            boost_block.setPosition(boost_block.getPosition().x + boost_block.getSize().x, boost_block.getPosition().y);
+                            boost.setString("Boost? ON");
+                            performance = true;
+                            // TODO: Change from list to paged array
+                        }else{
+                            boost_block.setPosition(boost_block.getPosition().x - boost_block.getSize().x, boost_block.getPosition().y);
+                            boost.setString("Boost? OFF");
+                            performance = false;
+                            // TODO: Change from paged array back to list
+                        }
+                    }
+                    // ------------------- Music controls
+                    if (pause_shape.getGlobalBounds().contains(mousePosF)){
+                        std::cout << "Pause/Continue" << std::endl;
+                        if(paused){
+                            pause.setString("|>");
+                            paused = false;
+                        }else{
+                            pause.setString("||");
+                            paused = true;
+                        }
+                    }
+                    if (minus_shape.getGlobalBounds().contains(mousePosF)){
+                        std::cout << "Went back 10s" << std::endl;
+                        scrub.setPosition(scrub.getPosition().x - 10.f, scrub.getPosition().y);
+                        scrub_line.setSize(sf::Vector2f(scrub.getPosition().x - (sidebar.getSize().x + curr_time.getGlobalBounds().width + 15.f), scrub.getRadius()/1.5));
+                    }
+                    if (plus_shape.getGlobalBounds().contains(mousePosF)){
+                        std::cout << "Went forward 10s" << std::endl;
+                        scrub.setPosition(scrub.getPosition().x + 10.f, scrub.getPosition().y);
+                        scrub_line.setSize(sf::Vector2f(scrub.getPosition().x - (sidebar.getSize().x + curr_time.getGlobalBounds().width + 15.f), scrub.getRadius()/1.5));
+                    }
+                    if (back_shape.getGlobalBounds().contains(mousePosF)){
+                        std::cout << "Going to previous song" << std::endl;
+                    }
+                    if (forw_shape.getGlobalBounds().contains(mousePosF)){
+                        std::cout << "Going to next song" << std::endl;
+                    }
+                    // ------------------- Scrub
+                    if (scrub.getGlobalBounds().contains(mousePosF)){
+                        dragging_scrub = true;
+                    }
+                    // ------------------- Volume
+                    if (increase_shape.getGlobalBounds().contains(mousePosF)){
+                        std::cout << "Volume up" << std::endl;
+                        volume_percentage += 5;
+                        volume_num.setString(std::to_string(volume_percentage) + "%");
+                    }
+                    if (decrease_shape.getGlobalBounds().contains(mousePosF)){
+                        std::cout << "Volume down" << std::endl;
+                        volume_percentage -= 5;
+                        volume_num.setString(std::to_string(volume_percentage) + "%");
+                    }
+                }
+            }
+            if (event.type == sf::Event::MouseButtonReleased){
+                if (event.mouseButton.button == sf::Mouse::Left) {
+                    sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+                    sf::Vector2f mousePosF(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
+                    
+                    if (dragging_scrub){
+                        if (mousePosF.x > scrub_line.getPosition().x && mousePosF.x < total_time.getPosition().x - 15.f){
+                            scrub.setPosition(mousePosF.x, scrub.getPosition().y);
+                            scrub_line.setSize(sf::Vector2f(scrub.getPosition().x - (sidebar.getSize().x + curr_time.getGlobalBounds().width + 15.f), scrub.getRadius()/1.5));
+                            dragging_scrub = false;
+                        }
+                    }
+                }
+            }
+
         }
+        window.clear(palette[1]);
+        // >>> Draw sidebar(song list) elements
+        window.draw(sidebar);   
+            // [Missing code implementation]
 
-        newWindow.clear(sf::Color::White);
-        newWindow.draw(button1);
-        newWindow.draw(text1); // draw text1
-        newWindow.draw(button2);
-        newWindow.draw(text2); // draw text2
-        newWindow.draw(button3);
-        newWindow.draw(text3); // draw text3
-        newWindow.draw(button4);
-        newWindow.draw(text4); // draw text4
-        newWindow.draw(button5);
-        newWindow.draw(text5); // draw text5
-        newWindow.display();
+        // >>> Draw settings button
+        window.draw(topbar);
+        window.draw(settings);
+
+        // >>> Draw memory usage widget
+        window.draw(boost);
+        window.draw(boost_toggle);
+        window.draw(boost_block);
+
+        // >>> Draw scrub elements
+        window.draw(scrub);
+        window.draw(curr_time);
+        window.draw(total_time);
+        window.draw(scrub_line);
+
+        // >>> Draw volume controls
+        window.draw(volume);
+        window.draw(volume_num);
+        window.draw(increase_shape);
+        window.draw(increase);
+        window.draw(decrease_shape);
+        window.draw(decrease);
+
+        // >>> Draw button 1 (Go previous song)
+        window.draw(back_shape);
+        window.draw(backward);
+
+        // >>> Draw button 2 (--10s)
+        window.draw(minus_shape);
+        window.draw(minus10);
+
+        // >>> Draw button 3 (Pause//Unpause)
+        window.draw(pause_shape);
+        window.draw(pause);
+
+        // >>> Draw button 4 (++10s)
+        window.draw(plus_shape);
+        window.draw(plus10); // draw text4
+
+        // >>> Draw button 5 (Go next song)
+        window.draw(forw_shape);
+        window.draw(forward); // draw text5
+
+
+        window.display();
     }
 }
 
 void Interface::InitWinC(){
-
+    sf::RenderWindow window(sf::VideoMode(std::get<0>(this->dimensions[1])/2, std::get<1>(this->dimensions[1])/3), "CMP: Configurations");
+    while (window.isOpen()) {
+        sf::Event event;
+        while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed){
+                window.close();
+            }
+        }
+    }
 }

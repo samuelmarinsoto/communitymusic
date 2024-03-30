@@ -3,12 +3,14 @@
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
+#include <tuple>
+#include <string>
 
 // Class for interacting with SFML resources
 class Interface {
     // ----------------------------- ATTRIBUTES
 protected:
-    char crc;
+    std::tuple<int, int> dimensions[2];
     sf::Font font;
     // ----------------------------- METHODS
 public:
