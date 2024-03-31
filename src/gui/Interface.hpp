@@ -17,6 +17,7 @@
 #include <vector>
 #include <string>
 #include <random>
+#include <cmath>
 
 using namespace std;
 // Class for interacting with SFML resources

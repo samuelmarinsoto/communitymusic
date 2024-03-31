@@ -94,9 +94,15 @@ void Interface::InitWinB(){
         int volume_percentage = 50;
 
         // Music player for window [B]
+        std::cout << this->songs.GetNode(0)->data.title << std::endl;
         this->loader->Convert(string(this->songs.GetNode(0)->data.file), "current.wav");
         sf::Music music_player;
             music_player.openFromFile("/home/frederick/Desktop/bib/.cmp/current.wav");
+            music_player.setVolume(volume_percentage);
+        
+        // Total duration of the current song
+        int duration = music_player.getDuration().asMilliseconds();
+        int offset = music_player.getPlayingOffset().asMilliseconds();
 
         // Sidebar elements creation
             // Sidebar
@@ -106,17 +112,12 @@ void Interface::InitWinB(){
             //TODO: Load songs
         
         // Scrub creation
-        sf::CircleShape scrub;
-            scrub.setRadius(6.f);
-            scrub.setPosition(float(window.getSize().x)/2, float(window.getSize().y) - 100.f);
-            scrub.setFillColor(palette[2]);
-        
         sf::Text curr_time;
             curr_time.setFont(this->font);
             curr_time.setString("0:00");
             curr_time.setCharacterSize(17);
             curr_time.setFillColor(sf::Color::White);
-            curr_time.setPosition(sidebar.getPosition().x + sidebar.getSize().x + 15.f, scrub.getPosition().y - curr_time.getGlobalBounds().height/2);
+            curr_time.setPosition(sidebar.getPosition().x + sidebar.getSize().x + 15.f, float(window.getSize().y) - 100.f - curr_time.getGlobalBounds().height/2);
 
         sf::Text total_time;
             total_time.setFont(this->font);
@@ -124,11 +125,17 @@ void Interface::InitWinB(){
             total_time.setCharacterSize(17);
             total_time.setFillColor(sf::Color::White);
             total_time.setPosition(float(window.getSize().x) - total_time.getGlobalBounds().width - 15.f, curr_time.getPosition().y);
+        
+        sf::CircleShape scrub;
+            scrub.setRadius(6.f);
+            scrub.setPosition(curr_time.getPosition().x + curr_time.getGlobalBounds().width + 10.f + float(offset), curr_time.getPosition().y + curr_time.getGlobalBounds().height/2);
+            scrub.setFillColor(palette[2]);
 
         sf::RectangleShape scrub_line(sf::Vector2f(scrub.getPosition().x - (sidebar.getSize().x + curr_time.getGlobalBounds().width + 15.f), scrub.getRadius()/1.5));
             scrub_line.setFillColor(scrub.getFillColor());
             scrub_line.setPosition(curr_time.getPosition().x + curr_time.getGlobalBounds().width + 10.f, scrub.getPosition().y + scrub.getRadius()/2);
 
+        float total_scrub_size = (total_time.getPosition().x - 15.f) - (scrub_line.getPosition().x) ;
 
         // Settings button creation
         sf::RectangleShape topbar(sf::Vector2f(float(window.getSize().x) - (sidebar.getPosition().x + sidebar.getSize().x), 50.f));
@@ -175,12 +182,12 @@ void Interface::InitWinB(){
             minus_shape.setRadius(20.f);
             minus_shape.setPosition( back_shape.getPosition().x + 50.f, back_shape.getPosition().y );
             minus_shape.setFillColor(palette[3]);
-        sf::Text minus10;
-            minus10.setFont(this->font);
-            minus10.setString("-10");
-            minus10.setCharacterSize(15);
-            minus10.setFillColor(sf::Color::White);
-            minus10.setPosition( minus_shape.getPosition().x + minus_shape.getRadius()/2 - 5.f, minus_shape.getPosition().y + minus_shape.getRadius()/2 );
+        sf::Text minus5;
+            minus5.setFont(this->font);
+            minus5.setString("-5");
+            minus5.setCharacterSize(15);
+            minus5.setFillColor(sf::Color::White);
+            minus5.setPosition( minus_shape.getPosition().x + minus_shape.getRadius()/2 - 5.f, minus_shape.getPosition().y + minus_shape.getRadius()/2 );
 
 
         // Button 3 creation
@@ -200,12 +207,12 @@ void Interface::InitWinB(){
             plus_shape.setRadius(20.f);
             plus_shape.setPosition( pause_shape.getPosition().x + 50.f, pause_shape.getPosition().y );
             plus_shape.setFillColor(palette[3]);
-        sf::Text plus10;
-            plus10.setFont(this->font);
-            plus10.setString("+10");
-            plus10.setCharacterSize(15);
-            plus10.setFillColor(sf::Color::White);
-            plus10.setPosition( plus_shape.getPosition().x + plus_shape.getRadius()/2 - 5.f, plus_shape.getPosition().y + plus_shape.getRadius()/2 );
+        sf::Text plus5;
+            plus5.setFont(this->font);
+            plus5.setString("+5");
+            plus5.setCharacterSize(15);
+            plus5.setFillColor(sf::Color::White);
+            plus5.setPosition( plus_shape.getPosition().x + plus_shape.getRadius()/2 - 5.f, plus_shape.getPosition().y + plus_shape.getRadius()/2 );
 
         // Button 5 creation
         sf::CircleShape forw_shape;
@@ -255,15 +262,28 @@ void Interface::InitWinB(){
             increase.setPosition(increase_shape.getPosition().x + increase.getGlobalBounds().width/2, increase_shape.getPosition().y - 2.5f);   
 
         while (window.isOpen()) {
+        // -------------------------------------------- Song time management
+        if (music_player.getStatus() == sf::Music::Playing){
+            offset = music_player.getPlayingOffset().asMilliseconds();
+            float time_proportions = float(offset)/float(duration);
+            scrub.setPosition(scrub_line.getPosition().x + total_scrub_size*time_proportions, scrub.getPosition().y);
+            scrub_line.setSize(sf::Vector2f(scrub.getPosition().x - (sidebar.getSize().x + curr_time.getGlobalBounds().width + 15.f), scrub.getRadius()/1.5));
+        }
+        if (music_player.getStatus() == sf::Music::Stopped && !paused){
+            std::cout << "Song starting again" << std::endl;
+            music_player.setPlayingOffset(sf::Time(sf::microseconds(0)));
+            paused = true;
+        }
+        // -------------------------------------------- Events
         sf::Event event;
         while (window.pollEvent(event)) {
+            sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+            sf::Vector2f mousePosF(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
             if (event.type == sf::Event::Closed){
                 window.close();
             }
             if (event.type == sf::Event::MouseButtonPressed) {
                 if (event.mouseButton.button == sf::Mouse::Left) {
-                    sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-                    sf::Vector2f mousePosF(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
                     // ------------------- Settings interaction
                     if(settings.getGlobalBounds().contains(mousePosF)){
                         std::cout << "Opening configurations" << std::endl;
@@ -297,14 +317,46 @@ void Interface::InitWinB(){
                         }
                     }
                     if (minus_shape.getGlobalBounds().contains(mousePosF)){
-                        std::cout << "Went back 10s" << std::endl;
-                        scrub.setPosition(scrub.getPosition().x - 10.f, scrub.getPosition().y);
+                        std::cout << "Went back 5s" << std::endl;
+                        // Pause the player
+                        music_player.pause();
+                        // Move the offset to desired location
+                        offset = music_player.getPlayingOffset().asMilliseconds() - 5000;
+                        if (offset < 0){
+                            offset = 0;
+                        }
+                        sf::Time moved(sf::microseconds(offset * int(std::pow(10.0,3.0)) ));
+                        // Set the playing offset
+                        music_player.setPlayingOffset(moved);
+                        // Move the scrub
+                        float time_proportions = float(offset)/float(duration);
+                        scrub.setPosition(scrub_line.getPosition().x + total_scrub_size*time_proportions, scrub.getPosition().y);
                         scrub_line.setSize(sf::Vector2f(scrub.getPosition().x - (sidebar.getSize().x + curr_time.getGlobalBounds().width + 15.f), scrub.getRadius()/1.5));
+                        // Continue the reproduction
+                        if(!paused){
+                            music_player.play();
+                        }
                     }
                     if (plus_shape.getGlobalBounds().contains(mousePosF)){
-                        std::cout << "Went forward 10s" << std::endl;
-                        scrub.setPosition(scrub.getPosition().x + 10.f, scrub.getPosition().y);
+                        std::cout << "Went forward 5s" << std::endl;
+                        // Pause the player
+                        music_player.pause();
+                        // Move the offset to desired location
+                        offset = music_player.getPlayingOffset().asMilliseconds() + 5000;
+                        if (offset > duration){
+                            offset = duration;
+                        }
+                        sf::Time moved(sf::microseconds(offset * int(std::pow(10.0,3.0)) ));
+                        // Set the playing offset
+                        music_player.setPlayingOffset(moved);
+                        // Move the scrub
+                        float time_proportions = float(offset)/float(duration);
+                        scrub.setPosition(scrub_line.getPosition().x + total_scrub_size*time_proportions, scrub.getPosition().y);
                         scrub_line.setSize(sf::Vector2f(scrub.getPosition().x - (sidebar.getSize().x + curr_time.getGlobalBounds().width + 15.f), scrub.getRadius()/1.5));
+                        // Continue the reproduction
+                        if(!paused){
+                            music_player.play();
+                        }
                     }
                     if (back_shape.getGlobalBounds().contains(mousePosF)){
                         std::cout << "Going to previous song" << std::endl;
@@ -319,31 +371,42 @@ void Interface::InitWinB(){
                     // ------------------- Volume
                     if (increase_shape.getGlobalBounds().contains(mousePosF)){
                         std::cout << "Volume up" << std::endl;
-                        volume_percentage += 5;
-                        volume_num.setString(std::to_string(volume_percentage) + "%");
+                        if (volume_percentage < 100){
+                            volume_percentage += 5;
+                            volume_num.setString(std::to_string(volume_percentage) + "%");
+                            music_player.setVolume(volume_percentage);
+                        }
                     }
                     if (decrease_shape.getGlobalBounds().contains(mousePosF)){
                         std::cout << "Volume down" << std::endl;
-                        volume_percentage -= 5;
-                        volume_num.setString(std::to_string(volume_percentage) + "%");
+                        if (volume_percentage > 0){
+                            volume_percentage -= 5;
+                            volume_num.setString(std::to_string(volume_percentage) + "%");
+                            music_player.setVolume(volume_percentage);
+                        }
                     }
                 }
             }
             if (event.type == sf::Event::MouseButtonReleased){
                 if (event.mouseButton.button == sf::Mouse::Left) {
-                    sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-                    sf::Vector2f mousePosF(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
-                    
                     if (dragging_scrub){
                         if (mousePosF.x > scrub_line.getPosition().x && mousePosF.x < total_time.getPosition().x - 15.f){
-                            scrub.setPosition(mousePosF.x, scrub.getPosition().y);
+                            music_player.pause();
+                            // Move scrub
+                            scrub.setPosition(mousePosF.x - 7.5f , scrub.getPosition().y);
                             scrub_line.setSize(sf::Vector2f(scrub.getPosition().x - (sidebar.getSize().x + curr_time.getGlobalBounds().width + 15.f), scrub.getRadius()/1.5));
                             dragging_scrub = false;
+                            // Move song offset
+                            float scrub_proportions = scrub_line.getSize().x/total_scrub_size;
+                            sf::Time moved(sf::microseconds( int(duration*scrub_proportions) * int(std::pow(10.0,3.0)) ));
+                            music_player.setPlayingOffset(moved);
+                            if(!paused){
+                                music_player.play();
+                            }
                         }
                     }
                 }
             }
-
         }
         window.clear(palette[1]);
         // >>> Draw sidebar(song list) elements
@@ -379,7 +442,7 @@ void Interface::InitWinB(){
 
         // >>> Draw button 2 (--10s)
         window.draw(minus_shape);
-        window.draw(minus10);
+        window.draw(minus5);
 
         // >>> Draw button 3 (Pause//Unpause)
         window.draw(pause_shape);
@@ -387,7 +450,7 @@ void Interface::InitWinB(){
 
         // >>> Draw button 4 (++10s)
         window.draw(plus_shape);
-        window.draw(plus10); // draw text4
+        window.draw(plus5); // draw text4
 
         // >>> Draw button 5 (Go next song)
         window.draw(forw_shape);
