@@ -1,7 +1,7 @@
 use rstk::*;
 
 fn main() {
-  let root = rstk::start_with("Community Playlist").unwrap();
+  let root = rstk::start_with("wish8.6").unwrap();
 
   // Set the window size to 800x600
   root.geometry(800,600,0,0);
