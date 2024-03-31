@@ -9,3 +9,4 @@ edition = "2021"
 # para que encuentre biblioteca del sistema
 [dependencies]
 gtk = "0.18.1"
+glib = "0.10.3"
