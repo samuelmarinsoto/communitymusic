@@ -8,7 +8,7 @@ MP3Tags::MP3Tags(std::string mp3_path) {
     string uuid_string = boost::uuids::to_string(guid);
     strcpy(this->uuid, uuid_string.c_str());
 
-    // Initialized the integers
+    // Initialize the integers
     this->upvotes = 0;
     this->downvotes = 0;
 
@@ -16,7 +16,7 @@ MP3Tags::MP3Tags(std::string mp3_path) {
     strcpy(this->file, mp3_path.c_str()); // copy file path as array into the required field
 
     // Metadata extraction
-    TagLib::FileRef file(mp3_path.c_str());
+    TagLib::FileRef file(mp3_path.c_str())
     if (!file.isNull() && file.tag()){
         TagLib::Tag *tag = file.tag(); // Get the tags
         // Set the tags into the object fields
@@ -51,7 +51,18 @@ MP3Tags::MP3Tags(std::string mp3_path) {
 
 }
 
-MP3Tags::~MP3Tags(){
+MP3Tags::MP3Tags() {
+    uuid[0] = '\0';
+    title[0] = '\0';
+    artist[0] = '\0';
+    album[0] = '\0';
+    genre[0] = '\0';
+    file[0] = '\0';
+    upvotes = 0;
+    downvotes = 0;
+}
+
+MP3Tags::~MP3Tags() {
 
 }
 

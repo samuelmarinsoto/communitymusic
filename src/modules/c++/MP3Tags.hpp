@@ -1,18 +1,14 @@
-#ifndef MP3TAGS_H
-#define MP3TAGS_H
+#pragma once
 
-#include <cstring> // For strcpy
+#include <cstring>
 #include <iostream>
-// For GUID
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
-// For tag retrieval
 #include <taglib/tag.h>
 #include <taglib/fileref.h>
 
 using namespace std;
-// C++ class implementation to extract the id3 metadata of mp3 files
 class MP3Tags {
 public:
     char uuid[80];
@@ -22,10 +18,12 @@ public:
     char genre[50];
     char file[100];
     int upvotes, downvotes;
-
 	// Loads the tags of a song into an object for use in the program
-    MP3Tags(std::string mp3_path);
-
+  MP3Tags(std::string mp3_path);
+  
+  // Default constructor
+  MP3Tags();
+  
 	// Destroys the object and all its contents		
 	~MP3Tags();
 
@@ -36,5 +34,3 @@ public:
 	// Compares check that the uuids are indeed different
 	bool operator==(MP3Tags other);
 };
-
-#endif // MP3TAGS_H
