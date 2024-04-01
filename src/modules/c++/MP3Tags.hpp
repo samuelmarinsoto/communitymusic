@@ -24,74 +24,17 @@ public:
     int upvotes, downvotes;
 
 	// Loads the tags of a song into an object for use in the program
-    MP3Tags(std::string mp3_path) {
-		// GUID generation
-		boost::uuids::random_generator gen;
-		boost::uuids::uuid guid = gen();
+    MP3Tags(std::string mp3_path);
 
-		string uuid_string = boost::uuids::to_string(guid);
-		strcpy(this->uuid, uuid_string.c_str());
-
-		// Initialized the integers
-        this->upvotes = 0;
-        this->downvotes = 0;
-
-		// Set the path into the buffer
-		strcpy(this->file, mp3_path.c_str()); // copy file path as array into the required field
-
-		// Metadata extraction
-		TagLib::FileRef file(mp3_path.c_str());
-		if (!file.isNull() && file.tag()){
-			TagLib::Tag *tag = file.tag(); // Get the tags
-			// Set the tags into the object fields
-			// Title
-			string title_tag = tag->title().to8Bit(true);
-			if (title_tag == ""){
-				title_tag = "Unknown";
-			}
-			strcpy(this->title , title_tag.c_str());
-			// Artist
-			string artist_tag = tag->artist().to8Bit(true);
-			if (artist_tag == ""){
-				artist_tag = "Unknown";
-			}
-			strcpy(this->artist , artist_tag.c_str());
-			// Album
-			string album_tag = tag->album().to8Bit(true);
-			if (album_tag == ""){
-				album_tag = "Unknown";
-			}
-			strcpy(this->album , album_tag.c_str());
-			// Genre
-			string genre_tag = tag->genre().to8Bit(true);
-			if (genre_tag == ""){
-				genre_tag = "Unknown";
-			}
-			strcpy(this->genre , genre_tag.c_str());
-		} else {
-			// TODO: Should manage this error into the logs
-			cout << "Failed to open mp3" << endl;
-		}
-
-    }
 	// Destroys the object and all its contents		
-	~MP3Tags(){
+	~MP3Tags();
 
-	}
 	// Returns the byte size of the object with all its elements
-	size_t GetSize(){
-		// TOTAL BYTE SIZE: file[100] + tags[50]*4 + uuid[80] + int[4]*2
-		//return sizeof(char[101]) + sizeof(char[50])*4 + sizeof(char[80]) + sizeof(int)*2;
-		return sizeof(*this);
-	}
+	size_t GetSize();
+
 	// Operator for comparing two MP3Tags instances correctly
 	// Compares check that the uuids are indeed different
-	bool operator==(MP3Tags other){
-		if(string(this->uuid) == string(other.uuid)){
-			return true;
-		}
-		return false;
-	}
+	bool operator==(MP3Tags other);
 };
 
 #endif // MP3TAGS_H
