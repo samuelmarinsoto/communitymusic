@@ -131,8 +131,8 @@ PagedArray::~PagedArray() {
 
 // Overloaded subscript operator definition
 MP3Tags& PagedArray::operator[](size_t index) {
-    size_t pageIndex = index / pagesize;
-    size_t pageOffset = index % pagesize;
+    size_t pageIndex = index / objs_per_page; 
+    size_t pageOffset = index % objs_per_page;
 
     if (pageIndex >= pagecount) {
         std::cerr << "Index out of bounds\n";
@@ -142,7 +142,7 @@ MP3Tags& PagedArray::operator[](size_t index) {
     // Check if the page is loaded and if it's at the front of all other pages
     int pageloaded = 0;
     int ramindex = -1;
-    for (size_t i = active_pages.size() - 1; i >= 0; --i) {
+    for (size_t i = 0; i < active_pages.size(); i++) {
         if (std::get<0>(active_pages[i]) == pageIndex) {
             pageloaded = 1;
             ramindex = i;
