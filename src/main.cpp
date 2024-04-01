@@ -7,5 +7,6 @@
 #include <string>
 int main(){
     Interface interface;
+    
     return 0;
 }
