@@ -55,8 +55,11 @@ MP3Tags::MP3Tags(std::string mp3_path) {
         }
         strcpy(this->genre, genre_tag.c_str());
     } else {
+    	if (file.isNull())
+    		cout << "Failed to open mp3 file\n" << endl;
+    	if (!file.tag())
+    		cout << "Could not extract metadata from mp3\n" << endl;
         // TODO: Should manage this error into the logs
-        cout << "Failed to open mp3" << endl;
     }
 }
 

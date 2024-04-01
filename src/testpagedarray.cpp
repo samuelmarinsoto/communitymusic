@@ -17,7 +17,8 @@ std::vector<std::string> loadFilenames(const std::string& directoryPath) {
     struct dirent* entry;
     while ((entry = readdir(dir)) != nullptr) {
         if (entry->d_type == DT_REG) {  // Regular file
-            filenames.push_back(entry->d_name);
+        	std::string fullFilename = directoryPath + "/" + entry->d_name;
+            filenames.push_back(fullFilename);
         }
     }
 
@@ -32,19 +33,17 @@ int main() {
 	char archivo[25] = "swap.bin";
 	PagedArray parray(55, 396, 3, 3168, archivo);
 	
-    // size_t i = 0;
-    // // Print the loaded filenames
-    // for (const std::string& filename : filenames) {
-    //     std::cout << filename << std::endl;
-    //     MP3Tags cancion(filename);
-    //     parray[i] = cancion;
-    //     i++;
-    // }
-    std::string songfile = "smackdat.mp3";
-    
-    MP3Tags cancion(songfile);
-	parray[31] = cancion;
-    std::cout << "Artist 31: " << parray[31].artist << std::endl;
+    size_t i = 0;
+    // Print the loaded filenames
+    for (const std::string& filename : filenames) {
+    	std::cout << filename << std::endl;
+    	MP3Tags cancion(filename);
+    	parray[i] = cancion;
+    	std::cout << cancion.title << "\n" << std::endl;
+    	if (i<26)
+    		std::cout << parray[i].title << "\n" << std::endl;
+    	i++;
+    }
 
     return 0;
 }
