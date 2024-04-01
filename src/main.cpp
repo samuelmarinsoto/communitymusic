@@ -6,7 +6,6 @@
 #include <iostream>
 #include <string>
 int main(){
-    Interface interface;
-    
+    Interface interface; 
     return 0;
 }
