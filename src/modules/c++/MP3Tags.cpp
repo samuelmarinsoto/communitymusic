@@ -1,15 +1,5 @@
-#include <cstring>
-#include <iostream>
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
-#include <taglib/tag.h>
-#include <taglib/fileref.h>
 #include "MP3Tags.hpp"
 
-using namespace std;
-
-// Constructor definition
 MP3Tags::MP3Tags(std::string mp3_path) {
     // GUID generation
     boost::uuids::random_generator gen;
@@ -26,44 +16,41 @@ MP3Tags::MP3Tags(std::string mp3_path) {
     strcpy(this->file, mp3_path.c_str()); // copy file path as array into the required field
 
     // Metadata extraction
-    TagLib::FileRef file(mp3_path.c_str());
-    if (!file.isNull() && file.tag()) {
-        TagLib::Tag* tag = file.tag(); // Get the tags
+    TagLib::FileRef file(mp3_path.c_str())
+    if (!file.isNull() && file.tag()){
+        TagLib::Tag *tag = file.tag(); // Get the tags
         // Set the tags into the object fields
         // Title
-        std::string title_tag = tag->title().to8Bit(true);
-        if (string(title_tag) == "") {
+        string title_tag = tag->title().to8Bit(true);
+        if (title_tag == ""){
             title_tag = "Unknown";
         }
-        strcpy(this->title, title_tag.c_str());
+        strcpy(this->title , title_tag.c_str());
         // Artist
-	    std::string artist_tag = tag->artist().to8Bit(true);
-        if (artist_tag == "") {
+        string artist_tag = tag->artist().to8Bit(true);
+        if (artist_tag == ""){
             artist_tag = "Unknown";
         }
-        strcpy(this->artist, artist_tag.c_str());
+        strcpy(this->artist , artist_tag.c_str());
         // Album
-        std::string album_tag = tag->album().to8Bit(true);
-        if (string(album_tag) == "") {
+        string album_tag = tag->album().to8Bit(true);
+        if (album_tag == ""){
             album_tag = "Unknown";
         }
-        strcpy(this->album, album_tag.c_str());
+        strcpy(this->album , album_tag.c_str());
         // Genre
-        std::string genre_tag = tag->genre().to8Bit(true);
-        if (string(genre_tag) == "") {
+        string genre_tag = tag->genre().to8Bit(true);
+        if (genre_tag == ""){
             genre_tag = "Unknown";
         }
-        strcpy(this->genre, genre_tag.c_str());
+        strcpy(this->genre , genre_tag.c_str());
     } else {
-    	if (file.isNull())
-    		cout << "Failed to open mp3 file\n" << endl;
-    	if (!file.tag())
-    		cout << "Could not extract metadata from mp3\n" << endl;
         // TODO: Should manage this error into the logs
+        cout << "Failed to open mp3" << endl;
     }
+
 }
 
-// Default constructor definition
 MP3Tags::MP3Tags() {
     uuid[0] = '\0';
     title[0] = '\0';
@@ -75,6 +62,19 @@ MP3Tags::MP3Tags() {
     downvotes = 0;
 }
 
-// Destructor definition
 MP3Tags::~MP3Tags() {
+
+}
+
+size_t MP3Tags::GetSize(){
+    // TOTAL BYTE SIZE: file[100] + tags[50]*4 + uuid[80] + int[4]*2
+    //return sizeof(char[101]) + sizeof(char[50])*4 + sizeof(char[80]) + sizeof(int)*2;
+    return sizeof(*this);
+}
+
+bool MP3Tags::operator==(MP3Tags other){
+    if(string(this->uuid) == string(other.uuid)){
+        return true;
+    }
+    return false;
 }

@@ -3,7 +3,7 @@
 
 // >>> Module imports <<<
 #include "args.h"
-#include "lib/fJSON.hpp"
+#include "../../lib/fJSON.hpp"
 #include "LinkedList.hpp"
 
 // >>> Main imports <<< 

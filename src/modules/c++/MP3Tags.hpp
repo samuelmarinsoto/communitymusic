@@ -18,8 +18,19 @@ public:
     char genre[50];
     char file[100];
     int upvotes, downvotes;
-
-    MP3Tags(std::string mp3_path);
-    MP3Tags();
+	// Loads the tags of a song into an object for use in the program
+  MP3Tags(std::string mp3_path);
+  
+  // Default constructor
+  MP3Tags();
+  
+	// Destroys the object and all its contents		
 	~MP3Tags();
+
+	// Returns the byte size of the object with all its elements
+	size_t GetSize();
+
+	// Operator for comparing two MP3Tags instances correctly
+	// Compares check that the uuids are indeed different
+	bool operator==(MP3Tags other);
 };

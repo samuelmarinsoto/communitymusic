@@ -16,10 +16,12 @@ class LinkedList {
         ~LinkedList(){
             Node<T>* current = this->head;
             Node<T>* temp;
-            while(current->next != nullptr){
-                temp = current;
-                current = current->next;
-                delete temp;
+            if (current != nullptr){
+                while(current->next != nullptr){
+                    temp = current;
+                    current = current->next;
+                    delete temp;
+                }
             }
         }
         // Inserts a new node at the beginning of the list
@@ -36,19 +38,21 @@ class LinkedList {
         // Removes(and frees) a node from the list at specifed index
         void remove(int index){
             Node<T>* current = this->head;
-            if (index == 0){
-                this->head = current->next;
-                delete current;
-                this->size--;
-            } else if (index>0){
-                Node<T>* temp;
-                for (int i = 1; i<index; i++){
-                    current = current->next;
+            if (current != nullptr){
+                if (index == 0){
+                    this->head = current->next;
+                    delete current;
+                    this->size--;
+                } else if (index>0){
+                    Node<T>* temp;
+                    for (int i = 1; i<index; i++){
+                        current = current->next;
+                    }
+                    temp = current->next;
+                    current->next = temp->next;
+                    delete temp;
+                    this->size--;
                 }
-                temp = current->next;
-                current->next = temp->next;
-                delete temp;
-                this->size--;
             }
         }
         // Find and removes(frees) a node from the list based on its contents
@@ -75,16 +79,39 @@ class LinkedList {
         // Removes(frees) the last node of the list
         // NOTE: this node is most commonly the first one inserted
         void pop(){
-            Node<T>* current = this->head;
-            for (int i = 0; i<this->size-1 ; i++){
-                current = current->next;
+            if (this->size == 1){
+                delete this->head;
+                this->head = nullptr;
+                this->size--;
+            } else if (this->size > 1){
+                Node<T>* current = this->head;
+                for (int i = 0; i<this->size-1 ; i++){
+                    current = current->next;
+                }
+                Node<T>* temp = current->next;
+                delete temp;
+                current->next = nullptr;
+                this->size--;
             }
-            Node<T>* temp = current->next;
-            current->next = nullptr;
-            delete temp;
-            this->size--;
         }
-        // Get the value of a node based on its index
+        // Get a node at a specified index
+        // Returns a nullptr if the list is empty
+        Node<T>* getNode(int index){
+            if (index < 0){
+                return nullptr;
+            }
+            Node<T>* node = this->head;
+            int counter = 0;
+            while (node!=nullptr){
+                if (counter == index){
+                    break;
+                }
+                node = node->next;
+                counter++;
+            }
+            return node;
+        }
+        // Get the data of a node based on its index
         T& get(int index){
             Node<T>* node = this->head;
             for (int i = 0; i<index; i++){
@@ -92,7 +119,7 @@ class LinkedList {
             }
             return node->data;
         }
-        // Get the value of a node based on its index
+        // Get the data of a node based on its index
         T& operator[](int index){
             return this->get(index);
         }
