@@ -18,6 +18,7 @@
 #include <string>
 #include <random>
 #include <cmath>
+#include <iostream>
 
 using namespace std;
 // Class for interacting with SFML resources
@@ -33,6 +34,7 @@ protected:
 
     string playlist_path;
     string program_data_path;
+    bool paged;
 
     Loader* loader;
     // ----------------------------- METHODS

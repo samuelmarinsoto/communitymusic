@@ -38,19 +38,21 @@ class LinkedList {
         // Removes(and frees) a node from the list at specifed index
         void remove(int index){
             Node<T>* current = this->head;
-            if (index == 0){
-                this->head = current->next;
-                delete current;
-                this->size--;
-            } else if (index>0){
-                Node<T>* temp;
-                for (int i = 1; i<index; i++){
-                    current = current->next;
+            if (current != nullptr){
+                if (index == 0){
+                    this->head = current->next;
+                    delete current;
+                    this->size--;
+                } else if (index>0){
+                    Node<T>* temp;
+                    for (int i = 1; i<index; i++){
+                        current = current->next;
+                    }
+                    temp = current->next;
+                    current->next = temp->next;
+                    delete temp;
+                    this->size--;
                 }
-                temp = current->next;
-                current->next = temp->next;
-                delete temp;
-                this->size--;
             }
         }
         // Find and removes(frees) a node from the list based on its contents
@@ -87,8 +89,8 @@ class LinkedList {
                     current = current->next;
                 }
                 Node<T>* temp = current->next;
-                current->next = nullptr;
                 delete temp;
+                current->next = nullptr;
                 this->size--;
             }
         }

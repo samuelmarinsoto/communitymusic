@@ -113,13 +113,14 @@ class CircularList<MP3Tags> : public Observer{
         // Sets a node marked as previously played as the
         void setPrevious(){
             Node<MP3Tags>* ref = this->origin->getHead();
-            Node<string>* last_id = this->alreadyPlayed.getNode(this->alreadyPlayed.size -1);
+            Node<string>* last_id = this->alreadyPlayed.getNode(0);
             
             while (ref != nullptr && last_id!=nullptr){ 
-                if(string(ref->data.uuid) == last_id->data) {
-                    this->alreadyPlayed.pop();
+                if( string(ref->data.uuid) == last_id->data ) {
+                    this->alreadyPlayed.remove(0);
                     this->playingNow->prev = new Node<MP3Tags>(ref->data);
                     this->playingNow->prev->next = this->playingNow;
+                    break;
                 }
                 ref = ref->next;
             }
@@ -214,14 +215,27 @@ class CircularList<MP3Tags> : public Observer{
 
             if (this->origin->size == this->alreadyPlayed.size){ // What happens when the playlist has reached its end
                 // Reset all the played song ids
-                while (this->alreadyPlayed.size > 0){
-                    this->alreadyPlayed.pop();
+                while (this->alreadyPlayed.size > 1){
+                    this->alreadyPlayed.remove(0);
                 }
+                // Delete current nodes
+                delete this->playingNow->next;
+                delete this->playingNow->prev;
+                delete this->playingNow;
+                this->playingNow = nullptr;
                 // Set back the start of the list at the first node
-                this->conditioned = false;
-                this->updateOrder();
-                this->conditioned = true;
-            }else {
+                Node<MP3Tags>* node = this->origin->getHead();
+                string start_id = this->alreadyPlayed.getNode(0)->data;
+                while (node != nullptr){
+                    if ( string(node->data.uuid) == start_id){
+                        break;
+                    }
+                    node = node->next;
+                }
+                this->playingNow = new Node<MP3Tags>(node->data);
+                this->setFollowing();
+                this->alreadyPlayed.remove(0);
+            } else {
                 this->playingNow = this->playingNow->next;
                 this->setFollowing();
             }
@@ -229,13 +243,12 @@ class CircularList<MP3Tags> : public Observer{
         // Moves back to the previous song(pointer)
         // Implies a change of context for the currently played
         void movePrevSong(){
-            if (this->playingNow->prev == nullptr){
-                // TODO:Throw exception
-            } else {
+            if (this->playingNow->prev != nullptr){
                 delete this->playingNow->next;
                     this->playingNow->next = nullptr;
 
                 this->playingNow = this->playingNow->prev;
+                this->alreadyPlayed.remove(0);
                 this->setPrevious();
             }
         }
