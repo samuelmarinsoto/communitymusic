@@ -57,13 +57,19 @@ class CircularList : public Observer{
 
 template <>
 class CircularList<MP3Tags> : public Observer{
-    private:
+    // ------------------------------------- ATTRIBUTES
+    protected:
         DoubleLinkedList<MP3Tags>* origin;
-        string identifier;
+    private:
         LinkedList<string> alreadyPlayed; // List of songs(uuids) that the have already been played and wont be played again(if the origin list changes), unless it is forced
-        string start;  // Reference to the id of the song that was played first, and by consequence should play again when the playlist ends
+    public:
+        Node<MP3Tags>* playingNow;  // Has a two-way link to the previous song() and the next song()
+                                    // Only this node is not a reference to the origin node, but a copy of the data, in case the origin list changes
+        bool conditioned;
 
-        // Changes the node order on the pointed origin list
+    // ------------------------------------- ATTRIBUTES
+    protected:
+        // Changes the node order based on the pointed origin list
         void updateOrder(){
             if (!this->conditioned){ // When the mp3 reproduction hasn't started
                 Node<MP3Tags>* ref = this->origin->GetNode(0); // A reference to the first node of the DoubleLinkedList
@@ -77,16 +83,11 @@ class CircularList<MP3Tags> : public Observer{
                 // Now its viable to change any data
                 if (ref != nullptr){
                     this->playingNow = new Node<MP3Tags>(ref->data); // Create a copy node of the contents
-                    if (ref->next != nullptr){
-                        this->playingNow->next = new Node<MP3Tags>(ref->next->data);
-                        this->playingNow->next->prev = this->playingNow;
-                    }
                 }
-                this->start = string(this->playingNow->data.uuid);
-            } else { // Once started
-                this->setFollowing();
             }
+            this->setFollowing();
         }
+    private:
         // Sets a the node with better voting difference as the following node
         void setFollowing(){
             // Get the head node and iterate over the nodes to find the one with a better voting difference
@@ -95,8 +96,9 @@ class CircularList<MP3Tags> : public Observer{
             Node<MP3Tags>* selected = nullptr;
             int best_difference = 0;
             while(ref != nullptr){
-                if ( (ref->data.upvotes - ref->data.downvotes) >= best_difference && ref != this->playingNow && this->check_played(string(ref->data.uuid)) ){
+                if ( (ref->data.upvotes - ref->data.downvotes) >= best_difference && string(ref->data.uuid) != string(this->playingNow->data.uuid) && !this->check_played(string(ref->data.uuid)) ){
                     selected = ref;
+                    best_difference = selected->data.upvotes - selected->data.downvotes;
                 }
                 ref = ref->next;
             }
@@ -111,8 +113,10 @@ class CircularList<MP3Tags> : public Observer{
         // Sets a node marked as previously played as the
         void setPrevious(){
             Node<MP3Tags>* ref = this->origin->getHead();
-            while (ref != nullptr){
-                if(string(ref->data.uuid) == this->alreadyPlayed.get(this->alreadyPlayed.size -1)){
+            Node<string>* last_id = this->alreadyPlayed.getNode(this->alreadyPlayed.size -1);
+            
+            while (ref != nullptr && last_id!=nullptr){ 
+                if(string(ref->data.uuid) == last_id->data) {
                     this->alreadyPlayed.pop();
                     this->playingNow->prev = new Node<MP3Tags>(ref->data);
                     this->playingNow->prev->next = this->playingNow;
@@ -124,9 +128,9 @@ class CircularList<MP3Tags> : public Observer{
         // Compares their unique uuids
         // Returns FALSE if not found, TRUE if found
         bool check_played(string uuid){
-            Node<MP3Tags>* ref = this->origin->getHead();
+            Node<string>* ref = this->alreadyPlayed.getNode(0);
             while (ref != nullptr){
-                if (string(ref->data.uuid) == uuid){
+                if (ref->data == uuid){
                     return true;
                 }
                 ref = ref->next;
@@ -134,22 +138,16 @@ class CircularList<MP3Tags> : public Observer{
             return false;
         }
     public:
-        Node<MP3Tags>* playingNow;  // Has a two-way link to the previous song() and the next song()
-                                    // Only this node is not a reference to the origin node, but a copy of the data, in case the origin list changes
-        bool conditioned;
-
         // Creates a CircularList class build upon a DoubleLinkedList
         // Parameters:
         // origin_ptr: is pointer to the memory address where the Linked List exists
         CircularList(DoubleLinkedList<MP3Tags>* origin_ptr){
+            // Observer elements
             this->origin = origin_ptr;
             this->origin->AddObserver(this);
-            boost::uuids::random_generator gen;
-            boost::uuids::uuid uuid = gen();
-            this->identifier = boost::uuids::to_string(uuid);
+            // Class elements
             this->conditioned = false;
             this->playingNow = nullptr;
-            this->start = "";
         }
         // Destroys the circular list
         ~CircularList(){
@@ -163,7 +161,11 @@ class CircularList<MP3Tags> : public Observer{
         void update(State state) override {
             switch (state){
                 case type1:
-                    std::cout << "Observer " << this->identifier <<" => " <<"List contents were modified" << std::endl;
+                    std::cout << "(CircularList)Observer" << " ! => " <<"List contents were modified" << std::endl;
+                    this->updateOrder();
+                    break;
+                case type2:
+                    std::cout << "(CircularList)Observer" << " ! => " <<"List contents were modified" << std::endl;
                     this->updateOrder();
                     break;
                 default:
@@ -204,7 +206,6 @@ class CircularList<MP3Tags> : public Observer{
         }
         // Moves to the next song(pointer)
         // Implies a change of context for the currently played
-        // If <reached_end> is set to true then the moved song is added to the already played list of songs
         void moveNextSong(){
             delete this->playingNow->prev;
                 this->playingNow->prev = nullptr;
@@ -219,7 +220,6 @@ class CircularList<MP3Tags> : public Observer{
                 // Set back the start of the list at the first node
                 this->conditioned = false;
                 this->updateOrder();
-                this->setFollowing();
                 this->conditioned = true;
             }else {
                 this->playingNow = this->playingNow->next;
@@ -228,16 +228,16 @@ class CircularList<MP3Tags> : public Observer{
         }
         // Moves back to the previous song(pointer)
         // Implies a change of context for the currently played
-        // If <reached_end> is set to true then the moved song is added to the already played list of songs
         void movePrevSong(){
             if (this->playingNow->prev == nullptr){
-                // Throw exception
-            }
-            delete this->playingNow->next;
-                this->playingNow->next = nullptr;
+                // TODO:Throw exception
+            } else {
+                delete this->playingNow->next;
+                    this->playingNow->next = nullptr;
 
-            this->playingNow = this->playingNow->prev;
-            this->setPrevious();
+                this->playingNow = this->playingNow->prev;
+                this->setPrevious();
+            }
         }
 };
 

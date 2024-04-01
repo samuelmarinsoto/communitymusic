@@ -14,20 +14,82 @@ Interface::Interface() {
 
     this->loader = new Loader("/home/frederick/Desktop/bib/.cmp");
     
+    // Array to fill with randomly picked songs
     vector<string> songnames = loader->RetrieveFileNames("/home/frederick/Desktop/bib/playlist1");
 
     random_device rd;
     mt19937 generator(rd());
     uniform_int_distribution<int> dist(0,songnames.size()-1);
-    for (int i = 0; i<10; i++){
-        int gen_int = dist(generator);
-        this->songs.InsertAtEnd(MP3Tags("/home/frederick/Desktop/bib/playlist1/" + songnames[gen_int]));
+
+    // Selected random indexes
+    if (songnames.size() < 10){
+        int randNums[songnames.size()];
+        int counter = 0;
+
+        while (counter < songnames.size()){
+            int gen_int = dist(generator);
+            std::cout << gen_int;
+
+            bool repeated = false;
+            for (int i = 0; i<counter; i++){
+                if (randNums[i]==gen_int){
+                    repeated = true;
+                    break;
+                }
+            }
+
+            if (!repeated){
+                randNums[counter++] = gen_int;
+            }
+        }
+
+        // Select all the songs from the random indexes
+        for (int index : randNums){
+            this->songs.InsertAtEnd(MP3Tags("/home/frederick/Desktop/bib/playlist1/" + songnames[index]));
+        }
+    } else {
+        int randNums[10];
+        int counter = 0;
+
+        while (counter < 10){
+            int gen_int = dist(generator);
+
+            bool repeated = false;
+            for (int i = 0; i<counter; i++){
+                if (randNums[i]==gen_int){
+                    repeated = true;
+                    break;
+                }
+            }
+
+            if (!repeated){
+                randNums[counter++] = gen_int;
+            }
+        }
+
+        // Select all the songs from the random indexes
+        for (int index : randNums){
+            this->songs.InsertAtEnd(MP3Tags("/home/frederick/Desktop/bib/playlist1/" + songnames[index]));
+        }
     }
+    this->player->conditioned = true;
 
     this->InitWinA();
 }
 
 Interface::~Interface(){
+
+}
+
+void Interface::find_replace(char value, char new_value, string& source){
+    for (int i = 0; i<source.length(); i++){
+        if (source[i] == value){
+            source[i] = new_value;
+        }
+    }
+}
+
+void Interface::Load_INI(){
 
 }
 
@@ -66,7 +128,7 @@ void Interface::InitWinA(){
                     if (button.getGlobalBounds().contains(mousePosF)) {
                         std::cout << "Button clicked" << std::endl;
                         window.close();
-                        this->InitWinB();
+                        this->InitWinB1();
                     }
                 }
             }
@@ -79,7 +141,7 @@ void Interface::InitWinA(){
     }
 }
 
-void Interface::InitWinB(){
+void Interface::InitWinB1(){
         sf::RenderWindow window(sf::VideoMode(std::get<0>(this->dimensions[1]), std::get<1>(this->dimensions[1])), "Comunity Playlist");
         // Color palette for the theme of the window
             // [0]: Grey
@@ -94,10 +156,14 @@ void Interface::InitWinB(){
         int volume_percentage = 50;
 
         // Music player for window [B]
-        std::cout << this->songs.GetNode(0)->data.title << std::endl;
-        this->loader->Convert(string(this->songs.GetNode(0)->data.file), "current.wav");
+        std::cout << this->player->playingNow->data.title << std::endl;
+
+        string filename = string(this->player->playingNow->data.title);
+        this->find_replace(' ', '_', filename);
+
+        this->loader->Convert(string(this->player->playingNow->data.file), filename);
         sf::Music music_player;
-            music_player.openFromFile("/home/frederick/Desktop/bib/.cmp/current.wav");
+            music_player.openFromFile("/home/frederick/Desktop/bib/.cmp/" + filename + ".wav");
             music_player.setVolume(volume_percentage);
         
         // Total duration of the current song
@@ -109,7 +175,68 @@ void Interface::InitWinB(){
         sf::RectangleShape sidebar(sf::Vector2f(float(window.getSize().x/5) + 15.f, float(window.getSize().y)));
             sidebar.setPosition(0.f,0.f);
             sidebar.setFillColor(palette[0]);
-            //TODO: Load songs
+            //Load songs
+        float blocks_dimensions[2] = {sidebar.getSize().x, float(window.getSize().y)/10};
+        float text_spacings = blocks_dimensions[1]/4;
+
+        sf::RectangleShape song_blocks[this->songs.size];
+        sf::Text title_names[this->songs.size];
+        sf::Text album_names[this->songs.size];
+        sf::Text artist_names[this->songs.size];
+        sf::Text upvotes_nums[this->songs.size];
+        sf::Text downvotes_nums[this->songs.size];
+
+        Node<MP3Tags>* iterator_node = this->songs.getHead();
+        int counter = 0;
+        while (iterator_node != nullptr){
+            sf::RectangleShape block(sf::Vector2f(blocks_dimensions[0], blocks_dimensions[1]));
+                block.setFillColor(sf::Color::Transparent);
+                block.setPosition(0.f , counter*block.getSize().y );
+            song_blocks[counter] = block;
+
+            sf::Text title_text;
+                title_text.setFont(this->font);
+                title_text.setString(string(iterator_node->data.title));
+                title_text.setFillColor(sf::Color::White);
+                title_text.setCharacterSize(14);
+                title_text.setPosition(block.getPosition().x + 5.f, block.getPosition().y + 5.f);
+            title_names[counter] = title_text;
+            
+            sf::Text album_text;
+                album_text.setFont(this->font);
+                album_text.setString(string(iterator_node->data.album));
+                album_text.setFillColor(sf::Color::White);
+                album_text.setCharacterSize(title_text.getCharacterSize());
+                album_text.setPosition(title_text.getPosition().x, title_text.getPosition().y + text_spacings);
+            album_names[counter] = album_text;
+
+            sf::Text artist_text;
+                artist_text.setFont(this->font);
+                artist_text.setString(string(iterator_node->data.artist));
+                artist_text.setFillColor(sf::Color::White);
+                artist_text.setCharacterSize(title_text.getCharacterSize());
+                artist_text.setPosition(title_text.getPosition().x, album_text.getPosition().y + text_spacings);
+            artist_names[counter] = artist_text;
+
+            sf::Text upvote_text;
+                upvote_text.setFont(this->font);
+                upvote_text.setString(to_string(iterator_node->data.upvotes));
+                upvote_text.setFillColor(sf::Color::Green);
+                upvote_text.setCharacterSize(14);
+                upvote_text.setPosition(title_text.getPosition().x + block.getGlobalBounds().width - 16.f , title_text.getPosition().y);
+            upvotes_nums[counter] = upvote_text;
+
+            sf::Text downvote_text;
+                downvote_text.setFont(this->font);
+                downvote_text.setString(to_string(iterator_node->data.downvotes));
+                downvote_text.setFillColor(sf::Color::Red);
+                downvote_text.setCharacterSize(upvote_text.getCharacterSize());
+                downvote_text.setPosition(upvote_text.getPosition().x , upvote_text.getPosition().y + 2*text_spacings);
+            downvotes_nums[counter] = downvote_text;
+
+            iterator_node = iterator_node->next;
+            counter++;
+        }
         
         // Scrub creation
         sf::Text curr_time;
@@ -129,13 +256,46 @@ void Interface::InitWinB(){
         sf::CircleShape scrub;
             scrub.setRadius(6.f);
             scrub.setPosition(curr_time.getPosition().x + curr_time.getGlobalBounds().width + 10.f + float(offset), curr_time.getPosition().y + curr_time.getGlobalBounds().height/2);
-            scrub.setFillColor(palette[2]);
+            scrub.setFillColor(palette[4]);
 
         sf::RectangleShape scrub_line(sf::Vector2f(scrub.getPosition().x - (sidebar.getSize().x + curr_time.getGlobalBounds().width + 15.f), scrub.getRadius()/1.5));
-            scrub_line.setFillColor(scrub.getFillColor());
+            scrub_line.setFillColor(palette[3]);
             scrub_line.setPosition(curr_time.getPosition().x + curr_time.getGlobalBounds().width + 10.f, scrub.getPosition().y + scrub.getRadius()/2);
 
         float total_scrub_size = (total_time.getPosition().x - 15.f) - (scrub_line.getPosition().x) ;
+
+        // Song widgets
+        sf::RectangleShape banner_to_prev(sf::Vector2f(float(window.getSize().x)/6, 30.f));
+            banner_to_prev.setFillColor(palette[2]);
+            banner_to_prev.setPosition(sidebar.getPosition().x + sidebar.getSize().x, curr_time.getPosition().y - banner_to_prev.getSize().y);
+        sf::Text previous_song;
+            previous_song.setFont(this->font);
+            previous_song.setString("");
+            previous_song.setCharacterSize(14);
+            previous_song.setFillColor(sf::Color::White);
+            previous_song.setPosition(banner_to_prev.getPosition().x + 2.5f, banner_to_prev.getPosition().y + 2.5f);
+
+
+        sf::RectangleShape banner_to_next(sf::Vector2f(float(window.getSize().x)/6, 30.f));
+            banner_to_next.setFillColor(palette[2]);
+            banner_to_next.setPosition(float(window.getSize().x) - banner_to_next.getSize().x, banner_to_prev.getPosition().y);
+        sf::Text next_song;
+            next_song.setFont(this->font);
+            next_song.setString(string(this->player->playingNow->next->data.title));
+            next_song.setCharacterSize(14);
+            next_song.setFillColor(sf::Color::White);
+            next_song.setPosition(banner_to_next.getPosition().x + 2.5f, banner_to_next.getPosition().y + 2.5f);
+
+        sf::RectangleShape banner_current(sf::Vector2f(float(window.getSize().x)/6, 30.f));
+            banner_current.setFillColor(banner_to_prev.getFillColor());
+            banner_current.setPosition( (banner_to_next.getPosition().x - (banner_to_prev.getPosition().x + banner_to_prev.getSize().x) ) + banner_current.getSize().x/2, banner_to_next.getPosition().y);
+        sf::Text current_song;
+            current_song.setFont(this->font);
+            current_song.setString(string(this->player->playingNow->data.title));
+            current_song.setCharacterSize(14);
+            current_song.setFillColor(sf::Color::White);
+            current_song.setPosition(banner_current.getPosition().x + 2.5f, banner_current.getPosition().y + 2.5f);
+        
 
         // Settings button creation
         sf::RectangleShape topbar(sf::Vector2f(float(window.getSize().x) - (sidebar.getPosition().x + sidebar.getSize().x), 50.f));
@@ -185,9 +345,9 @@ void Interface::InitWinB(){
         sf::Text minus5;
             minus5.setFont(this->font);
             minus5.setString("-5");
-            minus5.setCharacterSize(15);
+            minus5.setCharacterSize(16);
             minus5.setFillColor(sf::Color::White);
-            minus5.setPosition( minus_shape.getPosition().x + minus_shape.getRadius()/2 - 5.f, minus_shape.getPosition().y + minus_shape.getRadius()/2 );
+            minus5.setPosition( minus_shape.getPosition().x + minus_shape.getRadius()/2, minus_shape.getPosition().y + minus_shape.getRadius()/2 );
 
 
         // Button 3 creation
@@ -210,9 +370,9 @@ void Interface::InitWinB(){
         sf::Text plus5;
             plus5.setFont(this->font);
             plus5.setString("+5");
-            plus5.setCharacterSize(15);
+            plus5.setCharacterSize(16);
             plus5.setFillColor(sf::Color::White);
-            plus5.setPosition( plus_shape.getPosition().x + plus_shape.getRadius()/2 - 5.f, plus_shape.getPosition().y + plus_shape.getRadius()/2 );
+            plus5.setPosition( plus_shape.getPosition().x + plus_shape.getRadius()/2, plus_shape.getPosition().y + plus_shape.getRadius()/2 );
 
         // Button 5 creation
         sf::CircleShape forw_shape;
@@ -273,6 +433,24 @@ void Interface::InitWinB(){
             std::cout << "Song starting again" << std::endl;
             music_player.setPlayingOffset(sf::Time(sf::microseconds(0)));
             paused = true;
+        }
+        // -------------------------------------------- Sidebar information updating
+        Node<MP3Tags>* node = this->songs.getHead();
+        for (int i = 0; i<this->songs.size; i++){
+            // >>> Update counters
+            upvotes_nums[i].setString(to_string(node->data.upvotes));
+            downvotes_nums[i].setString(to_string(node->data.downvotes));
+            // >>> Update all banner colors
+            title_names[i].setFillColor(sf::Color::White);
+            album_names[i].setFillColor(sf::Color::White);
+            artist_names[i].setFillColor(sf::Color::White);
+            // >>> Update current song banner
+            if (string(node->data.uuid) == string(this->player->playingNow->data.uuid)){
+                title_names[i].setFillColor(palette[4]);
+                album_names[i].setFillColor(palette[4]);
+                artist_names[i].setFillColor(palette[4]);
+            }
+            node = node->next;
         }
         // -------------------------------------------- Events
         sf::Event event;
@@ -359,10 +537,48 @@ void Interface::InitWinB(){
                         }
                     }
                     if (back_shape.getGlobalBounds().contains(mousePosF)){
-                        std::cout << "Going to previous song" << std::endl;
+                        if (this->player->playingNow->prev != nullptr){
+                            music_player.stop();
+                            std::cout << "Going to previous song" << std::endl;
+
+                            this->player->movePrevSong();
+                            filename = string(this->player->playingNow->data.title);
+                                this->find_replace(' ', '_', filename);
+                            this->loader->Convert(this->player->playingNow->data.file, filename);
+
+                            music_player.openFromFile("/home/frederick/Desktop/bib/.cmp/"+filename+".wav");
+                            music_player.play();
+
+                            if (this->player->playingNow->prev == nullptr){
+                                previous_song.setString("");
+                            }else{
+                                previous_song.setString(string(this->player->playingNow->prev->data.title));
+                            }
+                            current_song.setString(string(this->player->playingNow->data.title));
+                            next_song.setString(string(this->player->playingNow->next->data.title));
+                        }
                     }
                     if (forw_shape.getGlobalBounds().contains(mousePosF)){
-                        std::cout << "Going to next song" << std::endl;
+                        if (this->player->playingNow->next != nullptr){
+                            music_player.stop();
+                            std::cout << "Going to next song" << std::endl;
+
+                            this->player->moveNextSong();
+                            filename = string(this->player->playingNow->data.title);
+                                this->find_replace(' ', '_', filename);
+                            this->loader->Convert(this->player->playingNow->data.file, filename);
+
+                            music_player.openFromFile("/home/frederick/Desktop/bib/.cmp/"+filename+".wav");
+                            music_player.play();
+
+                            if (this->player->playingNow->prev == nullptr){
+                                previous_song.setString("");
+                            }else{
+                                previous_song.setString(string(this->player->playingNow->prev->data.title));
+                            }
+                            current_song.setString(string(this->player->playingNow->data.title));
+                            next_song.setString(string(this->player->playingNow->next->data.title));
+                        }
                     }
                     // ------------------- Scrub
                     if (scrub.getGlobalBounds().contains(mousePosF)){
@@ -383,6 +599,16 @@ void Interface::InitWinB(){
                             volume_percentage -= 5;
                             volume_num.setString(std::to_string(volume_percentage) + "%");
                             music_player.setVolume(volume_percentage);
+                        }
+                    }
+                    // Song block interaction
+                    for (int i = 0; i<this->songs.size; i++){
+                        sf::RectangleShape block = song_blocks[i];
+                        if (block.getGlobalBounds().contains(mousePosF)){
+                            std::cout << "Interacting with block " << i+1 << std::endl;
+                            Node<MP3Tags>* node = this->songs.GetNode(i);
+                                node->data.upvotes += 1;
+                            this->songs.passive_notify();
                         }
                     }
                 }
@@ -412,7 +638,14 @@ void Interface::InitWinB(){
         // >>> Draw sidebar(song list) elements
         window.draw(sidebar);   
             // [Missing code implementation]
-
+        for (int i = 0; i<this->songs.size; i++){
+            window.draw(song_blocks[i]);
+            window.draw(title_names[i]);
+            window.draw(album_names[i]);
+            window.draw(artist_names[i]);
+            window.draw(upvotes_nums[i]);
+            window.draw(downvotes_nums[i]);
+        }
         // >>> Draw settings button
         window.draw(topbar);
         window.draw(settings);
@@ -423,10 +656,18 @@ void Interface::InitWinB(){
         window.draw(boost_block);
 
         // >>> Draw scrub elements
+        window.draw(scrub_line);
         window.draw(scrub);
         window.draw(curr_time);
         window.draw(total_time);
-        window.draw(scrub_line);
+
+        // >>> Draw song-order state banners
+        window.draw(banner_to_prev);
+            window.draw(previous_song);
+        window.draw(banner_current);
+            window.draw(current_song);    
+        window.draw(banner_to_next);
+            window.draw(next_song);    
 
         // >>> Draw volume controls
         window.draw(volume);
@@ -459,6 +700,10 @@ void Interface::InitWinB(){
 
         window.display();
     }
+}
+
+void Interface::InitWinB2(){
+
 }
 
 void Interface::InitWinC(){

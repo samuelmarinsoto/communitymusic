@@ -43,6 +43,11 @@ class Observable {
         State getState(){
             return this->current;
         };
+        void passive_notify(){
+            for(int i = 0; i<this->observers.size; i++){
+                this->observers[i]->update(State::type2);
+            }
+        }
     protected:
         State current;
         // Notifies all current observers

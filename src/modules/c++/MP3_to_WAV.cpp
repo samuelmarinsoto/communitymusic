@@ -25,8 +25,8 @@ Loader::Loader(string output_dir){
 
 int Loader::Convert(string path_to_MP3, string output_name){
     string old_out_path = this->output + "/" + this->cache_file;
-    string new_out_path = this->output + "/" + output_name;
-    this->cache_file = output_name;
+    string new_out_path = this->output + "/" + output_name + ".wav";
+    this->cache_file = output_name + ".wav";
 
     try {
         // Renaming the file

@@ -77,14 +77,37 @@ class LinkedList {
         // Removes(frees) the last node of the list
         // NOTE: this node is most commonly the first one inserted
         void pop(){
-            Node<T>* current = this->head;
-            for (int i = 0; i<this->size-1 ; i++){
-                current = current->next;
+            if (this->size == 1){
+                delete this->head;
+                this->head = nullptr;
+                this->size--;
+            } else if (this->size > 1){
+                Node<T>* current = this->head;
+                for (int i = 0; i<this->size-1 ; i++){
+                    current = current->next;
+                }
+                Node<T>* temp = current->next;
+                current->next = nullptr;
+                delete temp;
+                this->size--;
             }
-            Node<T>* temp = current->next;
-            current->next = nullptr;
-            delete temp;
-            this->size--;
+        }
+        // Get a node at a specified index
+        // Returns a nullptr if the list is empty
+        Node<T>* getNode(int index){
+            if (index < 0){
+                return nullptr;
+            }
+            Node<T>* node = this->head;
+            int counter = 0;
+            while (node!=nullptr){
+                if (counter == index){
+                    break;
+                }
+                node = node->next;
+                counter++;
+            }
+            return node;
         }
         // Get the data of a node based on its index
         T& get(int index){
