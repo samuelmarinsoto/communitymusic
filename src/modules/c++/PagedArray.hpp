@@ -8,6 +8,7 @@
 #include <tuple>
 #include "MP3Tags.hpp"
 
+// C++ implementation of limited size array allocated between virtual and physical memory
 class PagedArray {
 private:
 	size_t size, objsize, rampages, pagesize, pagecount, objs_per_page, previndex;

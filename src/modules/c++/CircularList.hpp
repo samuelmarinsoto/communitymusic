@@ -50,7 +50,7 @@ class CircularList : public Observer{
             return this->origin->size;
         }
         // Removes this observer class from the observable
-        void stopObserving(){
+        void stopObserving() override {
             this->origin->RemoveObserver(this);
         }
 };

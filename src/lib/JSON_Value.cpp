@@ -1,7 +1,5 @@
 #include "JSON_Value.h"
 
-#include <sstream>
-
 Value::Value(string json_str){
     this->content = json_str;
 }
@@ -13,7 +11,6 @@ Value::~Value(){
 int Value::as_int(){
     if (this->content[0] != '0' && this->content[0] != '1' && this->content[0] != '2' && this->content[0] != '3' && this->content[0] != '4'
      && this->content[0] != '5' && this->content[0] != '6' && this->content[0] != '7' && this->content[0] != '8' && this->content[0] != '9'){
-
         return 0;
     }
     int value;

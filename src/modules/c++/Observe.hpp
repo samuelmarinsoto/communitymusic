@@ -16,6 +16,8 @@ class Observer{
     public:
         // Receive an update of state changes in the object being observer
         virtual void update(State state){};
+        // Stop observing behaviour
+        virtual void stopObserving(){};
     protected:
         // For comparing any observer
         bool operator==(Observer other){

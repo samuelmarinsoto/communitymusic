@@ -26,7 +26,7 @@ public:
   
 	// Destroys the object and all its contents		
 	~MP3Tags();
-
+  
 	// Returns the byte size of the object with all its elements
 	size_t GetSize();
 

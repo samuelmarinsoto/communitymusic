@@ -5,7 +5,7 @@
 #include "JSON_Array.h"
 
 #include <string>
-#include <type_traits>
+#include <sstream>
 
 class Dictionary;
 class Array;
