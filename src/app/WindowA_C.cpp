@@ -36,6 +36,7 @@ void Interface::InitWinA(){
                         std::cout << "Button clicked" << std::endl;
                         window.close();
                         if (this->paged_mode){
+                            std::cout << "Loading with pages" << std::endl;
                             this->InitWinB2();
                         } else {
                             this->InitWinB1();

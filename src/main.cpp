@@ -1,4 +1,4 @@
-#include "gui/Interface.hpp"
+#include "app/Interface.hpp"
 
 using namespace std;
 int main(){

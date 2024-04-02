@@ -5,25 +5,25 @@ Interface::Interface() {
     this->dimensions[0] = std::make_tuple(200,160);
     this->dimensions[1] = std::make_tuple(950,700);
 
-    if (!this->font.loadFromFile("../app/res/CourierPrime-Bold.ttf")) {
+    if (!this->font.loadFromFile("./res/CourierPrime-Bold.ttf")) {
         std::cerr << "ERROR: Couldn't load font file" << std::endl; // TODO: Change for a LOG
     }
 
     // Load all the attributes(and INI properties)
-    this->player = new CircularList<MP3Tags>(&this->songs);
-    this->loader = new Loader("/home/frederick/Desktop/bib/.cmp");
     this->Load_INI();
+    if ( this->program_data_path == "None" || this->playlist_path == "None"){
+        this->InitWinC();
+    }
+    this->player = new CircularList<MP3Tags>(&this->songs);
+    this->loader = new Loader(this->program_data_path);
 
     // Pick songs anc condition the observer circular list
     this->Song_Selection();
     this->player->conditioned = true;
 
     // Define the program startup
-    if ( this->program_data_path == "None" || this->playlist_path == "None"){
-        this->InitWinC();
-    } else {
-        this->InitWinA();
-    }
+    this->LIST_TO_PAGED(); // Must change
+    this->InitWinA();
 }
 
 Interface::~Interface(){
@@ -40,7 +40,7 @@ void Interface::find_replace(char value, char new_value, string& source){
 
 void Interface::Song_Selection(){
     // Array to fill with randomly picked songs
-    vector<string> songnames = loader->RetrieveFileNames("/home/frederick/Desktop/bib/playlist1");
+    vector<string> songnames = loader->RetrieveFileNames(this->playlist_path);
 
     random_device rd;
     mt19937 generator(rd());
@@ -70,7 +70,7 @@ void Interface::Song_Selection(){
 
         // Select all the songs from the random indexes
         for (int index : randNums){
-            this->songs.InsertAtEnd(MP3Tags("/home/frederick/Desktop/bib/playlist1/" + songnames[index]));
+            this->songs.InsertAtEnd(MP3Tags(this->playlist_path + "/" + songnames[index]));
         }
     } else {
         int randNums[10];
@@ -104,7 +104,7 @@ void Interface::Load_INI(){
     vector< tuple <string, string> > ini_data;
 
     // Open the file strea,
-    ifstream file("../app/config.ini");
+    ifstream file("./res/config.ini");
     if (!file.is_open()){
         throw std::runtime_error("ERROR: Failed to load file"); // TODO: Change for a LOG & exception
     }
@@ -161,7 +161,25 @@ void Interface::Write_INI(){
 }
 
 void Interface::LIST_TO_PAGED(){
+    // this->player->stopObserving();
+    // delete this->player;
 
+    this->songs_array = new PagedArray(this->songs.size,this->songs.getHead()->data.GetSize(), 3, this->songs.getHead()->data.GetSize(), "res/swap.bin");
+
+    Node<MP3Tags>* current = this->songs.getHead();
+    for (int i = 0; i<this->songs.size; i++){
+        this->songs_array->operator[](i) = current->data;
+        current = current->next;
+    }
+
+    for (int i = 0; i<this->songs_array->getSize();i++){
+        MP3Tags song = this->songs_array->operator[](i);
+
+        std::cout << "[" << i+1 << "]" <<song.file << std::endl;
+        std::cout << "[" << i+1 << "]" << song.title << std::endl;
+        std::cout << "[" << i+1 << "]" << song.artist << std::endl;
+        std::cout << "[" << i+1 << "]" << song.album << std::endl;
+    }
 }
 
 void Interface::PAGED_TO_LIST(){

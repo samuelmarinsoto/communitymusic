@@ -22,7 +22,7 @@ void Interface::InitWinB1(){
 
         this->loader->Convert(string(this->player->playingNow->data.file), filename);
         sf::Music music_player;
-            music_player.openFromFile("/home/frederick/Desktop/bib/.cmp/" + filename + ".wav");
+            music_player.openFromFile(this->program_data_path + "/" + filename + ".wav");
             music_player.setVolume(volume_percentage);
         
         // Total duration of the current song
@@ -451,7 +451,7 @@ void Interface::InitWinB1(){
                                 this->find_replace(' ', '_', filename);
                             this->loader->Convert(this->player->playingNow->data.file, filename);
 
-                            music_player.openFromFile("/home/frederick/Desktop/bib/.cmp/"+filename+".wav");
+                            music_player.openFromFile(this->program_data_path + "/" + filename + ".wav");
                             music_player.play();
                         // >>> Update timer
                         duration = music_player.getDuration().asMilliseconds();
@@ -483,7 +483,7 @@ void Interface::InitWinB1(){
                             this->find_replace(' ', '_', filename);
                         this->loader->Convert(this->player->playingNow->data.file, filename);
 
-                        music_player.openFromFile("/home/frederick/Desktop/bib/.cmp/"+filename+".wav");
+                        music_player.openFromFile(this->program_data_path + "/" + filename + ".wav");
                         music_player.play();
                         // >>> Update timer
                         duration = music_player.getDuration().asMilliseconds();

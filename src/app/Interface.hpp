@@ -32,7 +32,7 @@ private:
     // Song-related resources
     DoubleLinkedList<MP3Tags> songs;
     CircularList<MP3Tags>* player;
-    PagedArray* song_array;
+    PagedArray* songs_array;
 
     string playlist_path;
     string program_data_path;
@@ -65,6 +65,8 @@ protected:
     // Swaps the current paged array of songs to a list
     void PAGED_TO_LIST();
 private:
+    int get_most_voted(PagedArray* origin_, vector<int>* disposed_);
+    bool check_disposed(vector<int>* disposed_, int position);
     // Initializes the first window[A] of the app
     // This is the welcome window
     void InitWinA();

@@ -160,3 +160,7 @@ MP3Tags& PagedArray::operator[](size_t index) {
 
     return std::get<1>(active_pages[0])[pageOffset];
 }
+
+size_t PagedArray::getSize(){
+    return this->size;
+}
