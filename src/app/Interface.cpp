@@ -1,11 +1,11 @@
 #include "Interface.hpp"
 
 Interface::Interface() {
-    this->user = nullptr;
+    // this->user = nullptr;
     this->dimensions[0] = std::make_tuple(200,160);
     this->dimensions[1] = std::make_tuple(950,700);
 
-    if (!this->font.loadFromFile("./res/CourierPrime-Bold.ttf")) {
+    if (!this->font.loadFromFile("./res/CourierPrime-Bold.ttf")){
         std::cerr << "ERROR: Couldn't load font file" << std::endl; // TODO: Change for a LOG
     }
 

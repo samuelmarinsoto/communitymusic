@@ -19,6 +19,7 @@
 #include <mutex>
 #include <stdexcept>
 
+using namespace std;
 class Server{
     // ----------------------------------------- ATTRIBUTES
     private:
@@ -51,7 +52,7 @@ class Server{
         char* load_response(cmd r_tp, Dictionary content);
         void open_new_channel(int client, int who);
         // Parse the current resource into a JSON object to share via sockets
-        Dictionary PARSE_resource();
+        Array PARSE_resource();
     protected:
         int modify_clients(action fn, int index);
         void modify_event(int who, string change);

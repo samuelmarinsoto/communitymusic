@@ -30,6 +30,8 @@ Server::Server(int port, const char* ip) {
     std::cout << "Connection started. Listening at: "<< ip << ":" << port << std::endl;
     
     // Sets up other instance attributes
+    this->_origin_l = nullptr;
+    this->_origin_pd = nullptr;
     this->status = true;
     this->clients.insert(0);
     this->modify_event(this->clients.get(0), string("No changes"));
@@ -89,6 +91,7 @@ char* Server::load_response(cmd r_tp, Dictionary content){
             response.add("status", JSON::convert_to_value<string>("OK"));
             response.add("id", content["id"]);
             // TODO: Full implementation of modifying the specific song attribute
+            this->modify_resource(content);
             break;
         case unknown:
             response.add("cmd", content["cmd"]);
@@ -229,7 +232,7 @@ Array Server::PARSE_resource(){
             attributes.add("id", JSON::convert_to_value<string>(string(song.uuid)) );
             attributes.add("title", JSON::convert_to_value<string>(string(song.title)) );
             attributes.add("album", JSON::convert_to_value<string>(string(song.album)) );
-            attributes.add("artist", JSON::convert_to_value<string>(string(song.artist))) ;
+            attributes.add("artist", JSON::convert_to_value<string>(string(song.artist)));
             attributes.add("upvotes", JSON::convert_to_value<int>(song.upvotes) );
             attributes.add("downvotes", JSON::convert_to_value<int>(song.downvotes) );
 
@@ -242,7 +245,7 @@ Array Server::PARSE_resource(){
             Dictionary attributes;
 
             MP3Tags song = current->data;
-            attributes.add("id", JSON::convert_to_value<string>(string(song.uuid)) );
+            attributes.add("id", JSON::convert_to_value<string>(string(song.uuid)));
             attributes.add("title", JSON::convert_to_value<string>(string(song.title)) );
             attributes.add("album", JSON::convert_to_value<string>(string(song.album)) );
             attributes.add("artist", JSON::convert_to_value<string>(string(song.artist))) ;
