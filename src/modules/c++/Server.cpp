@@ -45,7 +45,7 @@ Server::~Server(){
 // Starts listening for incoming clients
 void Server::start_listen(){
     listen(this->socket_server, 10);
-    while (this->accces_shared_status()){
+    while (this->access_shared_status()){
         int socket_client;
         std::cout<< "Waiting for client..." << std::endl;
         socket_client = accept(this->socket_server, nullptr, nullptr);
@@ -70,8 +70,8 @@ char* Server::load_response(cmd r_tp, Dictionary content){
         case is_Asking:
             response.add("cmd", JSON::convert_to_value<string>("send-songs"));
             response.add("status", JSON::convert_to_value<string>("OK"));
-            response.add("attach", JSON::convert_to_value<Dictionary>(Dictionary("{\"song1\":\"0x0009\"}")));
             // TODO: Full implementation of list of songs retrieval
+            response.add("attach", Value(this->PARSE_resource().content));
             break;
         case is_Exiting:
             response.add("cmd", JSON::convert_to_value<string>("exiting"));
@@ -82,6 +82,7 @@ char* Server::load_response(cmd r_tp, Dictionary content){
             response.add("status", JSON::convert_to_value<string>("OK"));
             response.add("id", content["id"]);
             // TODO: Full implementation of modifying the specific song attribute
+            this->modify_resource(content);
             break;
         case is_VotingDown:
             response.add("cmd", JSON::convert_to_value<string>("down-vote"));
@@ -128,6 +129,10 @@ void Server::open_new_channel(int client_socket, int who){
             char* response = this->load_response(is_Exiting, json);
             send(client_socket, response, strlen(response), 0);
             free(response);
+            // Close this channel
+            this->modify_clients(action::Remove, who);
+            return;
+
         } else if (json["cmd"].as_str()=="up-vote"){
             char* response = this->load_response(is_VotingUp, json);
             send(client_socket, response, strlen(response), 0);
@@ -142,7 +147,7 @@ void Server::open_new_channel(int client_socket, int who){
     }
 };
 
-bool Server::accces_shared_status(){
+bool Server::access_shared_status(){
     // lock guard to unlock on return 
     lock_guard<mutex> lock(this->shared_status);
     return this->status;
@@ -189,4 +194,112 @@ int Server::modify_clients(action fn, int index){
             break;
     }
     return client;
+}
+// Set a new resource for the server to access, only one type can be set at a time
+// If a type must be changed use set_attach() again. This means both resources cant exist at the same time
+void Server::set_attach(rsrc_type type, DoubleLinkedList<MP3Tags>* argL, PagedArray* argC){
+    this->shared_resource.lock(); // Lock the resource for changing its contents
+
+    switch (type){
+        case rsrc_type::ARR :
+            this->_origin_l = nullptr;
+            this->_origin_pd = argC;
+            break;
+        case rsrc_type::LIST:
+            this->_origin_l = argL;
+            this->_origin_pd = nullptr;
+            break;
+    }
+
+    this->shared_resource.unlock(); // Unlock(free) the resource so other threads can access it
+}
+
+// Parse current list or array of songs from program into a JSON array, each element of the array is dictionary with the key-values of the
+// song properties accordingly
+// IF no resource has been set for the server, the returned array is empty
+Array Server::PARSE_resource(){
+    lock_guard<mutex> lock(this->shared_resource); // Lock the resource until end of process;
+
+    Array resource;
+    if (this->_origin_l == nullptr){ // Should parse the pagedarray
+        for (int i = 0; i<this->_origin_pd->getSize(); i++){
+            Dictionary attributes;
+
+            MP3Tags& song = this->_origin_pd->operator[](i);
+            attributes.add("id", JSON::convert_to_value<string>(string(song.uuid)) );
+            attributes.add("title", JSON::convert_to_value<string>(string(song.title)) );
+            attributes.add("album", JSON::convert_to_value<string>(string(song.album)) );
+            attributes.add("artist", JSON::convert_to_value<string>(string(song.artist))) ;
+            attributes.add("upvotes", JSON::convert_to_value<int>(song.upvotes) );
+            attributes.add("downvotes", JSON::convert_to_value<int>(song.downvotes) );
+
+            resource.append(Value(attributes.content));
+        }
+    } else if (this->_origin_pd == nullptr){ // Should parse the doublelinkedlist
+        Node<MP3Tags>* current = this->_origin_l->getHead();
+
+        while (current != nullptr){
+            Dictionary attributes;
+
+            MP3Tags song = current->data;
+            attributes.add("id", JSON::convert_to_value<string>(string(song.uuid)) );
+            attributes.add("title", JSON::convert_to_value<string>(string(song.title)) );
+            attributes.add("album", JSON::convert_to_value<string>(string(song.album)) );
+            attributes.add("artist", JSON::convert_to_value<string>(string(song.artist))) ;
+            attributes.add("upvotes", JSON::convert_to_value<int>(song.upvotes) );
+            attributes.add("downvotes", JSON::convert_to_value<int>(song.downvotes) );
+
+            resource.append(Value(attributes.content));
+
+            current = current->next;
+        }
+    }
+
+    return resource;
+}
+// Access the program resource elements and modify the specified element attributes
+void Server::modify_resource(Dictionary info){
+    this->shared_resource.lock(); // Lock the resource
+
+    if (this->_origin_l != nullptr){ // Access elements from doublelinkedlist (as an observable should notify its observers)
+        if (info["cmd"].as_str() == "upvote"){
+            Node<MP3Tags>* node = this->_origin_l->getHead();
+            while (node != nullptr){
+                if (string(node->data.uuid) == info["id"].as_str()){
+                    node->data.upvotes += 1;
+                    break;
+                }
+                node = node->next;
+            }
+        }
+        if (info["cmd"].as_str() == "downvote"){
+            Node<MP3Tags>* node = this->_origin_l->getHead();
+            while (node != nullptr){
+                if (string(node->data.uuid) == info["id"].as_str()){
+                    node->data.upvotes -= 1;
+                    break;
+                }
+                node = node->next;
+            }
+        }
+    } else if (this->_origin_pd != nullptr){ // Access elements from pagedarray
+        if (info["cmd"].as_str() == "upvote"){
+            for (int i = 0; i<this->_origin_pd->getSize(); i++){
+                if (string(this->_origin_pd->operator[](i).uuid) == info["id"].as_str()){
+                    this->_origin_pd->operator[](i).upvotes += 1;
+                    break;
+                }
+            }
+        }
+        if (info["cmd"].as_str() == "downvote"){
+            for (int i = 0; i<this->_origin_pd->getSize(); i++){
+                if (string(this->_origin_pd->operator[](i).uuid) == info["id"].as_str()){
+                    this->_origin_pd->operator[](i).upvotes += 1;
+                    break;
+                }
+            }
+        }
+    }
+
+    this->shared_resource.unlock(); // Free the resource once done
 }

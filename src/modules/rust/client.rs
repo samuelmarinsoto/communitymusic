@@ -78,11 +78,17 @@ impl Client{
                     Ok(r) => r,
                     Err(e) => panic!("ERROR: {}", e)
                 };
-                if json_response["cmd"] != "idling" {
+                if json_response["cmd"] == "send-songs" {
                     // save response to client instance
                     let mut mutex_response = self.response.lock().unwrap();
                     *mutex_response = server_response.to_owned();
                     drop(mutex_response);
+                }
+                if (json_response["cmd"] == "up-vote" || json_response["cmd"] == "down-vote") && json_response["status"] == "OK" {
+                    self.set_petition(Cmds::Request, &[]);
+                }
+                if json_response["cmd"] == "exiting" && json_response["status"] == "OK" {
+                    self.stop_communication();
                 }
             }
     }
