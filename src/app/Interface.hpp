@@ -7,6 +7,7 @@
 #include "../modules/c++/CircularList.hpp"
 #include "../modules/c++/MP3Tags.hpp"
 #include "../modules/c++/MP3_to_WAV.h"
+#include "../modules/c++/Server.h"
 
 // ----------------------------- SFML Libraries
 #include <SFML/Graphics.hpp>
@@ -64,9 +65,15 @@ protected:
     void LIST_TO_PAGED();
     // Swaps the current paged array of songs to a list
     void PAGED_TO_LIST();
-private:
-    int get_most_voted(PagedArray* origin_, vector<int>* disposed_);
-    bool check_disposed(vector<int>* disposed_, int position);
+    // Retuns the index position with the best voting difference (usable when using paged mode)
+    int PAGED_getFollowing(PagedArray* origin_, vector<int>* disposed_);
+    // Retuns TRUE if a index position has already been used, and FALSE otherwise(usable when using paged mode)
+    bool PAGED_check_disposed(vector<int>* disposed_, int position);
+    // Gets an array of all artists in the playlist with their songs in the current playlist
+    void PAGED_getPlaylistArtists(string artists[], size_t size);
+    // Gets all the current playlist songs of an specific artist
+    vector<string> PAGED_getArtistSongs(string artist_name);
+private: 
     // Initializes the first window[A] of the app
     // This is the welcome window
     void InitWinA();

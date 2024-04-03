@@ -5,6 +5,9 @@
 #include "args.h"
 #include "../../lib/fJSON.hpp"
 #include "LinkedList.hpp"
+#include "DoubleLinkedList.hpp"
+#include "PagedArray.hpp"
+#include "MP3Tags.hpp"
 
 // >>> Main imports <<< 
 #include <cstring>
@@ -32,20 +35,21 @@ class Server{
         bool status;
         //String value
         string cli_event[2];
-        /* Attach files
-        ListaDoble* canciones;
-        ArregloPaginado* canciones;
-        */
-
+        // App resources
+        DoubleLinkedList<MP3Tags>* _origin_l;
+        PagedArray* _origin_pd;
     protected:
         void start_listen();
         char* load_response(cmd r_tp, Dictionary content);
         void open_new_channel(int client, int who);
 
         int modify_clients(action fn, int index);
-
-        // void set_ref_attach(Rsrc which, Lista* argL, Paginada* argC);
-        // void modify_ref_attach();
+        
+        // Set a new resource for the server to access, only one type can be set at a time
+        // If a type must be changed use set_attach() again. This means both resources cant exist at the same time
+        void set_attach(rsrc_type type, DoubleLinkedList<MP3Tags>* argL, PagedArray* argC);
+        Dictionary PARSE_resource();
+        void modify_resource(Dictionary client_action);
     public:
         Server(int port, const char* ip);
         ~Server();

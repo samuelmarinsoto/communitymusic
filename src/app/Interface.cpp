@@ -161,10 +161,9 @@ void Interface::Write_INI(){
 }
 
 void Interface::LIST_TO_PAGED(){
-    // this->player->stopObserving();
-    // delete this->player;
 
-    this->songs_array = new PagedArray(this->songs.size,this->songs.getHead()->data.GetSize(), 3, this->songs.getHead()->data.GetSize(), "res/swap.bin");
+    char bin_path[] = "./res/swap.bin";
+    this->songs_array = new PagedArray(this->songs.size,this->songs.getHead()->data.GetSize(), 3, this->songs.getHead()->data.GetSize(), bin_path);
 
     Node<MP3Tags>* current = this->songs.getHead();
     for (int i = 0; i<this->songs.size; i++){
@@ -172,16 +171,18 @@ void Interface::LIST_TO_PAGED(){
         current = current->next;
     }
 
-    for (int i = 0; i<this->songs_array->getSize();i++){
-        MP3Tags song = this->songs_array->operator[](i);
+    // for (int i = 0; i<this->songs_array->getSize();i++){
+    //     MP3Tags song = this->songs_array->operator[](i);
 
-        std::cout << "[" << i+1 << "]" <<song.file << std::endl;
-        std::cout << "[" << i+1 << "]" << song.title << std::endl;
-        std::cout << "[" << i+1 << "]" << song.artist << std::endl;
-        std::cout << "[" << i+1 << "]" << song.album << std::endl;
-    }
+    //     std::cout << "[" << i+1 << "]" <<song.file << std::endl;
+    //     std::cout << "[" << i+1 << "]" << song.title << std::endl;
+    //     std::cout << "[" << i+1 << "]" << song.artist << std::endl;
+    //     std::cout << "[" << i+1 << "]" << song.album << std::endl;
+    // }
 }
 
 void Interface::PAGED_TO_LIST(){
-
+    for (int i = 0; i<this->songs_array->getSize(); i++){
+        this->songs.InsertAtEnd(this->songs_array->operator[](i));
+    }
 }

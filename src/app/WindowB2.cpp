@@ -1,11 +1,18 @@
 #include "Interface.hpp"
 
-int Interface::get_most_voted(PagedArray* origin_, vector<int>* disposed_){
-    int selected = -1;
+int Interface::PAGED_getFollowing(PagedArray* origin_, vector<int>* disposed_){
+    int selected = 0;
     int best_difference = 0;
+    bool initial_state = true;
     for (int i = 0; i<origin_->getSize(); i++){
         MP3Tags song = origin_->operator[](i);
-        if ( (song.upvotes - song.downvotes) >= best_difference && !this->check_disposed(disposed_, i)){
+        if ( initial_state && ( (song.upvotes - song.downvotes) >= best_difference || (song.upvotes - song.downvotes) < best_difference)
+        && !this->PAGED_check_disposed(disposed_, i)){
+            selected = i;
+            best_difference = song.upvotes - song.downvotes;
+            initial_state = false;
+        }
+        if ( !initial_state && (song.upvotes - song.downvotes) >= best_difference && !this->PAGED_check_disposed(disposed_, i)){
             selected = i;
             best_difference = song.upvotes - song.downvotes;
         }
@@ -13,13 +20,42 @@ int Interface::get_most_voted(PagedArray* origin_, vector<int>* disposed_){
     return selected;
 }
 
-bool Interface::check_disposed(vector<int>* disposed_, int position){
+bool Interface::PAGED_check_disposed(vector<int>* disposed_, int position){
     for (int index = 0; index<disposed_->size(); index++){
         if (disposed_->operator[](index) == position){
             return true;
         }
     }
     return false;
+}
+
+void Interface::PAGED_getPlaylistArtists(string artists[], size_t size){
+    int counter = 0;
+    for (int i = 0; i<this->songs_array->getSize(); i++){
+        string current_artist = string(this->songs_array->operator[](i).artist);
+        bool repeated = false;
+        for (int j = 0; j<size; j++){
+            if (artists[j] == current_artist){
+                repeated = true;
+                break;
+            }
+        }
+        if (!repeated){
+            artists[counter++] = current_artist;
+        }
+    }
+}
+
+vector<string> Interface::PAGED_getArtistSongs(string artist_name){
+    vector<string> found_songs;
+
+    for (int i = 0; i<this->songs_array->getSize(); i++){
+        if (string(this->songs_array->operator[](i).artist) == artist_name){
+            found_songs.push_back(string(this->songs_array->operator[](i).title));
+        }
+    }
+
+    return found_songs;
 }
 
 void Interface::InitWinB2(){
@@ -35,6 +71,19 @@ void Interface::InitWinB2(){
         bool performance = false;
         bool dragging_scrub = false;
         int volume_percentage = 50;
+
+        string artists[this->songs_array->getSize()];
+            // Initialize all the values of the string 
+            for (int i = 0; i<this->songs.size; i++){
+                artists[i] = "";
+            }
+        this->PAGED_getPlaylistArtists(artists, this->songs_array->getSize());
+        int counted_artists = 0;
+        for ( string artist: artists){
+            if (artist != ""){
+                counted_artists++;
+            }
+        }
 
         vector<int> order; // For saving the reproduction order as it moves
             order.push_back(0);
@@ -174,7 +223,7 @@ void Interface::InitWinB2(){
             banner_to_next.setPosition(float(window.getSize().x) - banner_to_next.getSize().x, banner_to_prev.getPosition().y);
         sf::Text next_song;
             next_song.setFont(this->font);
-            next_song.setString(string(this->songs_array->operator[](this->get_most_voted(this->songs_array, &order)).title));
+            next_song.setString(string(this->songs_array->operator[](this->PAGED_getFollowing(this->songs_array, &order)).title));
             next_song.setCharacterSize(14);
             next_song.setFillColor(sf::Color::White);
             next_song.setPosition(banner_to_next.getPosition().x + 2.5f, banner_to_next.getPosition().y + 2.5f);
@@ -217,7 +266,61 @@ void Interface::InitWinB2(){
         sf::RectangleShape boost_toggle(sf::Vector2f(boost_block.getSize().x*2 , boost_block.getSize().y));
             boost_toggle.setFillColor(palette[1]);
             boost_toggle.setPosition(boost_block.getPosition().x , boost_block.getPosition().y);
-        
+
+        // Artists list section + songs creation
+        sf::Text found_artist_texts[counted_artists];
+        sf::RectangleShape found_artist_blocks[counted_artists];
+
+        sf::Text playlist_artists_title;
+            playlist_artists_title.setFont(this->font);
+            playlist_artists_title.setString("Artists on this playlist: ");
+            playlist_artists_title.setCharacterSize(18);
+            playlist_artists_title.setStyle(sf::Text::Bold);
+            playlist_artists_title.setFillColor(sf::Color::White);
+            playlist_artists_title.setPosition(sidebar.getPosition().x + sidebar.getSize().x + 10.f, topbar.getPosition().y + topbar.getSize().y + 7.5f);
+
+        float PLblock_dimension[2] = {float(window.getSize().x) - (sidebar.getPosition().x + sidebar.getSize().x), banner_current.getPosition().y - (playlist_artists_title.getPosition().y + playlist_artists_title.getGlobalBounds().height) - 15.f};
+        for (int i = 0; i<counted_artists; i++){
+            sf::RectangleShape artist_block(sf::Vector2f(PLblock_dimension[0]/2, PLblock_dimension[1]/counted_artists));
+                artist_block.setFillColor(sf::Color::Transparent);
+                artist_block.setPosition(playlist_artists_title.getPosition().x - 10.f, i*(artist_block.getSize().y) + playlist_artists_title.getPosition().y + playlist_artists_title.getGlobalBounds().height + 10.f);
+            sf::Text playlist_artist;
+                playlist_artist.setFont(this->font);
+                playlist_artist.setString(artists[i]);
+                playlist_artist.setCharacterSize(16);
+                playlist_artist.setFillColor(sf::Color::White);
+                playlist_artist.setPosition(artist_block.getPosition().x + 10.f, artist_block.getPosition().y + artist_block.getSize().y/3);
+
+            found_artist_blocks[i] = artist_block;
+            found_artist_texts[i] = playlist_artist;
+        }
+
+        int selected_artist = 0;
+        sf::Text about_artist_title;
+            about_artist_title.setFont(this->font);
+            about_artist_title.setString(artists[selected_artist] + " songs:");
+            about_artist_title.setCharacterSize(18);
+            about_artist_title.setStyle(sf::Text::Bold);
+            about_artist_title.setFillColor(sf::Color::White);
+            about_artist_title.setPosition((topbar.getPosition().x + PLblock_dimension[0]/2), playlist_artists_title.getPosition().y);
+
+        sf::RectangleShape songs_display(sf::Vector2f(PLblock_dimension[0]/2, PLblock_dimension[1]));
+            songs_display.setFillColor(palette[0]);
+            songs_display.setPosition(about_artist_title.getPosition().x, about_artist_title.getPosition().y + about_artist_title.getGlobalBounds().height + 10.f);
+
+        vector<string> S_artist_songs = this->PAGED_getArtistSongs(artists[selected_artist]);
+        sf::Text artist_songs[S_artist_songs.size()];
+        for (int i = 0; i<S_artist_songs.size(); i++){
+            sf::Text song_text;
+                song_text.setFont(this->font);
+                song_text.setString("> " + S_artist_songs[i]);
+                song_text.setCharacterSize(16);
+                song_text.setFillColor(sf::Color::White);
+                song_text.setPosition(songs_display.getPosition().x + 10.f, songs_display.getPosition().y + i*song_text.getGlobalBounds().height);
+
+            artist_songs[i] = song_text;
+        }
+
         // Button 1 creation
         sf::CircleShape back_shape;
             back_shape.setRadius(20.f);
@@ -371,8 +474,16 @@ void Interface::InitWinB2(){
         if (order.size() == this->songs_array->getSize()){
                 next_song.setString(""); 
         } else {
-            int following = this->get_most_voted(this->songs_array, &order);
+            int following = this->PAGED_getFollowing(this->songs_array, &order);
             next_song.setString(string(this->songs_array->operator[](following).title));
+        }
+        // -------------------------------------------- Selected artist updating
+        for (int i = 0; i<counted_artists; i++){
+            if (i == selected_artist){
+                found_artist_blocks[i].setFillColor(palette[0]);
+            } else {
+                found_artist_blocks[i].setFillColor(sf::Color::Transparent);
+            }
         }
         // -------------------------------------------- Events
         sf::Event event;
@@ -495,7 +606,7 @@ void Interface::InitWinB2(){
                         music_player.stop();
                         std::cout << "Going to next song" << std::endl;
 
-                        int following = this->get_most_voted(this->songs_array, &order);
+                        int following = this->PAGED_getFollowing(this->songs_array, &order);
                             order.push_back(following);
                         filename = string(this->songs_array->operator[](following).title);
                             this->find_replace(' ', '_', filename);
@@ -552,6 +663,24 @@ void Interface::InitWinB2(){
                             this->songs_array->operator[](i).upvotes += 1;
                         }
                     }
+                    // Playlist artists interaction
+                    for (int i = 0; i<counted_artists; i++){
+                        sf::RectangleShape block = found_artist_blocks[i];
+                        if (block.getGlobalBounds().contains(mousePosF)){
+                            about_artist_title.setString(artists[i] + " songs:");
+                            selected_artist = i;
+                            S_artist_songs = this->PAGED_getArtistSongs(artists[selected_artist]);
+                            for (int i = 0; i<S_artist_songs.size(); i++){
+                                sf::Text song_text;
+                                    song_text.setFont(this->font);
+                                    song_text.setString("> " + S_artist_songs[i]);
+                                    song_text.setCharacterSize(16);
+                                    song_text.setFillColor(sf::Color::White);
+                                    song_text.setPosition(songs_display.getPosition().x + 10.f, songs_display.getPosition().y + i*song_text.getGlobalBounds().height);
+                                artist_songs[i] = song_text;
+                            }
+                        }
+                    }
                 }
             }
             if (event.type == sf::Event::MouseButtonReleased){
@@ -596,6 +725,18 @@ void Interface::InitWinB2(){
         window.draw(boost_toggle);
         window.draw(boost_block);
 
+        // >>> Draw the artist & their song element
+        window.draw(playlist_artists_title);
+        for (int i=0; i<counted_artists; i++){
+            window.draw(found_artist_blocks[i]);
+            window.draw(found_artist_texts[i]);
+        }
+        window.draw(about_artist_title);
+        window.draw(songs_display);
+        for (int i = 0; i<S_artist_songs.size(); i++){
+            window.draw(artist_songs[i]);
+        }
+        
         // >>> Draw scrub elements
         window.draw(scrub_line);
         window.draw(scrub);

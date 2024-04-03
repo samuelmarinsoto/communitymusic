@@ -95,8 +95,15 @@ class CircularList<MP3Tags> : public Observer{
             Node<MP3Tags>* ref = this->origin->getHead();
             Node<MP3Tags>* selected = nullptr;
             int best_difference = 0;
+            bool initial_state = true;
             while(ref != nullptr){
-                if ( (ref->data.upvotes - ref->data.downvotes) >= best_difference && string(ref->data.uuid) != string(this->playingNow->data.uuid) && !this->check_played(string(ref->data.uuid)) ){
+                if (initial_state && ( (ref->data.upvotes - ref->data.downvotes) >= best_difference || (ref->data.upvotes - ref->data.downvotes) < best_difference )
+                && string(ref->data.uuid) != string(this->playingNow->data.uuid) && !this->check_played(string(ref->data.uuid))){
+                    selected = ref;
+                    best_difference = selected->data.upvotes - selected->data.downvotes;
+                    initial_state = false;
+                }
+                if (!initial_state && (ref->data.upvotes - ref->data.downvotes) >= best_difference && string(ref->data.uuid) != string(this->playingNow->data.uuid) && !this->check_played(string(ref->data.uuid)) ){
                     selected = ref;
                     best_difference = selected->data.upvotes - selected->data.downvotes;
                 }
@@ -201,9 +208,37 @@ class CircularList<MP3Tags> : public Observer{
             this->setFollowing();
         }
         // Gets an array of all artists in the playlist with their songs in the current playlist
-        // Returns and pointer to the list, and hence the pointer should be deallocated when it will be no longer used
-        string* retrieveArtists(){
-            return nullptr;
+        void getPlaylistArtists(string artists[], size_t size){
+            Node<MP3Tags>* current = this->origin->getHead();
+            int counter = 0;
+            while (current != nullptr){
+                string current_artist = string(current->data.artist);
+                bool repeated = false;
+                for (int i = 0; i<size; i++){
+                    if (artists[i] == current_artist){
+                        repeated = true;
+                        break;
+                    }
+                }
+                if (!repeated){
+                    artists[counter++] = current_artist;
+                }
+                current = current->next;
+            }
+        }
+        // Gets all the current playlist songs of an specific artist
+        vector<string> getArtistSongs(string artist_name){
+            vector<string> found_songs;
+            Node<MP3Tags>* current = this->origin->getHead();
+
+            while (current != nullptr){
+                if (string(current->data.artist) == artist_name){
+                    found_songs.push_back(string(current->data.title));
+                }
+                current = current->next;
+            }
+
+            return found_songs;
         }
         // Moves to the next song(pointer)
         // Implies a change of context for the currently played
