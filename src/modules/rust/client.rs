@@ -3,6 +3,7 @@ use core::time;
 // Socket related libraries
 use std::net::{TcpStream, Shutdown};
 use std::io::{Error, Read, Write};
+use std::str::FromStr;
 use std::{str, thread};
 
 // Thread related libraries
@@ -155,6 +156,8 @@ impl Client{
     #[allow(dead_code)]
     pub fn get_current_response(&self) -> String{
         let copy_response = self.response.lock().unwrap();
+        // let json = Value::from_str(copy_response.as_str()).unwrap();
+        // drop(copy_response);
         copy_response.clone()
     }
 }

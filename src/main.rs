@@ -1,6 +1,9 @@
 use rstk::*;
+use serde_json::Value;
+use std::str::FromStr;
 use std::sync::Arc;
-use std::thread::{self, Thread};
+use std::thread::{self, sleep, Thread};
+use std::time::Duration;
 
 // >> Project modules "imports" <<
 mod modules{
@@ -22,8 +25,17 @@ fn main() {
                 copy.start_com();
             });
             loop {
-                let response = arc_guard.get_current_response();
-                print!("Server said: {}\n", response);
+                let response: String = arc_guard.get_current_response();
+                if response != "None" {
+                    let _json: Value = match serde_json::from_str(response.as_str()){
+                        Ok(j) => j,
+                        Err(e) => panic!("ERROR: {}", e)
+                    };
+                    print!("Server sent songs: \n{}\n", _json["attach"]);
+                } else {
+                    print!("Server said: {}\n", response);
+                }
+                sleep(Duration::from_secs(6));
             }
         },
         Err(e) => {
