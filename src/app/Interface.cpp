@@ -1,7 +1,7 @@
 #include "Interface.hpp"
 
 Interface::Interface() {
-    // this->user = nullptr;
+    this->user = nullptr;
     this->dimensions[0] = std::make_tuple(200,160);
     this->dimensions[1] = std::make_tuple(950,700);
 

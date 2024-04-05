@@ -43,7 +43,7 @@ protected:
     std::tuple<int, int> dimensions[2];
     sf::Font font;
     Loader* loader;
-    // Server* user;
+    Server* user;
     // ----------------------------- METHODS
 public:
     // Creates an instance of the class which automatically runs window [A]
