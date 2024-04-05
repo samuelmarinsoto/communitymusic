@@ -15,6 +15,7 @@ using namespace std;
 class Array {
     private:
         vector <string> values;
+        void rebuild();
     public:
         string content; // Current array in json format
         // Creates a json array from given string using json formatting

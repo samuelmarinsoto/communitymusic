@@ -9,20 +9,11 @@ mod modules{
     }
 }
 
-
 use modules::rust::client::Client as Client;
 
 fn main() {
-    let root = rstk::start_wish().unwrap();
 
-    let hello = rstk::make_label(&root);
-    hello.text("Hello from Rust/Tk");
-  
-    hello.grid().layout();
-  
-    rstk::mainloop();
-
-    let client = Client::new("127.0.0.1", 49001);
+    let client = Client::new("127.0.0.1", 49094);
     match client {
         Ok(cli) => {
             let arc_guard = Arc::new(cli);

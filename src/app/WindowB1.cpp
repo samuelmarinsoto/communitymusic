@@ -327,6 +327,17 @@ void Interface::InitWinB1(){
             forward.setFillColor(sf::Color::White);
             forward.setPosition( forw_shape.getPosition().x + forw_shape.getRadius()/2, forw_shape.getPosition().y + forw_shape.getRadius()/2 );
 
+        // Button 6 creation
+        sf::RectangleShape host_shape(sf::Vector2f(90.f, 40.f));
+            host_shape.setFillColor(palette[3]);
+            host_shape.setPosition(back_shape.getPosition().x - 100.f - host_shape.getSize().x, back_shape.getPosition().y);
+        sf::Text host;
+            host.setFont(this->font);
+            host.setString("Start");
+            host.setCharacterSize(16);
+            host.setFillColor(sf::Color::White);
+            host.setPosition(host_shape.getPosition().x + host_shape.getSize().x/2 - host.getGlobalBounds().width/2 , host_shape.getPosition().y + host_shape.getSize().y/2 - host.getGlobalBounds().height/2 );
+
         // Volume control buttons
         sf::Text volume;
             volume.setFont(this->font);
@@ -580,6 +591,13 @@ void Interface::InitWinB1(){
                         }
 
                     }
+                    // ------------------- Socket initiation
+                    if (host_shape.getGlobalBounds().contains(mousePosF)){
+                        if (this->user == nullptr){
+                            this->user = new Server(this->PORT, "0.0.0.0");
+                            this->user->set_attach(rsrc_type::LIST, &this->songs, nullptr);
+                        }
+                    }
                     // ------------------- Scrub
                     if (scrub.getGlobalBounds().contains(mousePosF)){
                         dragging_scrub = true;
@@ -601,17 +619,17 @@ void Interface::InitWinB1(){
                             music_player.setVolume(volume_percentage);
                         }
                     }
-                    // Song block interaction
+                    // -------------------- Song block interaction
                     for (int i = 0; i<this->songs.size; i++){
                         sf::RectangleShape block = song_blocks[i];
-                        if (block.getGlobalBounds().contains(mousePosF)){
+                        if (block.getGlobalBounds().contains(mousePosF)){ // TODO: Change for forcing a current
                             std::cout << "Interacting with block " << i+1 << std::endl;
                             Node<MP3Tags>* node = this->songs.GetNode(i);
                                 node->data.upvotes += 1;
                             this->songs.passive_notify();
                         }
                     }
-                    // Playlist artists interaction
+                    // -------------------------- Playlist artists interaction
                     for (int i = 0; i<counted_artists; i++){
                         sf::RectangleShape block = found_artist_blocks[i];
                         if (block.getGlobalBounds().contains(mousePosF)){
@@ -727,6 +745,9 @@ void Interface::InitWinB1(){
         window.draw(forw_shape);
         window.draw(forward); // draw text5
 
+        // >>> Draw button 6 (Start hosting)
+        window.draw(host_shape);
+        window.draw(host);
 
         window.display();
     }

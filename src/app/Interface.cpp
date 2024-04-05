@@ -104,7 +104,7 @@ void Interface::Load_INI(){
     vector< tuple <string, string> > ini_data;
 
     // Open the file strea,
-    ifstream file("./res/config.ini");
+    ifstream file("res/config.ini");
     if (!file.is_open()){
         throw std::runtime_error("ERROR: Failed to load file"); // TODO: Change for a LOG & exception
     }

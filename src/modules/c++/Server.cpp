@@ -113,7 +113,7 @@ char* Server::load_response(cmd r_tp, Dictionary content){
 // who: index of client(from linkedlist)
 void Server::open_new_channel(int client_socket, int who){
     // buffer is the the allocated space for incoming messages
-    char buffer[1024] = { 0 };
+    char buffer[5000] = { 0 };
     // msg_raw is the "unparsed" json string(client message)
     string msg_raw_content;
     while (true) {
@@ -238,6 +238,7 @@ Array Server::PARSE_resource(){
 
             resource.append(Value(attributes.content));
         }
+        return resource;
     } else if (this->_origin_pd == nullptr){ // Should parse the doublelinkedlist
         Node<MP3Tags>* current = this->_origin_l->getHead();
 
@@ -256,8 +257,8 @@ Array Server::PARSE_resource(){
 
             current = current->next;
         }
+        return resource;
     }
-
     return resource;
 }
 // Access the program resource elements and modify the specified element attributes

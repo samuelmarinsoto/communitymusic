@@ -65,7 +65,7 @@ impl Client{
             // Set petition to default
                 self.set_petition(Cmds::Idling,&[]);
                 //-------------{Obtain response(bytes) from Server}--------------//
-                let mut response_buffer = [0 as u8; 1024];
+                let mut response_buffer = [0 as u8; 5000];
                 connection.read(&mut response_buffer).unwrap();
                 let mut server_response = match str::from_utf8(&response_buffer) {
                     Ok(rp_slice) => rp_slice,
