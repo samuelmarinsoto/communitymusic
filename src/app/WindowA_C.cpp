@@ -37,6 +37,7 @@ void Interface::InitWinA(){
                         window.close();
                         if (this->paged_mode){
                             std::cout << "Loading with pages" << std::endl;
+                            this->LIST_TO_PAGED();
                             this->InitWinB2();
                         } else {
                             this->InitWinB1();

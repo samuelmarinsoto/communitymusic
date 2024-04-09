@@ -35,24 +35,44 @@ class LinkedList {
             }
             this->size++;
         }
+        // Insert a new node at the end of the list
+        void append(T value){
+            Node<T>* node = new Node<T>(value);
+            if (this->size == 0){
+                this->head = node;
+            } else {
+               Node<T>* current = this->head;
+               while (true){
+                    if (current->next == nullptr){
+                        break;
+                    }
+                    current = current->next;
+               }
+               current->next = node;
+            }
+            this->size++;
+        }
         // Removes(and frees) a node from the list at specifed index
         void remove(int index){
             Node<T>* current = this->head;
-            if (current != nullptr){
-                if (index == 0){
-                    this->head = current->next;
-                    delete current;
-                    this->size--;
-                } else if (index>0){
-                    Node<T>* temp;
-                    for (int i = 1; i<index; i++){
-                        current = current->next;
-                    }
-                    temp = current->next;
-                    current->next = temp->next;
-                    delete temp;
-                    this->size--;
+            Node<T>* prev = nullptr;
+            int counter = 0;
+            while (current != nullptr){
+                if (counter == index){
+                    break;
                 }
+                prev = current;
+                current = current->next;
+                counter++;
+            }
+            if (index == 0){
+                this->head = current->next;
+                delete current;
+                this->size--;
+            } else {
+                prev->next = current->next;
+                delete current;
+                this->size --;
             }
         }
         // Find and removes(frees) a node from the list based on its contents

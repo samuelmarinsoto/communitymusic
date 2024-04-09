@@ -77,19 +77,28 @@ class DoubleLinkedList : public Observable {
         Node<T>* operator[](int index){
             return GetNode(index);
         }
-        // Deletes a node(element) of the list based on its data contained
-        void deleteNode(T data) {
+        // Deletes a node(element) of the list by its index
+        void deleteNode(int index) {
             // Normal operations
             Node<T>* current = this->head;
+            int counter = 0;
             while (current != nullptr) {
-                if (current->data == data) {
+                if (counter == index) {
                     Node<T>* temp = current;
-                    current = current->next;
-                    delete temp;
 
-                    if (current == nullptr) {
-                        tail = nullptr;
+                    if (current->prev != nullptr){
+                        current->prev->next = current->next;
+                    } else {
+                        this->head = current->next;
+                    } 
+
+                    if (current->next != nullptr){
+                        current->next->prev = current->prev;
+                    } else {
+                        this->tail = current->prev;
                     }
+                    
+                    delete temp;
                     this->size--;
                     // For observers
                     this->current = type1;
@@ -98,6 +107,7 @@ class DoubleLinkedList : public Observable {
                     break;
                 }
                 current = current->next;
+                counter ++;
             }
         }
         // Looks for a value and returns its index

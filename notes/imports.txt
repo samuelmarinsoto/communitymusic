@@ -1,0 +1,4 @@
+tasks other values:
+                "src/lib/**.cpp",
+                "src/modules/c++/**.cpp",
+                

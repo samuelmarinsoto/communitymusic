@@ -68,7 +68,6 @@ void Interface::InitWinB2(){
             // [4]: Dark magenta
         sf::Color palette[] = {sf::Color(27, 26, 27), sf::Color(12, 12, 12), sf::Color(128, 14, 174), sf::Color(56, 8, 151), sf::Color(127, 40, 135)};
         bool paused = true;
-        bool performance = false;
         bool dragging_scrub = false;
         int volume_percentage = 50;
 
@@ -254,7 +253,7 @@ void Interface::InitWinB2(){
         // Memory usage widget creation(TODO)
         sf::Text boost;
             boost.setFont(this->font);
-            boost.setString("Boost? OFF");
+            boost.setString("Boost? ON");
             boost.setCharacterSize(17);
             boost.setFillColor(sf::Color::White);
             boost.setPosition(float(window.getSize().x) - 275.f, settings.getPosition().y + boost.getGlobalBounds().height/4);
@@ -266,6 +265,13 @@ void Interface::InitWinB2(){
         sf::RectangleShape boost_toggle(sf::Vector2f(boost_block.getSize().x*2 , boost_block.getSize().y));
             boost_toggle.setFillColor(palette[1]);
             boost_toggle.setPosition(boost_block.getPosition().x , boost_block.getPosition().y);
+
+        sf::Text boosted_mem;
+            boosted_mem.setFont(this->font);
+            boosted_mem.setString("1.88 (GB)");
+            boosted_mem.setCharacterSize(17);
+            boosted_mem.setFillColor(sf::Color::White);
+            boosted_mem.setPosition(boost_toggle.getPosition().x + boost_toggle.getSize().x + boosted_mem.getGlobalBounds().width/2 , boost.getPosition().y );
 
         // Artists list section + songs creation
         sf::Text found_artist_texts[counted_artists];
@@ -492,6 +498,8 @@ void Interface::InitWinB2(){
             sf::Vector2f mousePosF(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
             if (event.type == sf::Event::Closed){
                 window.close();
+                music_player.stop();
+                    music_player.~Music();
             }
             if (event.type == sf::Event::MouseButtonPressed) {
                 if (event.mouseButton.button == sf::Mouse::Left) {
@@ -502,16 +510,21 @@ void Interface::InitWinB2(){
                     };
                     // ------------------- Boost toggle button
                     if (boost_toggle.getGlobalBounds().contains(mousePosF)){
-                        if (!performance){
+                        if (!this->paged_mode){
                             boost_block.setPosition(boost_block.getPosition().x + boost_block.getSize().x, boost_block.getPosition().y);
                             boost.setString("Boost? ON");
-                            performance = true;
+                            this->paged_mode = true;
                             // TODO: Change from list to paged array
                         }else{
                             boost_block.setPosition(boost_block.getPosition().x - boost_block.getSize().x, boost_block.getPosition().y);
                             boost.setString("Boost? OFF");
-                            performance = false;
+                            this->paged_mode = false;
                             // TODO: Change from paged array back to list
+                            window.close();
+                                music_player.stop();
+                                music_player.~Music();
+                            this->PAGED_TO_LIST();
+                            this->InitWinB1();
                         }
                     }
                     // ------------------- Music controls
@@ -574,8 +587,9 @@ void Interface::InitWinB2(){
                             music_player.stop();
                             std::cout << "Going to previous song" << std::endl;
 
+                            order.pop_back();
                             int previous = order[order.size()-1];
-                                order.pop_back();
+
                             filename = string(this->songs_array->operator[](previous).title);
                                 this->find_replace(' ', '_', filename);
                             this->loader->Convert(this->songs_array->operator[](previous).file, filename);
@@ -707,8 +721,7 @@ void Interface::InitWinB2(){
         window.clear(palette[1]);
         // >>> Draw sidebar(song list) elements
         window.draw(sidebar);   
-            // [Missing code implementation]
-        for (int i = 0; i<this->songs.size; i++){
+        for (int i = 0; i<this->songs_array->getSize(); i++){
             window.draw(song_blocks[i]);
             window.draw(title_names[i]);
             window.draw(album_names[i]);
@@ -724,6 +737,8 @@ void Interface::InitWinB2(){
         window.draw(boost);
         window.draw(boost_toggle);
         window.draw(boost_block);
+        window.draw(boosted_mem);
+
 
         // >>> Draw the artist & their song element
         window.draw(playlist_artists_title);

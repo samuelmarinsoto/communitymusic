@@ -10,7 +10,6 @@ void Interface::InitWinB1(){
             // [4]: Dark magenta
         sf::Color palette[] = {sf::Color(27, 26, 27), sf::Color(12, 12, 12), sf::Color(128, 14, 174), sf::Color(56, 8, 151), sf::Color(127, 40, 135)};
         bool paused = true;
-        bool performance = false;
         bool dragging_scrub = false;
         int volume_percentage = 50;
 
@@ -211,6 +210,13 @@ void Interface::InitWinB1(){
         sf::RectangleShape boost_toggle(sf::Vector2f(boost_block.getSize().x*2 , boost_block.getSize().y));
             boost_toggle.setFillColor(palette[1]);
             boost_toggle.setPosition(boost_block.getPosition().x , boost_block.getPosition().y);
+
+        sf::Text boosted_mem;
+            boosted_mem.setFont(this->font);
+            boosted_mem.setString("1.88 (GB)");
+            boosted_mem.setCharacterSize(17);
+            boosted_mem.setFillColor(sf::Color::White);
+            boosted_mem.setPosition(boost_toggle.getPosition().x + boost_toggle.getSize().x + boosted_mem.getGlobalBounds().width/2, boost.getPosition().y );
 
         // Artists list section + songs creation
         sf::Text found_artist_texts[counted_artists];
@@ -449,6 +455,8 @@ void Interface::InitWinB1(){
             sf::Vector2f mousePosF(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
             if (event.type == sf::Event::Closed){
                 window.close();
+                music_player.stop();
+                    music_player.~Music();
             }
             if (event.type == sf::Event::MouseButtonPressed) {
                 if (event.mouseButton.button == sf::Mouse::Left) {
@@ -459,15 +467,20 @@ void Interface::InitWinB1(){
                     };
                     // ------------------- Boost toggle button
                     if (boost_toggle.getGlobalBounds().contains(mousePosF)){
-                        if (!performance){
+                        if (!this->paged_mode){
                             boost_block.setPosition(boost_block.getPosition().x + boost_block.getSize().x, boost_block.getPosition().y);
                             boost.setString("Boost? ON");
-                            performance = true;
+                            this->paged_mode = true;
                             // TODO: Change from list to paged array
+                            window.close();
+                                music_player.stop();
+                                music_player.~Music();
+                            this->LIST_TO_PAGED();
+                            this->InitWinB2();
                         }else{
                             boost_block.setPosition(boost_block.getPosition().x - boost_block.getSize().x, boost_block.getPosition().y);
                             boost.setString("Boost? OFF");
-                            performance = false;
+                            this->paged_mode = false;
                             // TODO: Change from paged array back to list
                         }
                     }
@@ -690,6 +703,7 @@ void Interface::InitWinB1(){
         window.draw(boost);
         window.draw(boost_toggle);
         window.draw(boost_block);
+        window.draw(boosted_mem);
 
         // >>> Draw the artist & their song element
         window.draw(playlist_artists_title);

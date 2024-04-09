@@ -14,6 +14,7 @@ enum State{
 // C++ parent class for observer objects
 class Observer{
     public:
+        int id;
         // Receive an update of state changes in the object being observer
         virtual void update(State state){};
         // Stop observing behaviour
@@ -35,11 +36,12 @@ class Observable {
     public:
         // Adds a new observer to the list
         void AddObserver(Observer* observer){
-            this->observers.insert(observer);
+            this->observers.append(observer);
+            observer->id = this->observers.size-1;
         };
         // Removes an observer from the list
         void RemoveObserver(Observer* observer){
-            this->observers.find_remove(observer);
+            this->observers.remove(observer->id);
         };
         // Gets the current state and type of change
         State getState(){
@@ -55,7 +57,7 @@ class Observable {
         // Notifies all current observers
         void notifyObservers(){
             for(int i = 0; i<this->observers.size; i++){
-                this->observers[i]->update(this->current);
+                this->observers.getNode(i)->data->update(this->current);
             }
             this->current = type0;
         };

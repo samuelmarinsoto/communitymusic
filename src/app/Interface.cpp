@@ -2,6 +2,7 @@
 
 Interface::Interface() {
     this->user = nullptr;
+    this->memUsage = 0.0;
     this->dimensions[0] = std::make_tuple(200,160);
     this->dimensions[1] = std::make_tuple(950,700);
 
@@ -22,12 +23,11 @@ Interface::Interface() {
     this->player->conditioned = true;
 
     // Define the program startup
-    this->LIST_TO_PAGED(); // Must change
     this->InitWinA();
 }
 
 Interface::~Interface(){
-    delete this->player;
+    
 }
 
 void Interface::find_replace(char value, char new_value, string& source){
@@ -103,7 +103,7 @@ void Interface::Load_INI(){
     // Vector in which to save all the INI data
     vector< tuple <string, string> > ini_data;
 
-    // Open the file strea,
+    // Open the file stream
     ifstream file("res/config.ini");
     if (!file.is_open()){
         throw std::runtime_error("ERROR: Failed to load file"); // TODO: Change for a LOG & exception
@@ -162,6 +162,7 @@ void Interface::Write_INI(){
 
 void Interface::LIST_TO_PAGED(){
 
+    // Create the paged array
     char bin_path[] = "./res/swap.bin";
     this->songs_array = new PagedArray(this->songs.size,this->songs.getHead()->data.GetSize(), 3, this->songs.getHead()->data.GetSize(), bin_path);
 
@@ -171,18 +172,33 @@ void Interface::LIST_TO_PAGED(){
         current = current->next;
     }
 
-    // for (int i = 0; i<this->songs_array->getSize();i++){
-    //     MP3Tags song = this->songs_array->operator[](i);
+    // Liberate all data from the linked list
+    for (int j = this->songs.size-1; j>=0; j--){
+        this->songs.deleteNode(j);
+    }
 
-    //     std::cout << "[" << i+1 << "]" <<song.file << std::endl;
-    //     std::cout << "[" << i+1 << "]" << song.title << std::endl;
-    //     std::cout << "[" << i+1 << "]" << song.artist << std::endl;
-    //     std::cout << "[" << i+1 << "]" << song.album << std::endl;
-    // }
+    std::cout << this->songs.size << std::endl;
+
+    this->player->stopObserving();
+    delete this->player;
+    this->player = nullptr;
 }
 
 void Interface::PAGED_TO_LIST(){
+    this->player = new CircularList<MP3Tags>(&this->songs);
     for (int i = 0; i<this->songs_array->getSize(); i++){
-        this->songs.InsertAtEnd(this->songs_array->operator[](i));
+        MP3Tags song = this->songs_array->operator[](i);
+        this->songs.InsertAtEnd(song);
+    }
+    this->player->conditioned = true;
+
+    delete this->songs_array;
+    this->songs_array = nullptr;
+
+    std::cout << this->songs.size << std::endl;
+    Node<MP3Tags>* ref = this->songs.getHead();
+    while (ref!=nullptr){
+        std::cout << ref->data.title << std::endl;
+        ref = ref->next;
     }
 }

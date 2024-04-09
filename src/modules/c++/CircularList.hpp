@@ -159,11 +159,17 @@ class CircularList<MP3Tags> : public Observer{
         }
         // Destroys the circular list
         ~CircularList(){
-            delete playingNow->next;
-                playingNow->next = nullptr;
-            delete playingNow->prev;
-                playingNow->prev = nullptr;
-            delete playingNow;
+            if (playingNow != nullptr){
+                if (playingNow->next != nullptr){
+                    delete playingNow->next;
+                        playingNow->next = nullptr;
+                }
+                if (playingNow->prev != nullptr){
+                    delete playingNow->prev;
+                        playingNow->prev = nullptr;
+                }
+                delete playingNow;
+            }
         }
         // CircularList implementation of Observer update method upon changes of observable
         void update(State state) override {
@@ -286,6 +292,11 @@ class CircularList<MP3Tags> : public Observer{
                 this->alreadyPlayed.remove(0);
                 this->setPrevious();
             }
+        }
+        // Removes this observer class from the observable
+        void stopObserving() override {
+            this->origin->RemoveObserver(this);
+            this->origin = nullptr;
         }
 };
 

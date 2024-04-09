@@ -19,6 +19,8 @@
                 "-L/usr/local/lib",
                 "-L/usr/lib",
                 "-L/usr/lib/x86_64-linux-gnu",
+                "-lPocoFoundation",
+                "-lPocoNet",
                 "-lboost_filesystem",
                 "-lmpg123",
                 "-lsndfile",
