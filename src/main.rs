@@ -15,5 +15,6 @@ use modules::rust::client::Client as Client;
 use app::rust::client_gui::VotingWindow as VotingWindow;
 
 fn main() {
-
+    let window = VotingWindow::new();
+        window.run();
 }
