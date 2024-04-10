@@ -1,0 +1,37 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "(TASK)C/C++: File linking & compiling",
+            "detail": "Compiles and links the respective .hpp/.cpp(except templates) files into a single executable",
+            "type": "shell",
+            "command": "g++",
+            "args": [
+                "-g",
+                "src/app/c++/**.cpp",
+                "src/lib/**.cpp",
+                "src/modules/c++/**.cpp",
+                "src/main.cpp",
+                "-o",
+                "app",
+                "-I/usr/include",
+                "-I/usr/local/include",
+                "-L/usr/local/lib",
+                "-L/usr/lib",
+                "-L/usr/lib/x86_64-linux-gnu",
+                "-lboost_filesystem",
+                "-lmpg123",
+                "-lsndfile",
+                "-lsfml-system",
+                "-lsfml-audio",
+                "-lsfml-graphics",
+                "-lsfml-window",
+                "-ltag"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}

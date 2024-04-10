@@ -1,0 +1,43 @@
+// ----------------------------- All this client processes for the window could be changed into function
+
+        // The client should try to connect to the designated server address (TODO: as such the IP and port fields should be changed for the ones from INI)
+        /* HOW SHOULD IT WORK 
+            SUCCESS: The voting window opens normally
+            FAIL: The voting window does not open up and instead goes back to start window
+        */
+        let client = match Client::new("127.0.0.1", 49094){
+            Ok(c) => c,
+            Err(e) => panic!("ERROR: {}", e) // TODO: Change for a log and set a behavior to disregard this code an open another window
+        };
+
+        // Create an Arc to thread the client communication processes
+        let cli_arc_guard = Arc::new(client);
+            // <+> >>> 1st subprocess: Establish a communication channel
+            let client_copy_b = Arc::clone(&cli_arc_guard);
+            thread::spawn(move || {
+                client_copy_b.start_com();
+            });
+
+        // Create an auto-updated string which contains the most recent response from server(most cases is the list of songs up-to-date)
+        let mut songs = Arc::new(Mutex::new("".to_owned()));
+            // <+> >>> 2nd subprocess: Get responses from server every few seconds and save into "songs"
+            let client_copy_b = Arc::clone(&cli_arc_guard);
+            let songs_copy = Arc::clone(&songs);
+            thread::spawn(move || {
+                loop { // Get current response from server and copy into current field
+                    let mut songs_info = songs_copy.lock().unwrap();
+                    *songs_info = client_copy_b.get_current_response();
+                    drop(songs_info);
+                    sleep(Duration::from_secs(2));
+                }
+            });
+        sleep(Duration::from_secs(6));
+        // Create a usable client from within the GTK application
+        let usable_client = Arc::clone(&cli_arc_guard);
+        let mut json_songs = Value::from_str(songs.lock().unwrap().as_str()).unwrap(); // This has the list of songs inside it
+        loop {
+            json_songs = Value::from_str(songs.lock().unwrap().as_str()).unwrap();
+            print!("Song from server: {}", json_songs["attach"][3]);
+        }
+        
+    // ----------------------------- All this client processes for the window could be changed into function
