@@ -2,15 +2,22 @@ ACTUALICEN LOS INSTALADORES DE PAQUETES:    sudo apt-get update
                                             sudo apt-get upgrade
                                             sudo apt update
                                             sudo apt upgrade
-                                            
+# para interfaz servidor                                         
 sudo apt-get install libsfml-dev
+# para reproducir sonido
 sudo apt-get install libsndfile1-dev
 sudo apt-get install libmpg123-dev
+# para los tags
 sudo apt install libtag1-dev
+# para guid
 sudo apt install libboost-dev
 sudo apt install libboost-filesystem-dev
+# glogs
 sudo apt-get install libgoogle-glog-dev
+# no se xd
 sudo apt install libpoco-dev
+# para gtk
+sudo apt install libatk-1.0-dev libglib2.0-dev libpango1.0-dev libgdk3.0-dev libgdk-pixbuf-2.0-dev librust-gdk-sys-dev
 
 TIENEN QUE CREAR SU LOG: sudo touch /var/log/MiAplicacionLogs/NOMBRELOG.log
 CON ESTE SE LEE EL LOG:  cat /var/log/MiAplicacionLogs/NOMBRELOG.log
