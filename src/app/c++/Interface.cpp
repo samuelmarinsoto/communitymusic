@@ -94,7 +94,7 @@ void Interface::Song_Selection(){
 
         // Select all the songs from the random indexes
         for (int index : randNums){
-            this->songs.InsertAtEnd(MP3Tags("/home/frederick/Desktop/bib/playlist1/" + songnames[index]));
+            this->songs.InsertAtEnd(MP3Tags(this->playlist_path +"/" + songnames[index]));
         }
     }
 }
