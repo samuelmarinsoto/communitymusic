@@ -6,10 +6,9 @@ Interface::Interface() {
     this->dimensions[0] = std::make_tuple(200,160);
     this->dimensions[1] = std::make_tuple(950,700);
 
-    if (!this->font.loadFromFile("./res/CourierPrime-Bold.ttf")){
+    if (!this->font.loadFromFile("./app/c++/res/CourierPrime-Bold.ttf")){
         std::cerr << "ERROR: Couldn't load font file" << std::endl; // TODO: Change for a LOG
     }
-
     // Load all the attributes(and INI properties)
     this->Load_INI();
     if ( this->program_data_path == "None" || this->playlist_path == "None"){
@@ -104,7 +103,7 @@ void Interface::Load_INI(){
     vector< tuple <string, string> > ini_data;
 
     // Open the file stream
-    ifstream file("res/config.ini");
+    ifstream file("./app/c++/res/config.ini");
     if (!file.is_open()){
         throw std::runtime_error("ERROR: Failed to load file"); // TODO: Change for a LOG & exception
     }

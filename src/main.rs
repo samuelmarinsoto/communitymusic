@@ -1,6 +1,5 @@
 // >> Crate and external libs imports <<
 
-
 // >> Project modules "imports" <<
 pub mod modules{
     pub mod rust;
