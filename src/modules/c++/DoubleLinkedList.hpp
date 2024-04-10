@@ -45,14 +45,14 @@ class DoubleLinkedList : public Observable {
             Node<T>* newNode = new Node<T>(data);
             if (this->head != nullptr){
                 this->head->prev = newNode;
-                newNode->next = this.head;
+                newNode->next = this->head;
             } else {
                 this->tail = newNode;
             }
             this->head = newNode;
             this->size++;
             // For observers
-            this.current = type1;
+            this->current = type1;
             this->notifyObservers();
         }
         // Gets a pointer to a node in memory from its index
