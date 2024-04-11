@@ -7,7 +7,7 @@ Interface::Interface() {
     this->dimensions[1] = std::make_tuple(950,700);
 
     if (!this->font.loadFromFile("./res/CourierPrime-Bold.ttf")){
-        std::cerr << "ERROR: Couldn't load font file" << std::endl; // TODO: Change for a LOG
+        LOG(INFO) << "ERROR: Couldn't load font file";
     }
 
     // Load all the attributes(and INI properties)
@@ -53,7 +53,7 @@ void Interface::Song_Selection(){
 
         while (counter < songnames.size()){
             int gen_int = dist(generator);
-            std::cout << gen_int;
+            LOG(INFO) << gen_int;
 
             bool repeated = false;
             for (int i = 0; i<counter; i++){
@@ -106,9 +106,10 @@ void Interface::Load_INI(){
     // Open the file stream
     ifstream file("res/config.ini");
     if (!file.is_open()){
-        throw std::runtime_error("ERROR: Failed to load file"); // TODO: Change for a LOG & exception
+    	LOG(INFO) << "ERROR: Failed to load file";
+        throw std::runtime_error("ERROR: Failed to load file"); // TODO: Change for exception
     }
-    std::cout << "File loaded! & Reading..." << std::endl; // TODO: Change for a LOG
+    LOG(INFO) << "File loaded! & Reading...";
     // String for reading each line of the file
     string line_buff;
 
@@ -139,7 +140,7 @@ void Interface::Load_INI(){
 
     // Retrieve the INI data and save to class attributes
     for (int i =0; i<ini_data.size(); i++){
-        std::cout << get<0>(ini_data[i]) << " || " << get<1>(ini_data[i]) <<std::endl;
+        LOG(INFO) << get<0>(ini_data[i]) << " || " << get<1>(ini_data[i]);
         if (get<0>(ini_data[i]) == "BIB_PATH"){
             this->playlist_path = get<1>(ini_data[i]);
         } else if (get<0>(ini_data[i]) == "APP_DIR"){
@@ -177,7 +178,7 @@ void Interface::LIST_TO_PAGED(){
         this->songs.deleteNode(j);
     }
 
-    std::cout << this->songs.size << std::endl;
+   LOG(INFO) << this->songs.size;
 
     this->player->stopObserving();
     delete this->player;
@@ -195,10 +196,10 @@ void Interface::PAGED_TO_LIST(){
     delete this->songs_array;
     this->songs_array = nullptr;
 
-    std::cout << this->songs.size << std::endl;
+    LOG(INFO) << this->songs.size;
     Node<MP3Tags>* ref = this->songs.getHead();
     while (ref!=nullptr){
-        std::cout << ref->data.title << std::endl;
+        LOG(INFO) << ref->data.title;
         ref = ref->next;
     }
 }

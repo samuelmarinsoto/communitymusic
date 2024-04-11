@@ -34,7 +34,7 @@ impl VotingWindow {
             SUCCESS: The voting window opens normally
             FAIL: The voting window does not open up and instead goes back to start window
         */
-        let client = match Client::new("192.168.148.122", 49094){
+        let client = match Client::new("127.0.0.1", 49094){
             Ok(c) => c,
             Err(e) => {
             	info!("ERROR: cliente rust no pudo conectar socket");
@@ -81,30 +81,30 @@ impl VotingWindow {
 
         // Definir acciones para cada botón "Vote Up"
         let vote_up_actions = vec![
-            || println!("Vote Up 1 clicked!"),
-            || println!("Vote Up 2 clicked!"),
-            || println!("Vote Up 3 clicked!"),
-            || println!("Vote Up 4 clicked!"),
-            || println!("Vote Up 5 clicked!"),
-            || println!("Vote Up 6 clicked!"),
-            || println!("Vote Up 7 clicked!"),
-            || println!("Vote Up 8 clicked!"),
-            || println!("Vote Up 9 clicked!"),
-            || println!("Vote Up 10 clicked!"),
+            || info!("Vote Up 1 clicked!"),
+            || info!("Vote Up 2 clicked!"),
+            || info!("Vote Up 3 clicked!"),
+            || info!("Vote Up 4 clicked!"),
+            || info!("Vote Up 5 clicked!"),
+            || info!("Vote Up 6 clicked!"),
+            || info!("Vote Up 7 clicked!"),
+            || info!("Vote Up 8 clicked!"),
+            || info!("Vote Up 9 clicked!"),
+            || info!("Vote Up 10 clicked!"),
         ];
 
         // Definir acciones para cada botón "Vote Down"
         let vote_down_actions = vec![
-            || println!("Vote Down 1 clicked!"),
-            || println!("Vote Down 2 clicked!"),
-            || println!("Vote Down 3 clicked!"),
-            || println!("Vote Down 4 clicked!"),
-            || println!("Vote Down 5 clicked!"),
-            || println!("Vote Down 6 clicked!"),
-            || println!("Vote Down 7 clicked!"),
-            || println!("Vote Down 8 clicked!"),
-            || println!("Vote Down 9 clicked!"),
-            || println!("Vote Down 10 clicked!"),
+            || info!("Vote Down 1 clicked!"),
+            || info!("Vote Down 2 clicked!"),
+            || info!("Vote Down 3 clicked!"),
+            || info!("Vote Down 4 clicked!"),
+            || info!("Vote Down 5 clicked!"),
+            || info!("Vote Down 6 clicked!"),
+            || info!("Vote Down 7 clicked!"),
+            || info!("Vote Down 8 clicked!"),
+            || info!("Vote Down 9 clicked!"),
+            || info!("Vote Down 10 clicked!"),
         ];
 
         // Crear un contenedor grid

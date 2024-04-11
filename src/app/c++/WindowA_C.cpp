@@ -33,10 +33,10 @@ void Interface::InitWinA(){
                     sf::Vector2i mousePos = sf::Mouse::getPosition(window);
                     sf::Vector2f mousePosF(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
                     if (button.getGlobalBounds().contains(mousePosF)) {
-                        std::cout << "Button clicked" << std::endl;
+                        LOG(INFO) << "Button clicked";
                         window.close();
                         if (this->paged_mode){
-                            std::cout << "Loading with pages" << std::endl;
+                            LOG(INFO) << "Loading with pages";
                             this->LIST_TO_PAGED();
                             this->InitWinB2();
                         } else {

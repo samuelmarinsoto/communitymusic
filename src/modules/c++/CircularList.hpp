@@ -13,6 +13,7 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
+#include <glog/logging.h>
 
 using namespace std;
 // Specialized C++ data structure of a bidirectional circular linked list
@@ -39,7 +40,7 @@ class CircularList : public Observer{
         void update(State state) override {
             switch (state){
                 case type1:
-                    std::cout << "Observer[" << this->identifier <<"] => " <<"List contents were modified" << std::endl;
+                    LOG(INFO) << "Observer[" << this->identifier <<"] => " <<"List contents were modified";
                     break;
                 default:
                     break;
@@ -175,11 +176,11 @@ class CircularList<MP3Tags> : public Observer{
         void update(State state) override {
             switch (state){
                 case type1:
-                    std::cout << "(CircularList)Observer" << " ! => " <<"List contents were modified" << std::endl;
+                    LOG(INFO) << "(CircularList)Observer" << " ! => " <<"List contents were modified";
                     this->updateOrder();
                     break;
                 case type2:
-                    std::cout << "(CircularList)Observer" << " ! => " <<"List contents were modified" << std::endl;
+                    LOG(INFO) << "(CircularList)Observer" << " ! => " <<"List contents were modified";
                     this->updateOrder();
                     break;
                 default:

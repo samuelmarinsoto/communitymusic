@@ -7,6 +7,7 @@
 #include <boost/uuid/uuid_io.hpp>
 #include <taglib/tag.h>
 #include <taglib/fileref.h>
+#include <glog/logging.h>
 
 using namespace std;
 class MP3Tags {

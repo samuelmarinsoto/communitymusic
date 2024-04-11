@@ -1,8 +1,9 @@
 #include "app/c++/Interface.hpp"
 #include "lib/fJSON.hpp"
+#include <glog/logging.h>
 
-
-int main(){
+int main(int argc, char* argv[]){
+    google::InitGoogleLogging(argv[0]);
     Interface interface;
     // Dictionary dict;
     //     dict.add("key", JSON::convert_to_value<string>(string("hello")));

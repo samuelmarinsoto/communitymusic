@@ -102,14 +102,14 @@ PagedArray::PagedArray(size_t size_, size_t objsize_, size_t rampages_, size_t p
     objs_per_page = pagesize / objsize;
 
     if (pagesize_ % objsize_) {
-        std::cerr << "Tamaño de pagina inadecuado para el objeto almacenado";
+        LOG(INFO) << "Tamaño de pagina inadecuado para el objeto almacenado";
         std::exit(EXIT_FAILURE);
     }
 
     file.open(filename, std::ios::binary | std::ios::in | std::ios::out | std::ios::trunc);
 
     if (!file.is_open()) {
-        std::cerr << "Error: No se pudo abrir " << filename << " para uso en arreglo paginado\n";
+        LOG(INFO) << "Error: No se pudo abrir " << filename << " para uso en arreglo paginado";
         std::exit(EXIT_FAILURE);
     }
 
@@ -135,7 +135,7 @@ MP3Tags& PagedArray::operator[](size_t index) {
     size_t pageOffset = index % objs_per_page;
 
     if (pageIndex >= pagecount) {
-        std::cerr << "Index out of bounds\n";
+        LOG(INFO) << "Index out of bounds";
         std::exit(EXIT_FAILURE);
     }
 
