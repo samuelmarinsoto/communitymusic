@@ -21,7 +21,7 @@ LIBS = ${SYS} ${SERVER} ${TAGS}
 server: mp3tags pagedarray
 	${CC} ${CFLAGS} ${MODS} main.cpp ${INCS} ${LIBS} -lmp3tags -lpagedarray -o $@
 id3test: mp3tags
-	${CC} ${CFLAGS} testid3.cpp ${INCS} ${SYS} ${TAGS} -lmp3tags -o $@
+	${CC} ${CFLAGS} test/testid3.cpp ${INCS} ${SYS} ${TAGS} -lmp3tags -o $@
 mp3tags:
 	${CC} ${CFLAGS} -c modules/c++/MP3Tags.cpp ${INCS} ${SYS} ${TAGS} -o $@.o
 	ar rcs lib$@.a $@.o
@@ -40,7 +40,7 @@ mod:
 	done
 	ar rcs lib$@.a app.o mod.o lib.o
 testpa: mp3tags pagedarray
-	${CC} ${CFLAGS} testpagedarray.cpp ${INCS} ${LIBS} -lmp3tags -lpagedarray -lz -ltag -lboost_filesystem -lboost_random -o $@
+	${CC} ${CFLAGS} test/testpagedarray.cpp ${INCS} ${LIBS} -lmp3tags -lpagedarray -lz -ltag -lboost_filesystem -lboost_random -o $@
 cleanall: cleanserv
 	rm -rf id3test testpa *.a *.o *.core *.bin
 cleanserv:
