@@ -14,6 +14,9 @@ use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use std::thread::{self, sleep, Thread};
 use std::time::Duration;
+// Glogs
+use log::*;
+use glog::Flags;
 
 // Rust GTK window to preview playlist songs
 pub struct VotingWindow {
@@ -23,15 +26,20 @@ pub struct VotingWindow {
 impl VotingWindow {
     pub fn new() -> VotingWindow {
     // ----------------------------- All this client processes for the window could be changed into function
+    	// start glog
+    	glog::new().init(Flags::default()).unwrap();
 
         // The client should try to connect to the designated server address (TODO: as such the IP and port fields should be changed for the ones from INI)
         /* HOW SHOULD IT WORK 
             SUCCESS: The voting window opens normally
             FAIL: The voting window does not open up and instead goes back to start window
         */
-        let client = match Client::new("127.0.0.1", 49094){
+        let client = match Client::new("192.168.148.122", 49094){
             Ok(c) => c,
-            Err(e) => panic!("ERROR: {}", e) // TODO: Change for a log and set a behavior to disregard this code an open another window
+            Err(e) => {
+            	info!("ERROR: cliente rust no pudo conectar socket");
+            	panic!("ERROR: {}", e);  // TODO: set a behavior to disregard this code an open another window
+            }
         };
 
         // Create an Arc to thread the client communication processes
@@ -63,6 +71,7 @@ impl VotingWindow {
     // ----------------------------- All this client processes for the window could be changed into function
 
         // Initialize GTK
+        info!("Inicializando ventana");
         gtk::init().expect("Couldn't initialize GTK library binaries");
 
         // Create a new window
