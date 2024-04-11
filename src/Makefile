@@ -19,7 +19,7 @@ LIBS = ${SYS} ${SERVER} ${TAGS}
 
 
 server: mp3tags pagedarray
-	${CC} ${CFLAGS} ${MODS} main.cpp ${INCS} ${LIBS} -lmp3tags -lpagedarray -lmod -o $@
+	${CC} ${CFLAGS} ${MODS} main.cpp ${INCS} ${LIBS} -lmp3tags -lpagedarray -o $@
 id3test: mp3tags
 	${CC} ${CFLAGS} testid3.cpp ${INCS} ${SYS} ${TAGS} -lmp3tags -o $@
 mp3tags:
