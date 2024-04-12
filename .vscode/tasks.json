@@ -20,13 +20,15 @@
                 "-L/usr/lib",
                 "-L/usr/lib/x86_64-linux-gnu",
                 "-lboost_filesystem",
+                "-lboost_random",
                 "-lmpg123",
                 "-lsndfile",
                 "-lsfml-system",
                 "-lsfml-audio",
                 "-lsfml-graphics",
                 "-lsfml-window",
-                "-ltag"
+                "-ltag",
+                "-lglog"
             ],
             "group": {
                 "kind": "build",

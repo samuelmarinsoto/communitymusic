@@ -6,7 +6,7 @@ Interface::Interface() {
     this->dimensions[0] = std::make_tuple(200,160);
     this->dimensions[1] = std::make_tuple(950,700);
 
-    if (!this->font.loadFromFile("./res/CourierPrime-Bold.ttf")){
+    if (!this->font.loadFromFile("./app/c++/res/CourierPrime-Bold.ttf")){
         LOG(INFO) << "ERROR: Couldn't load font file";
     }
     // Load all the attributes(and INI properties)
