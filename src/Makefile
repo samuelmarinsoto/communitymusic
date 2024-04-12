@@ -18,8 +18,8 @@ INCS = -I/usr/local/include -I/usr/include ${LOCAL_INCS}
 LIBS = ${SYS} ${SERVER} ${TAGS}
 
 
-server: libmod.a
-	${CC} ${CFLAGS} ${MODS} main.cpp ${INCS} ${LIBS} -lmod -o $@
+server:
+	${CC} ${CFLAGS} ${SRCS} main.cpp ${INCS} ${LIBS} -o $@
 id3test: mp3tags
 	${CC} ${CFLAGS} test/testid3.cpp ${INCS} ${SYS} ${TAGS} -lmp3tags -o $@
 testpa: libmp3tags.a libpagedarray.a
@@ -31,7 +31,7 @@ libpagedarray.a: libmp3tags.a
 	${CC} ${CFLAGS} -c modules/c++/PagedArray.cpp ${INCS} ${SYS} ${TAGS} -o $@.o
 	ar rcs lib$@.a $@.o
 libmod.a: ${SRCS}
-	${CC} ${CFLAGS} -c ${SRCS} ${INCS} ${TAGS}
+	${CC} ${CFLAGS} -c ${SRCS} ${INCS} ${LIBS}
 	ar rcs $@ $(notdir $(SRCS:.cpp=.o))
 cleanall: cleanserv
 	rm -rf id3test testpa *.a *.o *.core *.bin
