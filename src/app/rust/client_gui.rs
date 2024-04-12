@@ -55,9 +55,8 @@ impl VotingWindow {
                             sleep(Duration::from_millis(1800));
                             let mut songs_ref = json_lock.lock().unwrap();
                             *songs_ref = other_cli_copy.get_current_response();
-                            println!("{}", *songs_ref);
                         }
-                    }).join().unwrap();
+                    });
                 // ----------------
                 arc_guard
             },
