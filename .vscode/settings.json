@@ -1,6 +1,7 @@
 {
     "rust-analyzer.linkedProjects": [
         "./Cargo.toml",
+        "./Cargo.toml",
         "./Cargo.toml"
     ],
     "files.associations": {
@@ -70,5 +71,6 @@
     "cSpell.words": [
         "downvotes",
         "upvotes"
-    ]
+    ],
+    "rust-analyzer.showUnlinkedFileNotification": false
 }

@@ -387,6 +387,21 @@ void Interface::InitWinB2(){
             forward.setCharacterSize(16);
             forward.setFillColor(sf::Color::White);
             forward.setPosition( forw_shape.getPosition().x + forw_shape.getRadius()/2, forw_shape.getPosition().y + forw_shape.getRadius()/2 );
+        
+        // Button 6 creation
+        sf::RectangleShape host_shape(sf::Vector2f(90.f, 40.f));
+            host_shape.setFillColor(palette[3]);
+            host_shape.setPosition(back_shape.getPosition().x - 100.f - host_shape.getSize().x, back_shape.getPosition().y);
+        sf::Text host;
+            host.setFont(this->font);
+            if (this->user == nullptr){
+                host.setString("Start");
+            } else {
+                host.setString("Stop");
+            }
+            host.setCharacterSize(16);
+            host.setFillColor(sf::Color::White);
+            host.setPosition(host_shape.getPosition().x + host_shape.getSize().x/2 - host.getGlobalBounds().width/2 , host_shape.getPosition().y + host_shape.getSize().y/2 - host.getGlobalBounds().height/2 );
 
         // Volume control buttons
         sf::Text volume;
@@ -525,6 +540,16 @@ void Interface::InitWinB2(){
                                 music_player.~Music();
                             this->PAGED_TO_LIST();
                             this->InitWinB1();
+                        }
+                    }
+                    // ------------------- Socket initiation
+                    if (host_shape.getGlobalBounds().contains(mousePosF)){
+                        if (this->user == nullptr){
+                            host.setString("Stop");
+                            this->user = new Server(this->PORT, "0.0.0.0");
+                        } else {
+                            host.setString("Start");
+                            // this->user.stop();
                         }
                     }
                     // ------------------- Music controls
@@ -794,6 +819,9 @@ void Interface::InitWinB2(){
         window.draw(forw_shape);
         window.draw(forward); // draw text5
 
+        // >>> Draw button 6 (Start hosting)
+        window.draw(host_shape);
+        window.draw(host);
 
         window.display();
     }

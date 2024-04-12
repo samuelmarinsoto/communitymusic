@@ -1,4 +1,4 @@
-// ----------------------------- All this client processes for the window could be changed into function
+    // ----------------------------- All this client processes for the window could be changed into function
 
         // The client should try to connect to the designated server address (TODO: as such the IP and port fields should be changed for the ones from INI)
         /* HOW SHOULD IT WORK 
@@ -37,7 +37,7 @@
         let mut json_songs = Value::from_str(songs.lock().unwrap().as_str()).unwrap(); // This has the list of songs inside it
         loop {
             json_songs = Value::from_str(songs.lock().unwrap().as_str()).unwrap();
-            print!("Song from server: {}", json_songs["attach"][3]);
+            print!("Song from server: {}", json_songs["attach"][0]["title"].as_str().unwrap());
         }
         
     // ----------------------------- All this client processes for the window could be changed into function

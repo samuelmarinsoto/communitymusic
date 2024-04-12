@@ -5,7 +5,7 @@ use gtk::prelude::*;
 use gtk::{Button, Grid, Label, Window, WindowType};
 
 // ---------------------------------- Project things
-use crate::modules::rust::client::Client as Client;
+use crate::modules::rust::client::{Client as Client, Cmds};
 use serde_json::Value;
 use std::str::FromStr;
 
@@ -18,6 +18,8 @@ use std::time::Duration;
 // Rust GTK window to preview playlist songs
 pub struct VotingWindow {
     window: Window,
+    client: Arc<Client>, // This should save the client during the execution of the program
+    songs: Arc< Mutex<String> >
 }
 
 impl VotingWindow {
@@ -29,48 +31,44 @@ impl VotingWindow {
             SUCCESS: The voting window opens normally
             FAIL: The voting window does not open up and instead goes back to start window
         */
+        let mut songs_json = Arc::new( Mutex::new("".to_owned()));
+
         let client = match Client::new("127.0.0.1", 49094){
-            Ok(c) => c,
+            Ok(c) => { // Create an arc of the connected client and
+                let arc_guard = Arc::new(c);
+                // ----------------
+                    // >>> Communication thread 
+                    let cli_copy = Arc::clone(&arc_guard);
+                    thread::spawn(move || {
+                       cli_copy.start_com();
+                    });
+                    // >>> List of songs retrieval
+                    let other_cli_copy = Arc::clone(&arc_guard);
+                    let mut json_lock = Arc::clone(&songs_json);
+                    thread::spawn(move || {
+                        loop {
+                            sleep(Duration::from_millis(1800));
+                            let mut songs_ref = json_lock.lock().unwrap();
+                            *songs_ref = other_cli_copy.get_current_response();
+                            println!("{}", *songs_ref);
+                        }
+                    }).join().unwrap();
+                // ----------------
+                arc_guard
+            },
             Err(e) => panic!("ERROR: {}", e) // TODO: Change for a log and set a behavior to disregard this code an open another window
         };
 
-        // Create an Arc to thread the client communication processes
-        let cli_arc_guard = Arc::new(client);
-            // <+> >>> 1st subprocess: Establish a communication channel
-            let client_copy_b = Arc::clone(&cli_arc_guard);
-            thread::spawn(move || {
-                client_copy_b.start_com();
-            });
-
-        // Create an auto-updated string which contains the most recent response from server(most cases is the list of songs up-to-date)
-        let mut songs = Arc::new(Mutex::new("".to_owned()));
-            // <+> >>> 2nd subprocess: Get responses from server every few seconds and save into "songs"
-            let client_copy_b = Arc::clone(&cli_arc_guard);
-            let songs_copy = Arc::clone(&songs);
-            thread::spawn(move || {
-                loop { // Get current response from server and copy into current field
-                    let mut songs_info = songs_copy.lock().unwrap();
-                    *songs_info = client_copy_b.get_current_response();
-                    drop(songs_info);
-                    sleep(Duration::from_secs(2));
-                }
-            });
-        sleep(Duration::from_secs(4));
-        // Create a usable client from within the GTK application
-        let usable_client = Arc::clone(&cli_arc_guard);
-        let mut json_songs = Value::from_str(songs.lock().unwrap().as_str()).unwrap(); // This has the list of songs inside it
-        
     // ----------------------------- All this client processes for the window could be changed into function
-
         // Initialize GTK
         gtk::init().expect("Couldn't initialize GTK library binaries");
 
         // Create a new window
         let window = Window::new(WindowType::Toplevel);
-        window.set_title("Votación");
+        window.set_title("CommunityMusic Client");
         window.set_default_size(600, 200);
-
-        // Definir acciones para cada botón "Vote Up"
+        
+        // Define actions for each "UpVote" button
         let vote_up_actions = vec![
             || println!("Vote Up 1 clicked!"),
             || println!("Vote Up 2 clicked!"),
@@ -107,6 +105,7 @@ impl VotingWindow {
         for (i, action) in vote_up_actions.into_iter().enumerate() {
             let button = Button::with_label(&format!("Vote Up {}", i + 1));
             button.connect_clicked(move |_| action());
+
             grid.attach(&button, 0, i as i32, 1, 1);
         }
 
@@ -126,7 +125,7 @@ impl VotingWindow {
         // Agregar el grid a la ventana
         window.add(&grid);
 
-        VotingWindow { window }
+        VotingWindow { window: window, client: client, songs: songs_json}
     }
 
     pub fn run(&self) {

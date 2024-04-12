@@ -233,6 +233,7 @@ Array Server::PARSE_resource(){
             attributes.add("title", JSON::convert_to_value<string>(string(song.title)) );
             attributes.add("album", JSON::convert_to_value<string>(string(song.album)) );
             attributes.add("artist", JSON::convert_to_value<string>(string(song.artist)));
+            attributes.add("genre", JSON::convert_to_value<string>(string(song.genre)));
             attributes.add("upvotes", JSON::convert_to_value<int>(song.upvotes) );
             attributes.add("downvotes", JSON::convert_to_value<int>(song.downvotes) );
 
@@ -250,6 +251,7 @@ Array Server::PARSE_resource(){
             attributes.add("title", JSON::convert_to_value<string>(string(song.title)) );
             attributes.add("album", JSON::convert_to_value<string>(string(song.album)) );
             attributes.add("artist", JSON::convert_to_value<string>(string(song.artist))) ;
+            attributes.add("genre", JSON::convert_to_value<string>(string(song.genre)));
             attributes.add("upvotes", JSON::convert_to_value<int>(song.upvotes) );
             attributes.add("downvotes", JSON::convert_to_value<int>(song.downvotes) );
 

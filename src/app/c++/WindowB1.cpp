@@ -339,7 +339,11 @@ void Interface::InitWinB1(){
             host_shape.setPosition(back_shape.getPosition().x - 100.f - host_shape.getSize().x, back_shape.getPosition().y);
         sf::Text host;
             host.setFont(this->font);
-            host.setString("Start");
+            if (this->user == nullptr){
+                host.setString("Start");
+            } else {
+                host.setString("Stop");
+            }
             host.setCharacterSize(16);
             host.setFillColor(sf::Color::White);
             host.setPosition(host_shape.getPosition().x + host_shape.getSize().x/2 - host.getGlobalBounds().width/2 , host_shape.getPosition().y + host_shape.getSize().y/2 - host.getGlobalBounds().height/2 );
@@ -607,8 +611,13 @@ void Interface::InitWinB1(){
                     // ------------------- Socket initiation
                     if (host_shape.getGlobalBounds().contains(mousePosF)){
                         if (this->user == nullptr){
+                            host.setString("Stop");
                             this->user = new Server(this->PORT, "0.0.0.0");
                             this->user->set_attach(rsrc_type::LIST, &this->songs, nullptr);
+                        } else {
+                            host.setString("Start");
+                            // this->user.stop();
+                            
                         }
                     }
                     // ------------------- Scrub

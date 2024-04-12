@@ -124,8 +124,30 @@ void Interface::InitWinC(){
         PORT_TEXT.setFillColor(sf::Color::White);
         PORT_TEXT.setCharacterSize(16);
         PORT_TEXT.setPosition(PORT_field.getPosition().x + 5.f, PORT_field.getPosition().y + PORT_TEXT.getGlobalBounds().height/2);
-        // >>> Paged array field
     // ------------------------------------------ Buttons
+    // >>> Paged array button
+    sf::Text boost_text;
+        boost_text.setFont(this->font);
+        if (this->paged_mode){
+            boost_text.setString("Use memory boost? (YES)");
+        } else {
+            boost_text.setString("Use memory boost? (NO)");
+        }
+        boost_text.setFillColor(sf::Color::White);
+        boost_text.setCharacterSize(16);
+        boost_text.setPosition(header_port.getPosition().x, PORT_field.getPosition().y + PORT_field.getSize().y+ 30.f);
+
+    sf::RectangleShape toggle(sf::Vector2f(45.f, 22.5f));
+        toggle.setFillColor(palette[0]);
+        toggle.setPosition(boost_text.getPosition(). x + boost_text.getGlobalBounds().width + 10.f, boost_text.getPosition().y );
+    
+    sf::RectangleShape toggle_block(sf::Vector2f(toggle.getSize().x/2, toggle.getSize().x/2));
+        toggle_block.setFillColor(sf::Color::Red);
+        if (this->paged_mode){
+            toggle_block.setPosition(toggle.getPosition().x + toggle.getSize().x - toggle_block.getSize().x, toggle.getPosition().y);
+        } else  {
+            toggle_block.setPosition(toggle.getPosition().x, toggle.getPosition().y);
+        }
 
     while (window.isOpen()) {
         // --------------- GUI elements updating
@@ -152,6 +174,9 @@ void Interface::InitWinC(){
         sf::Event event;
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed){
+                this->playlist_path = BIB_PATH.getString();
+                this->program_data_path = APP_PATH.getString();
+                stringstream(PORT_TEXT.getString()) >> this->PORT;
                 window.close();
                 this->Write_INI();
             }
@@ -1182,6 +1207,17 @@ void Interface::InitWinC(){
                     if (PORT_field.getGlobalBounds().contains(mousePosF)){
                         selected_field = 3;
                     }
+                    if (toggle_block.getGlobalBounds().contains(mousePosF)){
+                        if (this->paged_mode){
+                            this->paged_mode = false;
+                            boost_text.setString("Use memory boost? (NO)");
+                            toggle_block.setPosition(toggle_block.getPosition().x - toggle_block.getSize().x , toggle_block.getPosition().y);
+                        } else {
+                            this->paged_mode = true;
+                            boost_text.setString("Use memory boost? (YES)");
+                            toggle_block.setPosition(toggle_block.getPosition().x + toggle_block.getSize().x , toggle_block.getPosition().y);
+                        }
+                    }
                 }
                 if (event.mouseButton.button == sf::Mouse::Right){
                     if (!BIB_field.getGlobalBounds().contains(mousePosF) && !APP_field.getGlobalBounds().contains(mousePosF) && !PORT_field.getGlobalBounds().contains(mousePosF)){
@@ -1210,7 +1246,9 @@ void Interface::InitWinC(){
         window.draw(PORT_TEXT);
 
         // >>> Field 4[Paged mode toggle] elements
-
+        window.draw(boost_text);
+        window.draw(toggle);
+        window.draw(toggle_block);
         window.display();
     }
 }

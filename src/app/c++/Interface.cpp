@@ -156,13 +156,30 @@ void Interface::Load_INI(){
 }
 
 void Interface::Write_INI(){
+    std::ofstream file("./app/c++/res/config.ini", std::ios::trunc); // Open file in truncation mode
 
+    if (!file.is_open()){
+        throw std::runtime_error("ERROR: Failed to load file"); // TODO: Change for a LOG & exception
+    }
+    // Change INI file contents
+    file << "BIB_PATH" << " = " << this->playlist_path << std::endl;
+    file << "APP_DIR" << " = " << this->program_data_path << std::endl;
+    if (this->paged_mode){
+        file << "PAGED_MODE" << " = " << "true"<< std::endl;
+    } else {
+        file << "PAGED_MODE" << " = " << "false" << std::endl;
+    }
+    file << "IP" << " = " << "127.0.0.1" << std::endl;
+    file << "PORT" << " = " << to_string(this->PORT) << std::endl;
+
+    // Close the file
+    file.close();
 }
 
 void Interface::LIST_TO_PAGED(){
 
     // Create the paged array
-    char bin_path[] = "./res/swap.bin";
+    char bin_path[] = "./app/c++/res/swap.bin";
     this->songs_array = new PagedArray(this->songs.size,this->songs.getHead()->data.GetSize(), 3, this->songs.getHead()->data.GetSize(), bin_path);
 
     Node<MP3Tags>* current = this->songs.getHead();
