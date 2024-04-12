@@ -103,7 +103,7 @@ impl VotingWindow {
             || info!("Vote Down 10 clicked!"),
         ];
 
-        // Crear un contenedor grid
+        // Create a grid container for objects
         let grid = Grid::new();
         grid.set_column_homogeneous(true);
         grid.set_row_homogeneous(true);
@@ -111,45 +111,70 @@ impl VotingWindow {
 
 		let clientcopy = Arc::clone(&client);
         let jsoncopy= Arc::clone(&songs_json);
-        
-        // Cambiar i para que sea cantidad de canciones cargadas por el
-        // servidor, y no solo 10
+            let json_lockguard = jsoncopy.lock().unwrap();
+            let parsed_json: Value = serde_json::from_str(json_lockguard.as_str()).unwrap();
         // Create buttons for upvote
-        for (i, action) in vote_up_actions.into_iter().enumerate() {
-            let songs_lock = jsoncopy.lock().unwrap();
-            let songs_json: Value = serde_json::from_str(songs_lock.as_str()).unwrap();
-            let song_id = songs_json["attach"][i]["id"].as_str().unwrap().to_owned();
 
-            let button = Button::with_label(&format!("Up Vote"));
-            // Obtain a copy of the client to use in the action
-            let clientguard = Arc::clone(&clientcopy);
-            button.connect_clicked(move |_| {
-
-                // Send petition to server on request
-                clientguard.set_petition(Cmds::UpVote, &[song_id.as_str()]);
+        for i in 0..( parsed_json["attach"].as_array().unwrap().len()) {
+            // Retrieve the song on the iterator
+            let song: Value = parsed_json["attach"][i].to_owned();
+                let mut song_id = song["id"].as_str().unwrap().to_owned();
+                let song_title = song["title"].as_str().unwrap().to_owned();
+                let song_artist = song["artist"].as_str().unwrap().to_owned();
+            // ----------------- Create button 1
+            let client_guard1 = Arc::clone(&clientcopy);
+            let up_button = Button::with_label(&format!("Up Vote"));
+            up_button.connect_clicked(move |_| {
+                client_guard1.set_petition(Cmds::UpVote, &[song_id.as_str()]);
             });
-            grid.attach(&button, 0, i as i32, 1, 1);
-        }
-		// Cambiar i para que sea cantidad de canciones cargadas por el
-        // servidor, y no solo 10
-        // Crear etiquetas de canciones
-        for i in 0..10 {
-        	let songs_lock = jsoncopy.lock().unwrap();
-        	let songs_json: Value = serde_json::from_str(songs_lock.as_str()).unwrap();
-        	let song_title = songs_json["attach"][i]["title"].as_str().unwrap().to_owned();
-        	let song_artist = songs_json["attach"][i]["artist"].as_str().unwrap().to_owned();
+            grid.attach(&up_button, 0, i as i32, 1, 1);
+            song_id = song["id"].as_str().unwrap().to_owned(); // Reset the song_id
+            // ----------------- Create song tags
             let label = Label::new(Some(&format!("{} - {}", song_title, song_artist)));
             grid.attach(&label, 1, i as i32, 1, 1);
+            // ----------------- Create button 2
+            let client_guard2 = Arc::clone(&clientcopy);
+            let down_button = Button::with_label(&format!("Down Vote"));
+            down_button.connect_clicked(move |_| {
+                client_guard2.set_petition(Cmds::DownVote, &[song_id.as_str()]);
+            });
+            grid.attach(&down_button, 2, i as i32, 1, 1);
         }
+        // for (i, action) in vote_up_actions.into_iter().enumerate() {
+        //     let songs_lockguard = jsoncopy.lock().unwrap();
 
-        // Crear botones "Vote Down" con acciones
-        // Cambiar i para que sea cantidad de canciones cargadas por el
-        // servidor, y no solo 10
-        for (i, action) in vote_down_actions.into_iter().enumerate() {
-            let button = Button::with_label(&format!("Vote Down {}", i + 1));
-            button.connect_clicked(move |_| action());
-            grid.attach(&button, 2, i as i32, 1, 1);
-        }
+        //     let parsed_json: Value = serde_json::from_str(songs_lockguard.as_str()).unwrap();
+        //     let song_id = parsed_json["attach"][i]["id"].as_str().unwrap().to_owned();
+
+        //     let button = Button::with_label(&format!("Up Vote"));
+        //     // Obtain a copy of the client to use in the action
+        //     let client_guard = Arc::clone(&clientcopy);
+        //     button.connect_clicked(move |_| {
+        //         // Send petition to server on request
+        //         client_guard.set_petition(Cmds::UpVote, &[song_id.as_str()]);
+        //     });
+
+        //     grid.attach(&button, 0, i as i32, 1, 1);
+        // }
+
+        // // Create tags for each song
+        // for i in 0..10 {
+        // 	let songs_lock = jsoncopy.lock().unwrap();
+        // 	let songs_json: Value = serde_json::from_str(songs_lock.as_str()).unwrap();
+        // 	let song_title = songs_json["attach"][i]["title"].as_str().unwrap().to_owned();
+        // 	let song_artist = songs_json["attach"][i]["artist"].as_str().unwrap().to_owned();
+        //     let label = Label::new(Some(&format!("{} - {}", song_title, song_artist)));
+        //     grid.attach(&label, 1, i as i32, 1, 1);
+        // }
+
+        // // Crear botones "Vote Down" con acciones
+        // // Cambiar i para que sea cantidad de canciones cargadas por el
+        // // servidor, y no solo 10
+        // for (i, action) in vote_down_actions.into_iter().enumerate() {
+        //     let button = Button::with_label(&format!("Vote Down {}", i + 1));
+        //     button.connect_clicked(move |_| action());
+        //     grid.attach(&button, 2, i as i32, 1, 1);
+        // }
 
         // Agregar el grid a la ventana
         window.add(&grid);

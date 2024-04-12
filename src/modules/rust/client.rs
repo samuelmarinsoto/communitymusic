@@ -125,13 +125,9 @@ impl Client{
                 *json_string = json.to_owned();
             },
             Cmds::DownVote => {
-                let mut json = json!({
-                    "cmd" : "down-vote",
-                    "id": ""
-                });
-                json["id"] = json!(args[0]);
+                let new_petition = format!("{{\"cmd\":\"down-vote\",\"id\":\"{}\"}}", args[0]);
     
-                *json_string = json.to_string();
+                *json_string = new_petition;
             },
             Cmds::UpVote => {
                 let new_petition = format!("{{\"cmd\":\"up-vote\",\"id\":\"{}\"}}", args[0]);

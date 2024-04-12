@@ -291,7 +291,7 @@ void Server::modify_resource(Dictionary info){
             Node<MP3Tags>* node = this->_origin_l->getHead();
             while (node != nullptr){
                 if (string(node->data.uuid) == info["id"].as_str()){
-                    node->data.upvotes -= 1;
+                    node->data.downvotes += 1;
                     this->_origin_l->passive_notify();
                     break;
                 }
@@ -311,7 +311,7 @@ void Server::modify_resource(Dictionary info){
         if (info["cmd"].as_str() == "down-vote"){
             for (int i = 0; i<this->_origin_pd->getSize(); i++){
                 if (string(this->_origin_pd->operator[](i).uuid) == info["id"].as_str()){
-                    this->_origin_pd->operator[](i).upvotes += 1;
+                    this->_origin_pd->operator[](i).downvotes += 1;
                     break;
                 }
             }
