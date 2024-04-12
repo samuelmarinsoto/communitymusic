@@ -2,7 +2,7 @@
 
 Interface::Interface() {
     this->user = nullptr;
-    this->memUsage = 0.0;
+    this->memUsage = 0;
     this->dimensions[0] = std::make_tuple(200,160);
     this->dimensions[1] = std::make_tuple(950,700);
 
@@ -181,7 +181,8 @@ void Interface::LIST_TO_PAGED(){
 
     // Create the paged array
     char bin_path[] = "./app/c++/res/swap.bin";
-    this->songs_array = new PagedArray(this->songs.size,this->songs.getHead()->data.GetSize(), 3, this->songs.getHead()->data.GetSize(), bin_path);
+    size_t rampages = 3;
+    this->songs_array = new PagedArray(this->songs.size,this->songs.getHead()->data.GetSize(), rampages, this->songs.getHead()->data.GetSize(), bin_path);
 
     Node<MP3Tags>* current = this->songs.getHead();
     for (int i = 0; i<this->songs.size; i++){
@@ -199,11 +200,13 @@ void Interface::LIST_TO_PAGED(){
     this->player->stopObserving();
     delete this->player;
     this->player = nullptr;
+    this->memUsage = this->songs.getHead()->data.GetSize()*rampages;
 }
 
 void Interface::PAGED_TO_LIST(){
     this->player = new CircularList<MP3Tags>(&this->songs);
-    for (int i = 0; i<this->songs_array->getSize(); i++){
+    size_t i;
+    for (i = 0; i<this->songs_array->getSize(); i++){
         MP3Tags song = this->songs_array->operator[](i);
         this->songs.InsertAtEnd(song);
     }
@@ -218,4 +221,5 @@ void Interface::PAGED_TO_LIST(){
         LOG(INFO) << ref->data.title;
         ref = ref->next;
     }
+    this->memUsage = this->songs.getHead()->data.GetSize()*i;
 }
