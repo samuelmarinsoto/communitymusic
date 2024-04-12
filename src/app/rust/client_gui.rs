@@ -109,11 +109,17 @@ impl VotingWindow {
         grid.set_column_homogeneous(true);
         grid.set_row_homogeneous(true);
 
+		let clientcopy = Arc::clone(&client);
         // Crear botones "Vote Up" con acciones
         for (i, action) in vote_up_actions.into_iter().enumerate() {
             let button = Button::with_label(&format!("Vote Up {}", i + 1));
-            button.connect_clicked(move |_| action());
+            // Obtener una copia del cliente dentro del cierre del botón
+            let clientguard = Arc::clone(&clientcopy);
+            button.connect_clicked(move |_| {
 
+                // Enviar la solicitud de voto hacia arriba al servidor
+                clientguard.set_petition(Cmds::UpVote, &[&i.to_string()]);
+            });
             grid.attach(&button, 0, i as i32, 1, 1);
         }
 
