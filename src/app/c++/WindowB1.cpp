@@ -27,7 +27,7 @@ void Interface::InitWinB1(){
         }
 
         // Music player for window [B]
-        std::cout << this->player->playingNow->data.title << std::endl;
+        LOG(INFO) << this->player->playingNow->data.title;
 
         string filename = string(this->player->playingNow->data.title);
         this->find_replace(' ', '_', filename);
@@ -410,7 +410,7 @@ void Interface::InitWinB1(){
             }
         }
         if (music_player.getStatus() == sf::Music::Stopped && !paused){
-            std::cout << "Song starting again" << std::endl;
+            LOG(INFO) << "Song starting again";
             music_player.setPlayingOffset(sf::Time(sf::microseconds(0)));
             paused = true;
         }
@@ -466,7 +466,7 @@ void Interface::InitWinB1(){
                 if (event.mouseButton.button == sf::Mouse::Left) {
                     // ------------------- Settings interaction
                     if(settings.getGlobalBounds().contains(mousePosF)){
-                        std::cout << "Opening configurations" << std::endl;
+                        LOG(INFO) << "Opening configurations";
                         this->InitWinC();
                     };
                     // ------------------- Boost toggle button
@@ -490,7 +490,7 @@ void Interface::InitWinB1(){
                     }
                     // ------------------- Music controls
                     if (pause_shape.getGlobalBounds().contains(mousePosF)){
-                        std::cout << "Pause/Continue" << std::endl;
+                        LOG(INFO) << "Pause/Continue";
                         if(paused){
                             music_player.play();
                             pause.setString("|>");
@@ -502,7 +502,7 @@ void Interface::InitWinB1(){
                         }
                     }
                     if (minus_shape.getGlobalBounds().contains(mousePosF)){
-                        std::cout << "Went back 5s" << std::endl;
+                        LOG(INFO) << "Went back 5s";
                         // Pause the player
                         music_player.pause();
                         // Move the offset to desired location
@@ -523,7 +523,7 @@ void Interface::InitWinB1(){
                         }
                     }
                     if (plus_shape.getGlobalBounds().contains(mousePosF)){
-                        std::cout << "Went forward 5s" << std::endl;
+                        LOG(INFO) << "Went forward 5s";
                         // Pause the player
                         music_player.pause();
                         // Move the offset to desired location
@@ -547,7 +547,7 @@ void Interface::InitWinB1(){
                         if (this->player->playingNow->prev != nullptr){
                         // >>> Move song
                             music_player.stop();
-                            std::cout << "Going to previous song" << std::endl;
+                            LOG(INFO) << "Going to previous song";
 
                             this->player->movePrevSong();
                             filename = string(this->player->playingNow->data.title);
@@ -579,7 +579,7 @@ void Interface::InitWinB1(){
                     if (forw_shape.getGlobalBounds().contains(mousePosF)){
                         // >>> Move song
                         music_player.stop();
-                        std::cout << "Going to next song" << std::endl;
+                        LOG(INFO) << "Going to next song";
 
                         this->player->moveNextSong();
                         filename = string(this->player->playingNow->data.title);
@@ -626,7 +626,7 @@ void Interface::InitWinB1(){
                     }
                     // ------------------- Volume
                     if (increase_shape.getGlobalBounds().contains(mousePosF)){
-                        std::cout << "Volume up" << std::endl;
+                        LOG(INFO) << "Volume up";
                         if (volume_percentage < 100){
                             volume_percentage += 5;
                             volume_num.setString(std::to_string(volume_percentage) + "%");
@@ -634,7 +634,7 @@ void Interface::InitWinB1(){
                         }
                     }
                     if (decrease_shape.getGlobalBounds().contains(mousePosF)){
-                        std::cout << "Volume down" << std::endl;
+                        LOG(INFO) << "Volume down";
                         if (volume_percentage > 0){
                             volume_percentage -= 5;
                             volume_num.setString(std::to_string(volume_percentage) + "%");
@@ -645,7 +645,7 @@ void Interface::InitWinB1(){
                     for (int i = 0; i<this->songs.size; i++){
                         sf::RectangleShape block = song_blocks[i];
                         if (block.getGlobalBounds().contains(mousePosF)){ // TODO: Change for forcing a current
-                            std::cout << "Interacting with block " << i+1 << std::endl;
+                            LOG(INFO) << "Interacting with block " << i+1;
                             Node<MP3Tags>* node = this->songs.GetNode(i);
                                 node->data.upvotes += 1;
                             this->songs.passive_notify();

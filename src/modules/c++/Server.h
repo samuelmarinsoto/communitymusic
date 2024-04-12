@@ -18,6 +18,7 @@
 #include <string>
 #include <mutex>
 #include <stdexcept>
+#include <glog/logging.h>
 
 using namespace std;
 class Server{

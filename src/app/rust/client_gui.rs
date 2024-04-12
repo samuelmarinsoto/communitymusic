@@ -14,6 +14,9 @@ use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use std::thread::{self, sleep, Thread};
 use std::time::Duration;
+// Glogs
+use log::*;
+use glog::Flags;
 
 // Rust GTK window to preview playlist songs
 pub struct VotingWindow {
@@ -25,6 +28,8 @@ pub struct VotingWindow {
 impl VotingWindow {
     pub fn new() -> VotingWindow {
     // ----------------------------- All this client processes for the window could be changed into function
+    	// start glog
+    	glog::new().init(Flags::default()).unwrap();
 
         // The client should try to connect to the designated server address (TODO: as such the IP and port fields should be changed for the ones from INI)
         /* HOW SHOULD IT WORK 
@@ -56,11 +61,15 @@ impl VotingWindow {
                 // ----------------
                 arc_guard
             },
-            Err(e) => panic!("ERROR: {}", e) // TODO: Change for a log and set a behavior to disregard this code an open another window
+            Err(e) => {
+            	info!("ERROR: cliente rust no pudo conectar socket");
+            	panic!("ERROR: {}", e);  // TODO: set a behavior to disregard this code an open another window
+            }
         };
 
     // ----------------------------- All this client processes for the window could be changed into function
         // Initialize GTK
+        info!("Inicializando ventana");
         gtk::init().expect("Couldn't initialize GTK library binaries");
 
         // Create a new window
@@ -70,30 +79,30 @@ impl VotingWindow {
         
         // Define actions for each "UpVote" button
         let vote_up_actions = vec![
-            || println!("Vote Up 1 clicked!"),
-            || println!("Vote Up 2 clicked!"),
-            || println!("Vote Up 3 clicked!"),
-            || println!("Vote Up 4 clicked!"),
-            || println!("Vote Up 5 clicked!"),
-            || println!("Vote Up 6 clicked!"),
-            || println!("Vote Up 7 clicked!"),
-            || println!("Vote Up 8 clicked!"),
-            || println!("Vote Up 9 clicked!"),
-            || println!("Vote Up 10 clicked!"),
+            || info!("Vote Up 1 clicked!"),
+            || info!("Vote Up 2 clicked!"),
+            || info!("Vote Up 3 clicked!"),
+            || info!("Vote Up 4 clicked!"),
+            || info!("Vote Up 5 clicked!"),
+            || info!("Vote Up 6 clicked!"),
+            || info!("Vote Up 7 clicked!"),
+            || info!("Vote Up 8 clicked!"),
+            || info!("Vote Up 9 clicked!"),
+            || info!("Vote Up 10 clicked!"),
         ];
 
         // Definir acciones para cada botón "Vote Down"
         let vote_down_actions = vec![
-            || println!("Vote Down 1 clicked!"),
-            || println!("Vote Down 2 clicked!"),
-            || println!("Vote Down 3 clicked!"),
-            || println!("Vote Down 4 clicked!"),
-            || println!("Vote Down 5 clicked!"),
-            || println!("Vote Down 6 clicked!"),
-            || println!("Vote Down 7 clicked!"),
-            || println!("Vote Down 8 clicked!"),
-            || println!("Vote Down 9 clicked!"),
-            || println!("Vote Down 10 clicked!"),
+            || info!("Vote Down 1 clicked!"),
+            || info!("Vote Down 2 clicked!"),
+            || info!("Vote Down 3 clicked!"),
+            || info!("Vote Down 4 clicked!"),
+            || info!("Vote Down 5 clicked!"),
+            || info!("Vote Down 6 clicked!"),
+            || info!("Vote Down 7 clicked!"),
+            || info!("Vote Down 8 clicked!"),
+            || info!("Vote Down 9 clicked!"),
+            || info!("Vote Down 10 clicked!"),
         ];
 
         // Crear un contenedor grid

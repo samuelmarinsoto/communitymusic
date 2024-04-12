@@ -25,6 +25,9 @@
 #include <exception>
 #include <sstream>
 
+// glog
+#include <glog/logging.h>
+
 using namespace std;
 // Class for interacting with SFML resources
 class Interface {

@@ -7,6 +7,7 @@
 #include <cstring>
 #include <tuple>
 #include "MP3Tags.hpp"
+#include <glog/logging.h>
 
 // C++ implementation of limited size array allocated between virtual and physical memory
 class PagedArray {

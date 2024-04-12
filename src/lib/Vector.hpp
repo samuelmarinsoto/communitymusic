@@ -2,7 +2,7 @@
 #define VECTOR_H
 
 #include <stdexcept>
-
+#include <glog/logging.h>
 // Dynamically allocated array for variable size arrays
 template <typename T>
 class vect {
@@ -28,12 +28,14 @@ class vect {
             if (index < this->size){
                 return this->arr[index];
             } else {
+            	LOG(INFO) << "Vector.hpp: Index out of range";
                 throw std::out_of_range("Index out of range");
             }
         };
         // Allows assigning new values to indexed elements
         void set(int index, T value){
             if (index>=this->size){
+            	LOG(INFO) << "Vector.hpp: Value index out of range";
                 throw std::out_of_range("Value index out of range");
             }
             this->arr[index] = value;

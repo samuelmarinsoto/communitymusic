@@ -8,6 +8,7 @@
 #include <string>
 #include <cstring>
 #include <vector>
+#include <glog/logging.h>
 
 using namespace std;
 // Allows converting MP3 files to WAV for playing the music

@@ -45,8 +45,7 @@ MP3Tags::MP3Tags(std::string mp3_path) {
         }
         strcpy(this->genre , genre_tag.c_str());
     } else {
-        // TODO: Should manage this error into the logs
-        cout << "Failed to open mp3" << endl;
+        LOG(INFO) << "MP3Tags.cpp: Failed to open mp3";
     }
 
 }

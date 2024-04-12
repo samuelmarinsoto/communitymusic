@@ -24,10 +24,10 @@ Server::Server(int port, const char* ip) {
     // Binds the socket to the created address
     int binding = bind(this->socket_server, (struct sockaddr*)&address, sizeof(address));
     if (binding < 0){ // On FAIL
-        std::cout << "Binding failed at " << ip << ":" << port << std::endl;
+        LOG(INFO) << "Binding failed at " << ip << ":" << port;
         throw runtime_error("Failed to bind the socket to requested IP and port\n > Try using another IP or Port\n > Verify firewall access to specified ports and ips");
     } // On SUCCESS
-    std::cout << "Connection started. Listening at: "<< ip << ":" << port << std::endl;
+    LOG(INFO) << "Connection started. Listening at: "<< ip << ":" << port;
     
     // Sets up other instance attributes
     this->_origin_l = nullptr;
@@ -49,12 +49,12 @@ void Server::start_listen(){
     listen(this->socket_server, 10);
     while (this->access_shared_status()){
         int socket_client;
-        std::cout<< "Waiting for client..." << std::endl;
+        LOG(INFO)<< "Waiting for client...";
         socket_client = accept(this->socket_server, nullptr, nullptr);
         if (socket_client > 0){
             // Append to full list
             this->clients.insert(socket_client);
-            std::cout<< "Client connected succesfully" << std::endl;
+            LOG(INFO)<< "Client connected succesfully";
 
             // Open a separate thread for communication
             thread(&Server::open_new_channel, this, socket_client, this->clients.size-1).detach();
