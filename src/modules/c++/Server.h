@@ -46,6 +46,7 @@ class Server{
         ~Server();
 
         bool access_shared_status();
+        void modify_shared_status(bool arg);
         string* access_event();
         void set_attach(rsrc_type type, DoubleLinkedList<MP3Tags>* argL, PagedArray* argC);
     private:
@@ -57,7 +58,6 @@ class Server{
     protected:
         int modify_clients(action fn, int index);
         void modify_event(int who, string change);
-        void modify_shared_status(bool arg);
         // Modify values of the reference resources from an accepted client action
         void modify_resource(Dictionary info);
 };

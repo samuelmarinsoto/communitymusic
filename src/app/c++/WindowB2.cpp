@@ -521,6 +521,9 @@ void Interface::InitWinB2(){
                 if (event.mouseButton.button == sf::Mouse::Left) {
                     // ------------------- Settings interaction
                     if(settings.getGlobalBounds().contains(mousePosF)){
+                        window.close();
+                            music_player.stop();
+                            music_player.~Music();
                         LOG(INFO) << "Opening configurations";
                         this->InitWinC();
                     };
@@ -530,16 +533,17 @@ void Interface::InitWinB2(){
                             boost_block.setPosition(boost_block.getPosition().x + boost_block.getSize().x, boost_block.getPosition().y);
                             boost.setString("Boost? ON");
                             this->paged_mode = true;
-                            // TODO: Change from list to paged array
                         }else{
                             boost_block.setPosition(boost_block.getPosition().x - boost_block.getSize().x, boost_block.getPosition().y);
                             boost.setString("Boost? OFF");
                             this->paged_mode = false;
-                            // TODO: Change from paged array back to list
                             window.close();
                                 music_player.stop();
                                 music_player.~Music();
                             this->PAGED_TO_LIST();
+                            if (this->user != nullptr){
+                                this->user->set_attach(rsrc_type::LIST, &this->songs, nullptr);
+                            }
                             this->InitWinB1();
                         }
                     }
@@ -548,9 +552,14 @@ void Interface::InitWinB2(){
                         if (this->user == nullptr){
                             host.setString("Stop");
                             this->user = new Server(this->PORT, "0.0.0.0");
+                            this->user->set_attach(rsrc_type::ARR, nullptr, this->songs_array);
                         } else {
                             host.setString("Start");
-                            // this->user.stop();
+                            this->user->modify_shared_status(false);
+                            sleep(3);
+
+                            delete this->user;
+                            this->user = nullptr; 
                         }
                     }
                     // ------------------- Music controls

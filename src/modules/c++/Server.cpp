@@ -72,7 +72,6 @@ char* Server::load_response(cmd r_tp, Dictionary content){
         case is_Asking:
             response.add("cmd", JSON::convert_to_value<string>("send-songs"));
             response.add("status", JSON::convert_to_value<string>("OK"));
-            // TODO: Full implementation of list of songs retrieval
             response.add("attach", Value(this->PARSE_resource().content));
             break;
         case is_Exiting:
@@ -83,14 +82,12 @@ char* Server::load_response(cmd r_tp, Dictionary content){
             response.add("cmd", JSON::convert_to_value<string>("up-vote"));
             response.add("status", JSON::convert_to_value<string>("OK"));
             response.add("id", content["id"]);
-            // TODO: Full implementation of modifying the specific song attribute
             this->modify_resource(content);
             break;
         case is_VotingDown:
             response.add("cmd", JSON::convert_to_value<string>("down-vote"));
             response.add("status", JSON::convert_to_value<string>("OK"));
             response.add("id", content["id"]);
-            // TODO: Full implementation of modifying the specific song attribute
             this->modify_resource(content);
             break;
         case unknown:
@@ -132,6 +129,13 @@ void Server::open_new_channel(int client_socket, int who){
         // Save to client event for logging
         this->modify_event(who, json.content);
         // Generate response
+        // Ending response
+        if (!this->access_shared_status()){
+            char* response = this->load_response(is_Exiting, json);
+            send(client_socket, response, strlen(response), 0);
+            break;
+        }
+        // Common responses
         if (json["cmd"].as_str()=="idling" || json["cmd"].as_str()=="send-songs"){
             char* response = this->load_response(is_Asking, json);
             send(client_socket, response, strlen(response), 0);
@@ -217,7 +221,7 @@ void Server::set_attach(rsrc_type type, DoubleLinkedList<MP3Tags>* argL, PagedAr
             this->_origin_pd = argC;
             break;
         case rsrc_type::LIST:
-            this->_origin_l = argL;
+            this->_origin_l =argL;
             this->_origin_pd = nullptr;
             break;
     }

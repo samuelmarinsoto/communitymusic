@@ -138,7 +138,6 @@ impl Client{
                 let json = json!({
                     "cmd": "exiting"
                 });
-    
                 *json_string = json.to_string();
             }
         }

@@ -179,6 +179,7 @@ void Interface::InitWinC(){
                 stringstream(PORT_TEXT.getString()) >> this->PORT;
                 window.close();
                 this->Write_INI();
+                this->InitWinA();
             }
             // ----------------------- Keyboard inputs
             if (event.type == sf::Event::KeyPressed){
