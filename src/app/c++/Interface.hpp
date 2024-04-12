@@ -42,7 +42,7 @@ private:
     string program_data_path;
     int PORT;
     bool paged_mode;
-    double memUsage;
+    int memUsage;
 protected:
     std::tuple<int, int> dimensions[2];
     sf::Font font;

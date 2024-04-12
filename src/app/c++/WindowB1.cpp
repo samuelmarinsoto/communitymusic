@@ -211,9 +211,10 @@ void Interface::InitWinB1(){
             boost_toggle.setFillColor(palette[1]);
             boost_toggle.setPosition(boost_block.getPosition().x , boost_block.getPosition().y);
 
+		std::string memtext = std::to_string(this->memUsage);
         sf::Text boosted_mem;
             boosted_mem.setFont(this->font);
-            boosted_mem.setString("1.88 (GB)");
+            boosted_mem.setString(memtext);
             boosted_mem.setCharacterSize(17);
             boosted_mem.setFillColor(sf::Color::White);
             boosted_mem.setPosition(boost_toggle.getPosition().x + boost_toggle.getSize().x + boosted_mem.getGlobalBounds().width/2, boost.getPosition().y );
