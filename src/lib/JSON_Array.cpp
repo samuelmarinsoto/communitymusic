@@ -69,10 +69,12 @@ Value Array::operator[](int index){
 
 void Array::append(Value value){
     this->values.push_back(value.content);
+    this->rebuild();
 }
 
 void Array::pop(){
     this->values.pop_back();
+    this->rebuild();
 }
 
 void Array::remove(int index){
@@ -103,4 +105,17 @@ int Array::size(){
 
 Array::~Array(){
     
+}
+
+void Array::rebuild(){
+    this->content = "[";
+    string value;
+    for (int i = 0; i<this->values.size() ; i++){
+        value = this->values[i];
+        if (i != 0){
+            this->content += ",";
+        }
+        this->content += value;
+    }
+    this->content +=  "]";
 }

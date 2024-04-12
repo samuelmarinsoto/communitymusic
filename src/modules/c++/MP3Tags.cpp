@@ -16,7 +16,7 @@ MP3Tags::MP3Tags(std::string mp3_path) {
     strcpy(this->file, mp3_path.c_str()); // copy file path as array into the required field
 
     // Metadata extraction
-    TagLib::FileRef file(mp3_path.c_str())
+    TagLib::FileRef file(mp3_path.c_str());
     if (!file.isNull() && file.tag()){
         TagLib::Tag *tag = file.tag(); // Get the tags
         // Set the tags into the object fields
@@ -45,8 +45,7 @@ MP3Tags::MP3Tags(std::string mp3_path) {
         }
         strcpy(this->genre , genre_tag.c_str());
     } else {
-        // TODO: Should manage this error into the logs
-        cout << "Failed to open mp3" << endl;
+        LOG(INFO) << "MP3Tags.cpp: Failed to open mp3";
     }
 
 }

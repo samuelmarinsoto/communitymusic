@@ -123,7 +123,7 @@ Value Dictionary::operator[](string key){
     if (this->pairs.size() == 1){
         return Value(get<1>(this->pairs[0]));
     }
-    return Value("");
+    return Value("null");
 }
 
 void Dictionary::add(string key, Value value){

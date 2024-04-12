@@ -5,6 +5,9 @@
 #include "args.h"
 #include "../../lib/fJSON.hpp"
 #include "LinkedList.hpp"
+#include "DoubleLinkedList.hpp"
+#include "PagedArray.hpp"
+#include "MP3Tags.hpp"
 
 // >>> Main imports <<< 
 #include <cstring>
@@ -15,46 +18,48 @@
 #include <string>
 #include <mutex>
 #include <stdexcept>
+#include <glog/logging.h>
 
+using namespace std;
 class Server{
+    // ----------------------------------------- ATTRIBUTES
     private:
         // Holds the socket of the server
         int socket_server;
         // Loads all clients into this list
         LinkedList<int> clients;
-        
-        // The shared mutex allows modifying the following values: status and cli_event
-        mutex shared_status;
-        mutex shared_event;
         mutex shared_list;
 
         //Current status of the server(ON or OFF)
         bool status;
-        //String value
+        mutex shared_status;
+
         string cli_event[2];
-        /* Attach files
-        ListaDoble* canciones;
-        ArregloPaginado* canciones;
-        */
-
+        mutex shared_event;
     protected:
-        void start_listen();
-        char* load_response(cmd r_tp, Dictionary content);
-        void open_new_channel(int client, int who);
-
-        int modify_clients(action fn, int index);
-
-        // void set_ref_attach(Rsrc which, Lista* argL, Paginada* argC);
-        // void modify_ref_attach();
+        mutex shared_resource;
+        DoubleLinkedList<MP3Tags>* _origin_l;
+        PagedArray* _origin_pd;
+    // ----------------------------------------- METHODS
     public:
         Server(int port, const char* ip);
         ~Server();
 
-        bool accces_shared_status();
-        void modify_shared_status(bool arg);
-
+        bool access_shared_status();
         string* access_event();
+        void set_attach(rsrc_type type, DoubleLinkedList<MP3Tags>* argL, PagedArray* argC);
+    private:
+        void start_listen();
+        char* load_response(cmd r_tp, Dictionary content);
+        void open_new_channel(int client, int who);
+        // Parse the current resource into a JSON object to share via sockets
+        Array PARSE_resource();
+    protected:
+        int modify_clients(action fn, int index);
         void modify_event(int who, string change);
+        void modify_shared_status(bool arg);
+        // Modify values of the reference resources from an accepted client action
+        void modify_resource(Dictionary info);
 };
 
 #endif // SERVER_H

@@ -7,7 +7,9 @@
 #include <cstring>
 #include <tuple>
 #include "MP3Tags.hpp"
+#include <glog/logging.h>
 
+// C++ implementation of limited size array allocated between virtual and physical memory
 class PagedArray {
 private:
 	size_t size, objsize, rampages, pagesize, pagecount, objs_per_page, previndex;
@@ -25,4 +27,5 @@ public:
     PagedArray(size_t size_, size_t objsize_, size_t rampages_, size_t pagesize_, char* filename_);
     ~PagedArray();
     MP3Tags& operator[](size_t index);
+    size_t getSize();
 };

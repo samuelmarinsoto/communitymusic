@@ -2,10 +2,12 @@
 #define INTERFACE_HPP
 
 // ----------------------------- Project modules
-#include "../modules/c++/DoubleLinkedList.hpp"
-#include "../modules/c++/CircularList.hpp"
-#include "../modules/c++/MP3Tags.hpp"
-#include "../modules/c++/MP3_to_WAV.h"
+#include "../../modules/c++/PagedArray.hpp"
+#include "../../modules/c++/DoubleLinkedList.hpp"
+#include "../../modules/c++/CircularList.hpp"
+#include "../../modules/c++/MP3Tags.hpp"
+#include "../../modules/c++/MP3_to_WAV.h"
+#include "../../modules/c++/Server.h"
 
 // ----------------------------- SFML Libraries
 #include <SFML/Graphics.hpp>
@@ -18,25 +20,34 @@
 #include <string>
 #include <random>
 #include <cmath>
+#include <fstream>
 #include <iostream>
+#include <exception>
+#include <sstream>
+
+// glog
+#include <glog/logging.h>
 
 using namespace std;
 // Class for interacting with SFML resources
 class Interface {
     // ----------------------------- ATTRIBUTES
 private:
+    // Song-related resources
     DoubleLinkedList<MP3Tags> songs;
     CircularList<MP3Tags>* player;
-    /*PagedArray pagedsongs;*/
-protected:
-    std::tuple<int, int> dimensions[2];
-    sf::Font font;
+    PagedArray* songs_array;
 
     string playlist_path;
     string program_data_path;
-    bool paged;
-
+    int PORT;
+    bool paged_mode;
+    double memUsage;
+protected:
+    std::tuple<int, int> dimensions[2];
+    sf::Font font;
     Loader* loader;
+    Server* user;
     // ----------------------------- METHODS
 public:
     // Creates an instance of the class which automatically runs window [A]
@@ -51,7 +62,23 @@ protected:
     void find_replace(char value, char new_value, string& source);
     // Loads all ini file properties into the dedicated attributes
     void Load_INI();
-private:
+    // Write the current attributes 
+    void Write_INI();
+    // Loads 10 random songs file from the playlist directory into the songs list
+    void Song_Selection();
+    // Swaps the current list of songs to a paged array
+    void LIST_TO_PAGED();
+    // Swaps the current paged array of songs to a list
+    void PAGED_TO_LIST();
+    // Retuns the index position with the best voting difference (usable when using paged mode)
+    int PAGED_getFollowing(PagedArray* origin_, vector<int>* disposed_);
+    // Retuns TRUE if a index position has already been used, and FALSE otherwise(usable when using paged mode)
+    bool PAGED_check_disposed(vector<int>* disposed_, int position);
+    // Gets an array of all artists in the playlist with their songs in the current playlist
+    void PAGED_getPlaylistArtists(string artists[], size_t size);
+    // Gets all the current playlist songs of an specific artist
+    vector<string> PAGED_getArtistSongs(string artist_name);
+private: 
     // Initializes the first window[A] of the app
     // This is the welcome window
     void InitWinA();

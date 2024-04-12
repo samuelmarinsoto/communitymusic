@@ -7,6 +7,7 @@
 #include <boost/uuid/uuid_io.hpp>
 #include <taglib/tag.h>
 #include <taglib/fileref.h>
+#include <glog/logging.h>
 
 using namespace std;
 class MP3Tags {
@@ -26,7 +27,7 @@ public:
   
 	// Destroys the object and all its contents		
 	~MP3Tags();
-
+  
 	// Returns the byte size of the object with all its elements
 	size_t GetSize();
 

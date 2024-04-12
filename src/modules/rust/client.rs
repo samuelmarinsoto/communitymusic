@@ -3,6 +3,7 @@ use core::time;
 // Socket related libraries
 use std::net::{TcpStream, Shutdown};
 use std::io::{Error, Read, Write};
+use std::str::FromStr;
 use std::{str, thread};
 
 // Thread related libraries
@@ -65,7 +66,7 @@ impl Client{
             // Set petition to default
                 self.set_petition(Cmds::Idling,&[]);
                 //-------------{Obtain response(bytes) from Server}--------------//
-                let mut response_buffer = [0 as u8; 1024];
+                let mut response_buffer = [0 as u8; 5000];
                 connection.read(&mut response_buffer).unwrap();
                 let mut server_response = match str::from_utf8(&response_buffer) {
                     Ok(rp_slice) => rp_slice,
@@ -78,11 +79,17 @@ impl Client{
                     Ok(r) => r,
                     Err(e) => panic!("ERROR: {}", e)
                 };
-                if json_response["cmd"] != "idling" {
+                if json_response["cmd"] == "send-songs" {
                     // save response to client instance
                     let mut mutex_response = self.response.lock().unwrap();
                     *mutex_response = server_response.to_owned();
                     drop(mutex_response);
+                }
+                if (json_response["cmd"] == "up-vote" || json_response["cmd"] == "down-vote") && json_response["status"] == "OK" {
+                    self.set_petition(Cmds::Request, &[]);
+                }
+                if json_response["cmd"] == "exiting" && json_response["status"] == "OK" {
+                    self.stop_communication();
                 }
             }
     }
@@ -149,6 +156,8 @@ impl Client{
     #[allow(dead_code)]
     pub fn get_current_response(&self) -> String{
         let copy_response = self.response.lock().unwrap();
+        // let json = Value::from_str(copy_response.as_str()).unwrap();
+        // drop(copy_response);
         copy_response.clone()
     }
 }

@@ -1,11 +1,8 @@
-#include "gui/Interface.hpp"
-#include "modules/c++/CircularList.hpp"
-#include "modules/c++/DoubleLinkedList.hpp"
-#include "modules/c++/MP3Tags.hpp"
+#include "app/c++/Interface.hpp"
+#include <glog/logging.h>
 
-#include <iostream>
-#include <string>
-int main(){
-    Interface interface; 
+int main(int argc, char* argv[]){
+    google::InitGoogleLogging(argv[0]);
+    Interface interface;
     return 0;
 }

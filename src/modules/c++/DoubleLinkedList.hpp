@@ -7,6 +7,7 @@
 #include <string>
 #include <iostream>
 #include <stdexcept>
+#include <glog/logging.h>
 
 using namespace std;
 // C++ data structure for dynamic memory usage with node linking in both directions
@@ -45,14 +46,14 @@ class DoubleLinkedList : public Observable {
             Node<T>* newNode = new Node<T>(data);
             if (this->head != nullptr){
                 this->head->prev = newNode;
-                newNode->next = this.head;
+                newNode->next = this->head;
             } else {
                 this->tail = newNode;
             }
             this->head = newNode;
             this->size++;
             // For observers
-            this.current = type1;
+            this->current = type1;
             this->notifyObservers();
         }
         // Gets a pointer to a node in memory from its index
@@ -77,19 +78,28 @@ class DoubleLinkedList : public Observable {
         Node<T>* operator[](int index){
             return GetNode(index);
         }
-        // Deletes a node(element) of the list based on its data contained
-        void deleteNode(T data) {
+        // Deletes a node(element) of the list by its index
+        void deleteNode(int index) {
             // Normal operations
             Node<T>* current = this->head;
+            int counter = 0;
             while (current != nullptr) {
-                if (current->data == data) {
+                if (counter == index) {
                     Node<T>* temp = current;
-                    current = current->next;
-                    delete temp;
 
-                    if (current == nullptr) {
-                        tail = nullptr;
+                    if (current->prev != nullptr){
+                        current->prev->next = current->next;
+                    } else {
+                        this->head = current->next;
+                    } 
+
+                    if (current->next != nullptr){
+                        current->next->prev = current->prev;
+                    } else {
+                        this->tail = current->prev;
                     }
+                    
+                    delete temp;
                     this->size--;
                     // For observers
                     this->current = type1;
@@ -98,6 +108,7 @@ class DoubleLinkedList : public Observable {
                     break;
                 }
                 current = current->next;
+                counter ++;
             }
         }
         // Looks for a value and returns its index
@@ -124,9 +135,9 @@ class DoubleLinkedList : public Observable {
             // Normal behaviour
             // >> Retrieve the original node references
             Node<T>* node1 = this->GetNode(index1);
-                std::cout << node1->data << std::endl;
+                LOG(INFO) << node1->data;
             Node<T>* node2 = this->GetNode(index2);
-                std::cout << node2->data << std::endl;
+                LOG(INFO) << node2->data;
             // >> Create new nodes that swap the forward and backward pointers to nodes
             Node<T>* new_node1 = new Node<T>(node1->data);
                 new_node1->next = node2->next;
@@ -185,10 +196,10 @@ class DoubleLinkedList : public Observable {
         void PrintList() {
             Node<T>* current = this->head;
             while (current != nullptr) {
-                std::cout << current->data << ' ';
+                LOG(INFO) << current->data << ' ';
                 current = current->next;
             }
-            std::cout << '\n';
+            LOG(INFO) << '\n';
         }
 };
 

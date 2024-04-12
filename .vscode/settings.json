@@ -69,5 +69,10 @@
     "cSpell.words": [
         "downvotes",
         "upvotes"
+    ],
+    "rust-analyzer.showUnlinkedFileNotification": false,
+    "cSpell.words": [
+        "downvotes",
+        "upvotes"
     ]
 }

@@ -1,6 +1,64 @@
 #include "Interface.hpp"
 
-void Interface::InitWinB1(){
+int Interface::PAGED_getFollowing(PagedArray* origin_, vector<int>* disposed_){
+    int selected = 0;
+    int best_difference = 0;
+    bool initial_state = true;
+    for (int i = 0; i<origin_->getSize(); i++){
+        MP3Tags song = origin_->operator[](i);
+        if ( initial_state && ( (song.upvotes - song.downvotes) >= best_difference || (song.upvotes - song.downvotes) < best_difference)
+        && !this->PAGED_check_disposed(disposed_, i)){
+            selected = i;
+            best_difference = song.upvotes - song.downvotes;
+            initial_state = false;
+        }
+        if ( !initial_state && (song.upvotes - song.downvotes) >= best_difference && !this->PAGED_check_disposed(disposed_, i)){
+            selected = i;
+            best_difference = song.upvotes - song.downvotes;
+        }
+    }
+    return selected;
+}
+
+bool Interface::PAGED_check_disposed(vector<int>* disposed_, int position){
+    for (int index = 0; index<disposed_->size(); index++){
+        if (disposed_->operator[](index) == position){
+            return true;
+        }
+    }
+    return false;
+}
+
+void Interface::PAGED_getPlaylistArtists(string artists[], size_t size){
+    int counter = 0;
+    for (int i = 0; i<this->songs_array->getSize(); i++){
+        string current_artist = string(this->songs_array->operator[](i).artist);
+        bool repeated = false;
+        for (int j = 0; j<size; j++){
+            if (artists[j] == current_artist){
+                repeated = true;
+                break;
+            }
+        }
+        if (!repeated){
+            artists[counter++] = current_artist;
+        }
+    }
+}
+
+vector<string> Interface::PAGED_getArtistSongs(string artist_name){
+    vector<string> found_songs;
+
+    for (int i = 0; i<this->songs_array->getSize(); i++){
+        if (string(this->songs_array->operator[](i).artist) == artist_name){
+            found_songs.push_back(string(this->songs_array->operator[](i).title));
+        }
+    }
+
+    return found_songs;
+}
+
+void Interface::InitWinB2(){
         sf::RenderWindow window(sf::VideoMode(std::get<0>(this->dimensions[1]), std::get<1>(this->dimensions[1])), "Comunity Playlist");
         // Color palette for the theme of the window
             // [0]: Grey
@@ -10,19 +68,33 @@ void Interface::InitWinB1(){
             // [4]: Dark magenta
         sf::Color palette[] = {sf::Color(27, 26, 27), sf::Color(12, 12, 12), sf::Color(128, 14, 174), sf::Color(56, 8, 151), sf::Color(127, 40, 135)};
         bool paused = true;
-        bool performance = false;
         bool dragging_scrub = false;
         int volume_percentage = 50;
 
-        // Music player for window [B]
-        std::cout << this->player->playingNow->data.title << std::endl;
+        string artists[this->songs_array->getSize()];
+            // Initialize all the values of the string 
+            for (int i = 0; i<this->songs.size; i++){
+                artists[i] = "";
+            }
+        this->PAGED_getPlaylistArtists(artists, this->songs_array->getSize());
+        int counted_artists = 0;
+        for ( string artist: artists){
+            if (artist != ""){
+                counted_artists++;
+            }
+        }
 
-        string filename = string(this->player->playingNow->data.title);
+        vector<int> order; // For saving the reproduction order as it moves
+            order.push_back(0);
+        // Music player for window [B]
+        LOG(INFO) << this->songs_array->operator[](0).title;
+
+        string filename = string(this->songs_array->operator[](0).title);
         this->find_replace(' ', '_', filename);
 
-        this->loader->Convert(string(this->player->playingNow->data.file), filename);
+        this->loader->Convert(string(this->songs_array->operator[](0).file), filename);
         sf::Music music_player;
-            music_player.openFromFile("/home/frederick/Desktop/bib/.cmp/" + filename + ".wav");
+            music_player.openFromFile(this->program_data_path + "/" + filename + ".wav");
             music_player.setVolume(volume_percentage);
         
         // Total duration of the current song
@@ -38,63 +110,58 @@ void Interface::InitWinB1(){
         float blocks_dimensions[2] = {sidebar.getSize().x, float(window.getSize().y)/10};
         float text_spacings = blocks_dimensions[1]/4;
 
-        sf::RectangleShape song_blocks[this->songs.size];
-        sf::Text title_names[this->songs.size];
-        sf::Text album_names[this->songs.size];
-        sf::Text artist_names[this->songs.size];
-        sf::Text upvotes_nums[this->songs.size];
-        sf::Text downvotes_nums[this->songs.size];
+        sf::RectangleShape song_blocks[this->songs_array->getSize()];
+        sf::Text title_names[this->songs_array->getSize()];
+        sf::Text album_names[this->songs_array->getSize()];
+        sf::Text artist_names[this->songs_array->getSize()];
+        sf::Text upvotes_nums[this->songs_array->getSize()];
+        sf::Text downvotes_nums[this->songs_array->getSize()];
 
-        Node<MP3Tags>* iterator_node = this->songs.getHead();
-        int counter = 0;
-        while (iterator_node != nullptr){
+        for (int i = 0; i<this->songs_array->getSize(); i++){
             sf::RectangleShape block(sf::Vector2f(blocks_dimensions[0], blocks_dimensions[1]));
                 block.setFillColor(sf::Color::Transparent);
-                block.setPosition(0.f , counter*block.getSize().y );
-            song_blocks[counter] = block;
+                block.setPosition(0.f , i*block.getSize().y );
+            song_blocks[i] = block;
 
             sf::Text title_text;
                 title_text.setFont(this->font);
-                title_text.setString(string(iterator_node->data.title));
+                title_text.setString(string(this->songs_array->operator[](i).title));
                 title_text.setFillColor(sf::Color::White);
                 title_text.setCharacterSize(14);
                 title_text.setPosition(block.getPosition().x + 5.f, block.getPosition().y + 5.f);
-            title_names[counter] = title_text;
+            title_names[i] = title_text;
             
             sf::Text album_text;
                 album_text.setFont(this->font);
-                album_text.setString(string(iterator_node->data.album));
+                album_text.setString(string(this->songs_array->operator[](i).album));
                 album_text.setFillColor(sf::Color::White);
                 album_text.setCharacterSize(title_text.getCharacterSize());
                 album_text.setPosition(title_text.getPosition().x, title_text.getPosition().y + text_spacings);
-            album_names[counter] = album_text;
+            album_names[i] = album_text;
 
             sf::Text artist_text;
                 artist_text.setFont(this->font);
-                artist_text.setString(string(iterator_node->data.artist));
+                artist_text.setString(string(this->songs_array->operator[](i).artist));
                 artist_text.setFillColor(sf::Color::White);
                 artist_text.setCharacterSize(title_text.getCharacterSize());
                 artist_text.setPosition(title_text.getPosition().x, album_text.getPosition().y + text_spacings);
-            artist_names[counter] = artist_text;
+            artist_names[i] = artist_text;
 
             sf::Text upvote_text;
                 upvote_text.setFont(this->font);
-                upvote_text.setString(to_string(iterator_node->data.upvotes));
+                upvote_text.setString(to_string(this->songs_array->operator[](i).upvotes));
                 upvote_text.setFillColor(sf::Color::Green);
                 upvote_text.setCharacterSize(14);
                 upvote_text.setPosition(title_text.getPosition().x + block.getGlobalBounds().width - 16.f , title_text.getPosition().y);
-            upvotes_nums[counter] = upvote_text;
+            upvotes_nums[i] = upvote_text;
 
             sf::Text downvote_text;
                 downvote_text.setFont(this->font);
-                downvote_text.setString(to_string(iterator_node->data.downvotes));
+                downvote_text.setString(to_string(this->songs_array->operator[](i).downvotes));
                 downvote_text.setFillColor(sf::Color::Red);
                 downvote_text.setCharacterSize(upvote_text.getCharacterSize());
                 downvote_text.setPosition(upvote_text.getPosition().x , upvote_text.getPosition().y + 2*text_spacings);
-            downvotes_nums[counter] = downvote_text;
-
-            iterator_node = iterator_node->next;
-            counter++;
+            downvotes_nums[i] = downvote_text;
         }
         
         // Scrub creation
@@ -155,7 +222,7 @@ void Interface::InitWinB1(){
             banner_to_next.setPosition(float(window.getSize().x) - banner_to_next.getSize().x, banner_to_prev.getPosition().y);
         sf::Text next_song;
             next_song.setFont(this->font);
-            next_song.setString(string(this->player->playingNow->next->data.title));
+            next_song.setString(string(this->songs_array->operator[](this->PAGED_getFollowing(this->songs_array, &order)).title));
             next_song.setCharacterSize(14);
             next_song.setFillColor(sf::Color::White);
             next_song.setPosition(banner_to_next.getPosition().x + 2.5f, banner_to_next.getPosition().y + 2.5f);
@@ -165,7 +232,7 @@ void Interface::InitWinB1(){
             banner_current.setPosition( (banner_to_next.getPosition().x - (banner_to_prev.getPosition().x + banner_to_prev.getSize().x) ) + banner_current.getSize().x/2, banner_to_next.getPosition().y);
         sf::Text current_song;
             current_song.setFont(this->font);
-            current_song.setString(string(this->player->playingNow->data.title));
+            current_song.setString(this->songs_array->operator[](0).title);
             current_song.setCharacterSize(14);
             current_song.setFillColor(sf::Color::White);
             current_song.setPosition(banner_current.getPosition().x + 2.5f, banner_current.getPosition().y + 2.5f);
@@ -186,7 +253,7 @@ void Interface::InitWinB1(){
         // Memory usage widget creation(TODO)
         sf::Text boost;
             boost.setFont(this->font);
-            boost.setString("Boost? OFF");
+            boost.setString("Boost? ON");
             boost.setCharacterSize(17);
             boost.setFillColor(sf::Color::White);
             boost.setPosition(float(window.getSize().x) - 275.f, settings.getPosition().y + boost.getGlobalBounds().height/4);
@@ -198,7 +265,68 @@ void Interface::InitWinB1(){
         sf::RectangleShape boost_toggle(sf::Vector2f(boost_block.getSize().x*2 , boost_block.getSize().y));
             boost_toggle.setFillColor(palette[1]);
             boost_toggle.setPosition(boost_block.getPosition().x , boost_block.getPosition().y);
-        
+
+        sf::Text boosted_mem;
+            boosted_mem.setFont(this->font);
+            boosted_mem.setString("1.88 (GB)");
+            boosted_mem.setCharacterSize(17);
+            boosted_mem.setFillColor(sf::Color::White);
+            boosted_mem.setPosition(boost_toggle.getPosition().x + boost_toggle.getSize().x + boosted_mem.getGlobalBounds().width/2 , boost.getPosition().y );
+
+        // Artists list section + songs creation
+        sf::Text found_artist_texts[counted_artists];
+        sf::RectangleShape found_artist_blocks[counted_artists];
+
+        sf::Text playlist_artists_title;
+            playlist_artists_title.setFont(this->font);
+            playlist_artists_title.setString("Artists on this playlist: ");
+            playlist_artists_title.setCharacterSize(18);
+            playlist_artists_title.setStyle(sf::Text::Bold);
+            playlist_artists_title.setFillColor(sf::Color::White);
+            playlist_artists_title.setPosition(sidebar.getPosition().x + sidebar.getSize().x + 10.f, topbar.getPosition().y + topbar.getSize().y + 7.5f);
+
+        float PLblock_dimension[2] = {float(window.getSize().x) - (sidebar.getPosition().x + sidebar.getSize().x), banner_current.getPosition().y - (playlist_artists_title.getPosition().y + playlist_artists_title.getGlobalBounds().height) - 15.f};
+        for (int i = 0; i<counted_artists; i++){
+            sf::RectangleShape artist_block(sf::Vector2f(PLblock_dimension[0]/2, PLblock_dimension[1]/counted_artists));
+                artist_block.setFillColor(sf::Color::Transparent);
+                artist_block.setPosition(playlist_artists_title.getPosition().x - 10.f, i*(artist_block.getSize().y) + playlist_artists_title.getPosition().y + playlist_artists_title.getGlobalBounds().height + 10.f);
+            sf::Text playlist_artist;
+                playlist_artist.setFont(this->font);
+                playlist_artist.setString(artists[i]);
+                playlist_artist.setCharacterSize(16);
+                playlist_artist.setFillColor(sf::Color::White);
+                playlist_artist.setPosition(artist_block.getPosition().x + 10.f, artist_block.getPosition().y + artist_block.getSize().y/3);
+
+            found_artist_blocks[i] = artist_block;
+            found_artist_texts[i] = playlist_artist;
+        }
+
+        int selected_artist = 0;
+        sf::Text about_artist_title;
+            about_artist_title.setFont(this->font);
+            about_artist_title.setString(artists[selected_artist] + " songs:");
+            about_artist_title.setCharacterSize(18);
+            about_artist_title.setStyle(sf::Text::Bold);
+            about_artist_title.setFillColor(sf::Color::White);
+            about_artist_title.setPosition((topbar.getPosition().x + PLblock_dimension[0]/2), playlist_artists_title.getPosition().y);
+
+        sf::RectangleShape songs_display(sf::Vector2f(PLblock_dimension[0]/2, PLblock_dimension[1]));
+            songs_display.setFillColor(palette[0]);
+            songs_display.setPosition(about_artist_title.getPosition().x, about_artist_title.getPosition().y + about_artist_title.getGlobalBounds().height + 10.f);
+
+        vector<string> S_artist_songs = this->PAGED_getArtistSongs(artists[selected_artist]);
+        sf::Text artist_songs[S_artist_songs.size()];
+        for (int i = 0; i<S_artist_songs.size(); i++){
+            sf::Text song_text;
+                song_text.setFont(this->font);
+                song_text.setString("> " + S_artist_songs[i]);
+                song_text.setCharacterSize(16);
+                song_text.setFillColor(sf::Color::White);
+                song_text.setPosition(songs_display.getPosition().x + 10.f, songs_display.getPosition().y + i*song_text.getGlobalBounds().height);
+
+            artist_songs[i] = song_text;
+        }
+
         // Button 1 creation
         sf::CircleShape back_shape;
             back_shape.setRadius(20.f);
@@ -259,6 +387,21 @@ void Interface::InitWinB1(){
             forward.setCharacterSize(16);
             forward.setFillColor(sf::Color::White);
             forward.setPosition( forw_shape.getPosition().x + forw_shape.getRadius()/2, forw_shape.getPosition().y + forw_shape.getRadius()/2 );
+        
+        // Button 6 creation
+        sf::RectangleShape host_shape(sf::Vector2f(90.f, 40.f));
+            host_shape.setFillColor(palette[3]);
+            host_shape.setPosition(back_shape.getPosition().x - 100.f - host_shape.getSize().x, back_shape.getPosition().y);
+        sf::Text host;
+            host.setFont(this->font);
+            if (this->user == nullptr){
+                host.setString("Start");
+            } else {
+                host.setString("Stop");
+            }
+            host.setCharacterSize(16);
+            host.setFillColor(sf::Color::White);
+            host.setPosition(host_shape.getPosition().x + host_shape.getSize().x/2 - host.getGlobalBounds().width/2 , host_shape.getPosition().y + host_shape.getSize().y/2 - host.getGlobalBounds().height/2 );
 
         // Volume control buttons
         sf::Text volume;
@@ -322,39 +465,46 @@ void Interface::InitWinB1(){
             }
         }
         if (music_player.getStatus() == sf::Music::Stopped && !paused){
-            std::cout << "Song starting again" << std::endl;
+            LOG(INFO) << "Song starting again";
             music_player.setPlayingOffset(sf::Time(sf::microseconds(0)));
             paused = true;
         }
         // -------------------------------------------- Sidebar information updating
-        Node<MP3Tags>* node = this->songs.getHead();
-        for (int i = 0; i<this->songs.size; i++){
+        for (int i = 0; i<this->songs_array->getSize(); i++){
             // >>> Update counters
-            upvotes_nums[i].setString(to_string(node->data.upvotes));
-            downvotes_nums[i].setString(to_string(node->data.downvotes));
+            upvotes_nums[i].setString(to_string(this->songs_array->operator[](i).upvotes));
+            downvotes_nums[i].setString(to_string(this->songs_array->operator[](i).downvotes));
             // >>> Update all banner colors
             title_names[i].setFillColor(sf::Color::White);
             album_names[i].setFillColor(sf::Color::White);
             artist_names[i].setFillColor(sf::Color::White);
             // >>> Update current song banner
-            if (string(node->data.uuid) == string(this->player->playingNow->data.uuid)){
+            if (string(this->songs_array->operator[](i).uuid) == string(this->songs_array->operator[](order[order.size()-1]).uuid)){
                 title_names[i].setFillColor(palette[4]);
                 album_names[i].setFillColor(palette[4]);
                 artist_names[i].setFillColor(palette[4]);
             }
-            node = node->next;
         }
         // Song-order status banners updating
-        if (this->player->playingNow->prev == nullptr){
+        if (order.size() <= 1){
             previous_song.setString("");
         }else{
-            previous_song.setString(string(this->player->playingNow->prev->data.title));
+            previous_song.setString(string(this->songs_array->operator[](order[order.size()-2]).title));
         }
-        current_song.setString(string(this->player->playingNow->data.title));
-        if (this->player->playingNow->next == nullptr){
+        current_song.setString(string(this->songs_array->operator[](order[order.size()-1]).title));
+        if (order.size() == this->songs_array->getSize()){
                 next_song.setString(""); 
         } else {
-            next_song.setString(string(this->player->playingNow->next->data.title));
+            int following = this->PAGED_getFollowing(this->songs_array, &order);
+            next_song.setString(string(this->songs_array->operator[](following).title));
+        }
+        // -------------------------------------------- Selected artist updating
+        for (int i = 0; i<counted_artists; i++){
+            if (i == selected_artist){
+                found_artist_blocks[i].setFillColor(palette[0]);
+            } else {
+                found_artist_blocks[i].setFillColor(sf::Color::Transparent);
+            }
         }
         // -------------------------------------------- Events
         sf::Event event;
@@ -363,31 +513,48 @@ void Interface::InitWinB1(){
             sf::Vector2f mousePosF(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
             if (event.type == sf::Event::Closed){
                 window.close();
+                music_player.stop();
+                    music_player.~Music();
             }
             if (event.type == sf::Event::MouseButtonPressed) {
                 if (event.mouseButton.button == sf::Mouse::Left) {
                     // ------------------- Settings interaction
                     if(settings.getGlobalBounds().contains(mousePosF)){
-                        std::cout << "Opening configurations" << std::endl;
+                        LOG(INFO) << "Opening configurations";
                         this->InitWinC();
                     };
                     // ------------------- Boost toggle button
                     if (boost_toggle.getGlobalBounds().contains(mousePosF)){
-                        if (!performance){
+                        if (!this->paged_mode){
                             boost_block.setPosition(boost_block.getPosition().x + boost_block.getSize().x, boost_block.getPosition().y);
                             boost.setString("Boost? ON");
-                            performance = true;
+                            this->paged_mode = true;
                             // TODO: Change from list to paged array
                         }else{
                             boost_block.setPosition(boost_block.getPosition().x - boost_block.getSize().x, boost_block.getPosition().y);
                             boost.setString("Boost? OFF");
-                            performance = false;
+                            this->paged_mode = false;
                             // TODO: Change from paged array back to list
+                            window.close();
+                                music_player.stop();
+                                music_player.~Music();
+                            this->PAGED_TO_LIST();
+                            this->InitWinB1();
+                        }
+                    }
+                    // ------------------- Socket initiation
+                    if (host_shape.getGlobalBounds().contains(mousePosF)){
+                        if (this->user == nullptr){
+                            host.setString("Stop");
+                            this->user = new Server(this->PORT, "0.0.0.0");
+                        } else {
+                            host.setString("Start");
+                            // this->user.stop();
                         }
                     }
                     // ------------------- Music controls
                     if (pause_shape.getGlobalBounds().contains(mousePosF)){
-                        std::cout << "Pause/Continue" << std::endl;
+                        LOG(INFO) << "Pause/Continue";
                         if(paused){
                             music_player.play();
                             pause.setString("|>");
@@ -399,7 +566,7 @@ void Interface::InitWinB1(){
                         }
                     }
                     if (minus_shape.getGlobalBounds().contains(mousePosF)){
-                        std::cout << "Went back 5s" << std::endl;
+                        LOG(INFO) << "Went back 5s";
                         // Pause the player
                         music_player.pause();
                         // Move the offset to desired location
@@ -420,7 +587,7 @@ void Interface::InitWinB1(){
                         }
                     }
                     if (plus_shape.getGlobalBounds().contains(mousePosF)){
-                        std::cout << "Went forward 5s" << std::endl;
+                        LOG(INFO) << "Went forward 5s";
                         // Pause the player
                         music_player.pause();
                         // Move the offset to desired location
@@ -440,18 +607,19 @@ void Interface::InitWinB1(){
                             music_player.play();
                         }
                     }
-                    if (back_shape.getGlobalBounds().contains(mousePosF)){
-                        if (this->player->playingNow->prev != nullptr){
+                    if (back_shape.getGlobalBounds().contains(mousePosF) && order.size() > 1){
                         // >>> Move song
                             music_player.stop();
-                            std::cout << "Going to previous song" << std::endl;
+                            LOG(INFO) << "Going to previous song";
 
-                            this->player->movePrevSong();
-                            filename = string(this->player->playingNow->data.title);
+                            order.pop_back();
+                            int previous = order[order.size()-1];
+
+                            filename = string(this->songs_array->operator[](previous).title);
                                 this->find_replace(' ', '_', filename);
-                            this->loader->Convert(this->player->playingNow->data.file, filename);
+                            this->loader->Convert(this->songs_array->operator[](previous).file, filename);
 
-                            music_player.openFromFile("/home/frederick/Desktop/bib/.cmp/"+filename+".wav");
+                            music_player.openFromFile(this->program_data_path + "/" + filename + ".wav");
                             music_player.play();
                         // >>> Update timer
                         duration = music_player.getDuration().asMilliseconds();
@@ -471,19 +639,19 @@ void Interface::InitWinB1(){
                                 total_time.setString(to_string(mins_diff)+":0"+to_string(secs_diff));
                             }
                         }
-                        }
                     }
-                    if (forw_shape.getGlobalBounds().contains(mousePosF)){
+                    if (forw_shape.getGlobalBounds().contains(mousePosF) && (order.size() != this->songs_array->getSize()) ){
                         // >>> Move song
                         music_player.stop();
-                        std::cout << "Going to next song" << std::endl;
+                        LOG(INFO) << "Going to next song";
 
-                        this->player->moveNextSong();
-                        filename = string(this->player->playingNow->data.title);
+                        int following = this->PAGED_getFollowing(this->songs_array, &order);
+                            order.push_back(following);
+                        filename = string(this->songs_array->operator[](following).title);
                             this->find_replace(' ', '_', filename);
-                        this->loader->Convert(this->player->playingNow->data.file, filename);
+                        this->loader->Convert(this->songs_array->operator[](following).file, filename);
 
-                        music_player.openFromFile("/home/frederick/Desktop/bib/.cmp/"+filename+".wav");
+                        music_player.openFromFile(this->program_data_path + "/" + filename + ".wav");
                         music_player.play();
                         // >>> Update timer
                         duration = music_player.getDuration().asMilliseconds();
@@ -511,7 +679,7 @@ void Interface::InitWinB1(){
                     }
                     // ------------------- Volume
                     if (increase_shape.getGlobalBounds().contains(mousePosF)){
-                        std::cout << "Volume up" << std::endl;
+                        LOG(INFO) << "Volume up";
                         if (volume_percentage < 100){
                             volume_percentage += 5;
                             volume_num.setString(std::to_string(volume_percentage) + "%");
@@ -519,7 +687,7 @@ void Interface::InitWinB1(){
                         }
                     }
                     if (decrease_shape.getGlobalBounds().contains(mousePosF)){
-                        std::cout << "Volume down" << std::endl;
+                        LOG(INFO) << "Volume down";
                         if (volume_percentage > 0){
                             volume_percentage -= 5;
                             volume_num.setString(std::to_string(volume_percentage) + "%");
@@ -527,13 +695,29 @@ void Interface::InitWinB1(){
                         }
                     }
                     // Song block interaction
-                    for (int i = 0; i<this->songs.size; i++){
+                    for (int i = 0; i<this->songs_array->getSize(); i++){
                         sf::RectangleShape block = song_blocks[i];
                         if (block.getGlobalBounds().contains(mousePosF)){
-                            std::cout << "Interacting with block " << i+1 << std::endl;
-                            Node<MP3Tags>* node = this->songs.GetNode(i);
-                                node->data.upvotes += 1;
-                            this->songs.passive_notify();
+                            LOG(INFO) << "Interacting with block " << i+1;
+                            this->songs_array->operator[](i).upvotes += 1;
+                        }
+                    }
+                    // Playlist artists interaction
+                    for (int i = 0; i<counted_artists; i++){
+                        sf::RectangleShape block = found_artist_blocks[i];
+                        if (block.getGlobalBounds().contains(mousePosF)){
+                            about_artist_title.setString(artists[i] + " songs:");
+                            selected_artist = i;
+                            S_artist_songs = this->PAGED_getArtistSongs(artists[selected_artist]);
+                            for (int i = 0; i<S_artist_songs.size(); i++){
+                                sf::Text song_text;
+                                    song_text.setFont(this->font);
+                                    song_text.setString("> " + S_artist_songs[i]);
+                                    song_text.setCharacterSize(16);
+                                    song_text.setFillColor(sf::Color::White);
+                                    song_text.setPosition(songs_display.getPosition().x + 10.f, songs_display.getPosition().y + i*song_text.getGlobalBounds().height);
+                                artist_songs[i] = song_text;
+                            }
                         }
                     }
                 }
@@ -562,8 +746,7 @@ void Interface::InitWinB1(){
         window.clear(palette[1]);
         // >>> Draw sidebar(song list) elements
         window.draw(sidebar);   
-            // [Missing code implementation]
-        for (int i = 0; i<this->songs.size; i++){
+        for (int i = 0; i<this->songs_array->getSize(); i++){
             window.draw(song_blocks[i]);
             window.draw(title_names[i]);
             window.draw(album_names[i]);
@@ -579,7 +762,21 @@ void Interface::InitWinB1(){
         window.draw(boost);
         window.draw(boost_toggle);
         window.draw(boost_block);
+        window.draw(boosted_mem);
 
+
+        // >>> Draw the artist & their song element
+        window.draw(playlist_artists_title);
+        for (int i=0; i<counted_artists; i++){
+            window.draw(found_artist_blocks[i]);
+            window.draw(found_artist_texts[i]);
+        }
+        window.draw(about_artist_title);
+        window.draw(songs_display);
+        for (int i = 0; i<S_artist_songs.size(); i++){
+            window.draw(artist_songs[i]);
+        }
+        
         // >>> Draw scrub elements
         window.draw(scrub_line);
         window.draw(scrub);
@@ -622,6 +819,9 @@ void Interface::InitWinB1(){
         window.draw(forw_shape);
         window.draw(forward); // draw text5
 
+        // >>> Draw button 6 (Start hosting)
+        window.draw(host_shape);
+        window.draw(host);
 
         window.display();
     }

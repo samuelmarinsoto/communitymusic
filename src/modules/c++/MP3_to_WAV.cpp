@@ -18,8 +18,8 @@ Loader::Loader(string output_dir){
             }
         }
     }catch (const std::exception& ex) {
-        std::cerr << "Error loading output directory\n" << ex.what() << std::endl;
-        // TODO: Manage exception and save to logs
+        LOG(INFO) << "MP3_to_Wav.h: Error loading output directory" << ex.what();
+        // TODO: Manage exception
     }
 }
 
@@ -33,7 +33,7 @@ int Loader::Convert(string path_to_MP3, string output_name){
         boost::filesystem::rename(old_out_path, new_out_path);
     } 
     catch (const std::exception& ex) {
-        std::cerr << "Error renaming output file\n" << ex.what() << std::endl;
+        LOG(INFO) << "MP3_to_Wav.h: Error renaming output file" << ex.what();
         // TODO: Manage exception
     }
 
