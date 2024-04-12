@@ -28,7 +28,7 @@ pub struct VotingWindow {
 impl VotingWindow {
     pub fn new() -> VotingWindow {
     // ----------------------------- All this client processes for the window could be changed into function
-    	// start glog
+    	// Start glog
     	glog::new().init(Flags::default()).unwrap();
 
         // The client should try to connect to the designated server address (TODO: as such the IP and port fields should be changed for the ones from INI)
