@@ -2,7 +2,7 @@
 CC = clang++
 CFLAGS = -g -W -O0
 
-MODS = app/c++/**.cpp lib/**.cpp modules/c++/**.cpp
+SRCS = app/c++/**.cpp lib/**.cpp modules/c++/**.cpp
 TAGS = -lboost_filesystem -lboost_random -ltag -lglog
 SYS = -L/usr/lib -L/usr/local/lib -L/usr/lib/x86_64-linux-gnu -L.
 SERVER = -lX11 -lXrandr -lmpg123 -lsndfile -lsfml-system -lsfml-audio -lsfml-graphics -lsfml-window -lglog
@@ -18,29 +18,21 @@ INCS = -I/usr/local/include -I/usr/include ${LOCAL_INCS}
 LIBS = ${SYS} ${SERVER} ${TAGS}
 
 
-server: mp3tags pagedarray
-	${CC} ${CFLAGS} ${MODS} main.cpp ${INCS} ${LIBS} -lmp3tags -lpagedarray -o $@
+server: libmod.a
+	${CC} ${CFLAGS} ${MODS} main.cpp ${INCS} ${LIBS} -lmod -o $@
 id3test: mp3tags
 	${CC} ${CFLAGS} test/testid3.cpp ${INCS} ${SYS} ${TAGS} -lmp3tags -o $@
-mp3tags:
+testpa: libmp3tags.a libpagedarray.a
+	${CC} ${CFLAGS} test/testpagedarray.cpp ${INCS} ${LIBS} -lmp3tags -lpagedarray -o $@
+libmp3tags.a:
 	${CC} ${CFLAGS} -c modules/c++/MP3Tags.cpp ${INCS} ${SYS} ${TAGS} -o $@.o
 	ar rcs lib$@.a $@.o
-pagedarray: mp3tags
+libpagedarray.a: libmp3tags.a
 	${CC} ${CFLAGS} -c modules/c++/PagedArray.cpp ${INCS} ${SYS} ${TAGS} -o $@.o
 	ar rcs lib$@.a $@.o
-mod:
-	for i in app/c++/**.cpp;do \
-		${CC} ${CFLAGS} -c $$i ${INCS} ${LIBS} -o app.o; \
-	done
-	for i in modules/c++/**.cpp;do \
-		${CC} ${CFLAGS} -c $$i ${INCS} ${LIBS} -o mod.o; \
-	done
-	for i in lib/**.cpp;do \
-		${CC} ${CFLAGS} -c $$i ${INCS} ${LIBS} -o lib.o; \
-	done
-	ar rcs lib$@.a app.o mod.o lib.o
-testpa: mp3tags pagedarray
-	${CC} ${CFLAGS} test/testpagedarray.cpp ${INCS} ${LIBS} -lmp3tags -lpagedarray -lz -ltag -lboost_filesystem -lboost_random -o $@
+libmod.a: ${SRCS}
+	${CC} ${CFLAGS} -c ${SRCS} ${INCS} ${TAGS}
+	ar rcs $@ $(notdir $(SRCS:.cpp=.o))
 cleanall: cleanserv
 	rm -rf id3test testpa *.a *.o *.core *.bin
 cleanserv:
