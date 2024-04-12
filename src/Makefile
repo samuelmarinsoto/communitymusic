@@ -6,7 +6,7 @@ MODS = app/c++/**.cpp lib/**.cpp modules/c++/**.cpp
 TAGS = -lboost_filesystem -lboost_random -ltag -lglog
 SYS = -L/usr/lib -L/usr/local/lib -L/usr/lib/x86_64-linux-gnu -L.
 SERVER = -lX11 -lXrandr -lmpg123 -lsndfile -lsfml-system -lsfml-audio -lsfml-graphics -lsfml-window -lglog
-LOCAL_INCS = -Iapp/c++/*.hpp -Ilib/**.h -Ilib/**.hpp -Imodules/c++/**.hpp -Imodules/c++/**.h
+LOCAL_INCS = -Iapp/c++ -Ilib -Imodules/c++
 
 INCS = -I/usr/include -I/usr/local/include ${LOCAL_INCS}
 

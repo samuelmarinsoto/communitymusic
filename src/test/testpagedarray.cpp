@@ -27,11 +27,11 @@ std::vector<std::string> loadFilenames(const std::string& directoryPath) {
 }
 
 int main() {
-    std::string directoryPath = "musica";
+    std::string directoryPath = "../musica";
     std::vector<std::string> filenames = loadFilenames(directoryPath);
 
 	char archivo[25] = "swap.bin";
-	PagedArray parray(55, 396, 3, 3168, archivo);
+	PagedArray parray(55, 396, 1, 3168, archivo);
 	
     size_t i = 0;
     // Print the loaded filenames
@@ -42,6 +42,11 @@ int main() {
     	std::cout << cancion.title << "\n" << std::endl;
     	if (i<26)
     		std::cout << parray[i].title << "\n" << std::endl;
+    	i++;
+    }
+    i = 0;
+	for (const std::string& filename : filenames) {
+		std::cout << parray[i].title << "\n" << std::endl;
     	i++;
     }
 
