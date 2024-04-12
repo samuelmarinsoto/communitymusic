@@ -60,14 +60,14 @@ impl VotingWindow {
                 arc_guard
             },
             Err(e) => {
-            	info!("ERROR: cliente rust no pudo conectar socket");
+            	info!("ERROR: Rust client socket failed to connect {}", e);
             	panic!("ERROR: {}", e);  // TODO: set a behavior to disregard this code an open another window
             }
         };
-
+        sleep(Duration::from_millis(3600));
     // ----------------------------- All this client processes for the window could be changed into function
         // Initialize GTK
-        info!("Inicializando ventana");
+        info!("Initializing GTK window");
         gtk::init().expect("Couldn't initialize GTK library binaries");
 
         // Create a new window
@@ -108,16 +108,23 @@ impl VotingWindow {
         grid.set_column_homogeneous(true);
         grid.set_row_homogeneous(true);
 
+
 		let clientcopy = Arc::clone(&client);
-        // Crear botones "Vote Up" con acciones
+        let jsoncopy= Arc::clone(&songs_json);
+
+        // Create buttons for upvote
         for (i, action) in vote_up_actions.into_iter().enumerate() {
-            let button = Button::with_label(&format!("Vote Up {}", i + 1));
-            // Obtener una copia del cliente dentro del cierre del botón
+            let songs_lock = jsoncopy.lock().unwrap();
+            let songs_json: Value = serde_json::from_str(songs_lock.as_str()).unwrap();
+                let song_id = songs_json["attach"][i]["id"].as_str().unwrap().to_owned();
+
+            let button = Button::with_label(&format!("Up Vote"));
+            // Obtain a copy of the client to use in the action
             let clientguard = Arc::clone(&clientcopy);
             button.connect_clicked(move |_| {
 
-                // Enviar la solicitud de voto hacia arriba al servidor
-                clientguard.set_petition(Cmds::UpVote, &[&i.to_string()]);
+                // Send petition to server on request
+                clientguard.set_petition(Cmds::UpVote, &[song_id.as_str()]);
             });
             grid.attach(&button, 0, i as i32, 1, 1);
         }

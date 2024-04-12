@@ -115,12 +115,20 @@ void Server::open_new_channel(int client_socket, int who){
     // buffer is the the allocated space for incoming messages
     char buffer[5000] = { 0 };
     // msg_raw is the "unparsed" json string(client message)
-    string msg_raw_content;
+    string msg_raw_content = "";
     while (true) {
         recv(client_socket, buffer, sizeof(buffer), 0);
         msg_raw_content = string(buffer);
         // Parse the buffer message into the json dict
-        Dictionary json(msg_raw_content);
+        string delimited_string = "";
+        for (char c: msg_raw_content){
+            if (c != '\n'){
+                delimited_string.push_back(c);
+            }else {
+                break;
+            }
+        }
+        Dictionary json(delimited_string);
         // Save to client event for logging
         this->modify_event(who, json.content);
         // Generate response
@@ -135,7 +143,6 @@ void Server::open_new_channel(int client_socket, int who){
             // Close this channel
             this->modify_clients(action::Remove, who);
             return;
-
         } else if (json["cmd"].as_str()=="up-vote"){
             char* response = this->load_response(is_VotingUp, json);
             send(client_socket, response, strlen(response), 0);
@@ -147,6 +154,7 @@ void Server::open_new_channel(int client_socket, int who){
         } else { // For UNKNOWN commands
 
         }
+        buffer[5000] = { 0 };
     }
 };
 
@@ -268,36 +276,39 @@ void Server::modify_resource(Dictionary info){
     this->shared_resource.lock(); // Lock the resource
 
     if (this->_origin_l != nullptr){ // Access elements from doublelinkedlist (as an observable should notify its observers)
-        if (info["cmd"].as_str() == "upvote"){
+        if (info["cmd"].as_str() == "up-vote"){
             Node<MP3Tags>* node = this->_origin_l->getHead();
             while (node != nullptr){
                 if (string(node->data.uuid) == info["id"].as_str()){
                     node->data.upvotes += 1;
+                    this->_origin_l->passive_notify();
                     break;
                 }
                 node = node->next;
             }
         }
-        if (info["cmd"].as_str() == "downvote"){
+        if (info["cmd"].as_str() == "down-vote"){
             Node<MP3Tags>* node = this->_origin_l->getHead();
             while (node != nullptr){
                 if (string(node->data.uuid) == info["id"].as_str()){
                     node->data.upvotes -= 1;
+                    this->_origin_l->passive_notify();
                     break;
                 }
                 node = node->next;
             }
         }
     } else if (this->_origin_pd != nullptr){ // Access elements from pagedarray
-        if (info["cmd"].as_str() == "upvote"){
+        if (info["cmd"].as_str() == "up-vote"){
             for (int i = 0; i<this->_origin_pd->getSize(); i++){
                 if (string(this->_origin_pd->operator[](i).uuid) == info["id"].as_str()){
                     this->_origin_pd->operator[](i).upvotes += 1;
+                    this->_origin_l->passive_notify();
                     break;
                 }
             }
         }
-        if (info["cmd"].as_str() == "downvote"){
+        if (info["cmd"].as_str() == "down-vote"){
             for (int i = 0; i<this->_origin_pd->getSize(); i++){
                 if (string(this->_origin_pd->operator[](i).uuid) == info["id"].as_str()){
                     this->_origin_pd->operator[](i).upvotes += 1;

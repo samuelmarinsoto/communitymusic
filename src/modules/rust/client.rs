@@ -57,41 +57,43 @@ impl Client{
         // Starts communication using a loop for constant messaging
         while self.access_condition() {
             // Access(LOCK) the current petition on mutex-petition attribute
-                let msg_buffer = self.petition.lock().unwrap();
+            let msg_buffer = self.petition.lock().unwrap();
             // Access(LOCK) the socket, or TCPstream
-                let mut connection = self.socket.lock().unwrap();
-                connection.write(msg_buffer.as_bytes()).unwrap(); // Send a petition
-            // Drop the buffer to unlock
-                drop(msg_buffer);
+            let mut connection = self.socket.lock().unwrap();
+            // Frame the message (e.g., with a newline delimiter)
+            let mut message_with_delimiter = msg_buffer.clone(); // Make a copy to append delimiter
+            message_with_delimiter.push('\n'); // Append delimiter
+            connection.write_all(message_with_delimiter.as_bytes()).unwrap(); // Send the message
+            connection.flush().unwrap();
+        // Drop the buffer to unlock
+            drop(msg_buffer);
+            //-------------{Obtain response(bytes) from Server}--------------//
+            let mut response_buffer = [0 as u8; 5000];
+            connection.read(&mut response_buffer).unwrap();
+            let mut server_response = match str::from_utf8(&response_buffer) {
+                Ok(rp_slice) => rp_slice,
+                Err(e) => panic!("ERROR: {}", e)
+            };
+            let new_response = &server_response.replace("\u{0000}", " ");
+            server_response = new_response.trim();
             // Set petition to default
-                self.set_petition(Cmds::Idling,&[]);
-                //-------------{Obtain response(bytes) from Server}--------------//
-                let mut response_buffer = [0 as u8; 5000];
-                connection.read(&mut response_buffer).unwrap();
-                let mut server_response = match str::from_utf8(&response_buffer) {
-                    Ok(rp_slice) => rp_slice,
-                    Err(e) => panic!("ERROR: {}", e)
-                };
-                let new_response = &server_response.replace("\u{0000}", " ");
-                server_response = new_response.trim();
-                //----------------------{Analyze received json}----------------------//
-                let json_response: Value = match serde_json::from_str(server_response){
-                    Ok(r) => r,
-                    Err(e) => panic!("ERROR: {}", e)
-                };
-                if json_response["cmd"] == "send-songs" {
-                    // save response to client instance
-                    let mut mutex_response = self.response.lock().unwrap();
-                    *mutex_response = server_response.to_owned();
-                    drop(mutex_response);
-                }
-                if (json_response["cmd"] == "up-vote" || json_response["cmd"] == "down-vote") && json_response["status"] == "OK" {
-                    self.set_petition(Cmds::Request, &[]);
-                }
-                if json_response["cmd"] == "exiting" && json_response["status"] == "OK" {
-                    self.stop_communication();
-                }
+            // self.set_petition(Cmds::Idling,&[]);
+            //----------------------{Analyze received json}----------------------//
+            let json_response: Value = match serde_json::from_str(server_response){
+                Ok(r) => r,
+                Err(e) => panic!("ERROR: {}", e)
+            };
+            if json_response["cmd"] == "send-songs" {
+                // save response to client instance
+                let mut mutex_response = self.response.lock().unwrap();
+                *mutex_response = server_response.to_owned();
+                drop(mutex_response);
+            } else if (json_response["cmd"] == "up-vote" || json_response["cmd"] == "down-vote") && json_response["status"] == "OK" {
+                self.set_petition(Cmds::Request, &[]);
+            } else if json_response["cmd"] == "exiting" && json_response["status"] == "OK" {
+                self.stop_communication();
             }
+        }
     }
 
     #[allow(dead_code)]
@@ -118,29 +120,23 @@ impl Client{
                 *json_string = json.to_string();
             },
             Cmds::Request => {
-                let json = json!({
-                    "cmd": "send-songs"
-                });
+                let json = "{\"cmd\":\"send-songs\"}";
     
-                *json_string = json.to_string();
+                *json_string = json.to_owned();
             },
             Cmds::DownVote => {
                 let mut json = json!({
                     "cmd" : "down-vote",
-                    "id": "0"
+                    "id": ""
                 });
                 json["id"] = json!(args[0]);
     
                 *json_string = json.to_string();
             },
             Cmds::UpVote => {
-                let mut json = json!({
-                    "cmd" : "up-vote",
-                    "id": "0"
-                });
-                json["id"] = json!(args[0]);
+                let new_petition = format!("{{\"cmd\":\"up-vote\",\"id\":\"{}\"}}", args[0]);
     
-                *json_string = json.to_string();
+                *json_string = new_petition;
             },
             Cmds::Exit => {
                 let json = json!({
